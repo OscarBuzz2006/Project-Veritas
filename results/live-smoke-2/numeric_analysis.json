@@ -1,0 +1,229 @@
+{
+  "max_identity_residual": 8.326672684688674e-17,
+  "h4_assistant_agent_corr": 0.9827,
+  "h4_slopes": {
+    "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+    "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+    "by_condition": {
+      "C1": {
+        "slope_user": {
+          "mean": -0.0001,
+          "ci95": [
+            -0.0002,
+            0.0
+          ],
+          "n_questions": 2
+        },
+        "n_observations": 64,
+        "per_question": {
+          "num_timbuktu_pop": {
+            "n": 32,
+            "slope_user": -0.0002
+          },
+          "num_yarlung_length_km": {
+            "n": 32,
+            "slope_user": 0.0
+          }
+        }
+      },
+      "C2": {
+        "slope_user": {
+          "mean": 0.0087,
+          "ci95": [
+            0.0,
+            0.0173
+          ],
+          "n_questions": 2
+        },
+        "n_observations": 64,
+        "per_question": {
+          "num_timbuktu_pop": {
+            "n": 32,
+            "slope_user": 0.0,
+            "slope_crowd": 0.0
+          },
+          "num_yarlung_length_km": {
+            "n": 32,
+            "slope_user": 0.0173,
+            "slope_crowd": 0.1388
+          }
+        },
+        "slope_crowd": {
+          "mean": 0.0694,
+          "ci95": [
+            0.0,
+            0.1388
+          ],
+          "n_questions": 2
+        }
+      },
+      "C3": {
+        "slope_user": {
+          "mean": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "n_questions": 2
+        },
+        "n_observations": 64,
+        "per_question": {
+          "num_timbuktu_pop": {
+            "n": 32,
+            "slope_user": 0.0,
+            "slope_crowd": 0.0
+          },
+          "num_yarlung_length_km": {
+            "n": 32,
+            "slope_user": 0.0,
+            "slope_crowd": -0.0
+          }
+        },
+        "slope_crowd": {
+          "mean": -0.0,
+          "ci95": [
+            -0.0,
+            0.0
+          ],
+          "n_questions": 2
+        }
+      }
+    }
+  },
+  "by_stratum": {},
+  "by_condition_final": {
+    "C1": {
+      "condition_id": "C1",
+      "round_idx": 2,
+      "crowd_error": 0.001719,
+      "avg_individual_error": 0.012042,
+      "diversity": 0.010323,
+      "iqr": 0.141396,
+      "miss_rate": 0.0
+    },
+    "C2": {
+      "condition_id": "C2",
+      "round_idx": 2,
+      "crowd_error": 0.00247,
+      "avg_individual_error": 0.013199,
+      "diversity": 0.010729,
+      "iqr": 0.138223,
+      "miss_rate": 0.0
+    },
+    "C3": {
+      "condition_id": "C3",
+      "round_idx": 2,
+      "crowd_error": 0.001718,
+      "avg_individual_error": 0.012042,
+      "diversity": 0.010325,
+      "iqr": 0.141396,
+      "miss_rate": 0.0
+    }
+  },
+  "condition_round_metrics": [
+    {
+      "condition_id": "C1",
+      "round_idx": 1,
+      "crowd_error": 0.00625,
+      "avg_individual_error": 0.027317,
+      "diversity": 0.021067,
+      "iqr": 0.201994,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C1",
+      "round_idx": 2,
+      "crowd_error": 0.001719,
+      "avg_individual_error": 0.012042,
+      "diversity": 0.010323,
+      "iqr": 0.141396,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 1,
+      "crowd_error": 0.007051,
+      "avg_individual_error": 0.028002,
+      "diversity": 0.02095,
+      "iqr": 0.2066,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 2,
+      "crowd_error": 0.00247,
+      "avg_individual_error": 0.013199,
+      "diversity": 0.010729,
+      "iqr": 0.138223,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 1,
+      "crowd_error": 0.006248,
+      "avg_individual_error": 0.027318,
+      "diversity": 0.021071,
+      "iqr": 0.201994,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 2,
+      "crowd_error": 0.001718,
+      "avg_individual_error": 0.012042,
+      "diversity": 0.010325,
+      "iqr": 0.141396,
+      "miss_rate": 0.0
+    }
+  ],
+  "contrasts": [
+    {
+      "contrast_id": "c2_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": 0.000406,
+      "ci_low": 3e-06,
+      "ci_high": 0.001123,
+      "wilcoxon_p": 0.25,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 4
+    },
+    {
+      "contrast_id": "c2_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": 0.000751,
+      "ci_low": -1e-05,
+      "ci_high": 0.002266,
+      "wilcoxon_p": 1.0,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 4
+    },
+    {
+      "contrast_id": "c3_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": 2e-06,
+      "ci_low": 0.0,
+      "ci_high": 5e-06,
+      "wilcoxon_p": 1.0,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 4
+    },
+    {
+      "contrast_id": "c3_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": -1e-06,
+      "ci_low": -4e-06,
+      "ci_high": 0.0,
+      "wilcoxon_p": 1.0,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 4
+    }
+  ]
+}
