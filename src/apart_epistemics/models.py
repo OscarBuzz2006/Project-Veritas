@@ -157,6 +157,9 @@ class NumericEstimateRecord(BaseModel):
     input_tokens: int = Field(default=0, ge=0)
     output_tokens: int = Field(default=0, ge=0)
     finish_reason: str = ""
+    # Actual charge reported by the provider, summed over every call this row needed (including
+    # a format retry). None when the provider does not report cost.
+    cost_usd: float | None = Field(default=None, ge=0.0)
     # None means the setting was not sent to the model (provider default applied).
     temperature: float | None = Field(default=None, ge=0.0, le=2.0)
     top_p: float | None = Field(default=None, ge=0.0, le=1.0)

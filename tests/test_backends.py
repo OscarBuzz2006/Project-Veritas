@@ -324,3 +324,47 @@ def test_reasoning_tokens_read_from_nested_usage_with_flat_fallback(
     out = extract_openai_chat_fields(data, "p", "m")
     assert out["reasoning_tokens"] == expected_reasoning
     assert out["output_tokens"] == 100
+
+
+@pytest.mark.parametrize(
+    ("usage", "expected"),
+    [
+        ({"cost": 9.47e-05}, 9.47e-05),
+        ({"cost": 0}, 0.0),  # a free call is a real, known cost of zero
+        ({"cost": None}, None),
+        ({"cost": "n/a"}, None),
+        ({"cost": -1}, None),
+        ({}, None),
+    ],
+)
+def test_provider_reported_cost_is_extracted_when_valid(
+    usage: dict[str, Any], expected: float | None
+) -> None:
+    from apart_epistemics.backends.base import extract_openai_chat_fields
+
+    data = {"choices": [{"message": {"content": "x"}}], "usage": {"prompt_tokens": 1, **usage}}
+    assert extract_openai_chat_fields(data, "p", "m")["cost_usd"] == expected
+
+
+def test_numeric_reply_passes_cost_through_and_other_adapters_report_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for env_var in ("OPENROUTER_API_KEY", "ANTHROPIC_API_KEY"):
+        monkeypatch.setenv(env_var, "dummy-value")
+    router = create_backend(
+        "openrouter",
+        transport=lambda _u, _h, _p: {
+            "choices": [{"message": {"content": "Final estimate: 5"}}],
+            "usage": {"cost": 0.0123},
+        },
+    )
+    assert router.generate_numeric_reply(system_prompt="s", user_prompt="u")["cost_usd"] == 0.0123
+
+    claude = create_backend(
+        "anthropic",
+        transport=lambda _u, _h, _p: {
+            "content": [{"text": "Final estimate: 5"}],
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        },
+    )
+    assert claude.generate_numeric_reply(system_prompt="s", user_prompt="u")["cost_usd"] is None

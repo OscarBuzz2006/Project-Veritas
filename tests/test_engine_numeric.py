@@ -193,6 +193,94 @@ def test_changing_max_tokens_requires_a_new_output_folder(tmp_path: Path) -> Non
         run_numeric_core(**kwargs, max_tokens=2048)
 
 
+def _priced_backend(cost: float | None, per_attempt: list[float | None] | None = None) -> Any:
+    class Priced(SyntheticEpistemicBackend):
+        calls = 0
+
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            out = super().generate_numeric_reply(**kwargs)
+            out["input_tokens"], out["output_tokens"] = 10, 10
+            seq = per_attempt if per_attempt is not None else [cost]
+            out["cost_usd"] = seq[min(Priced.calls, len(seq) - 1)]
+            Priced.calls += 1
+            return out
+
+    return Priced(seed=1)
+
+
+def test_records_store_the_providers_real_cost(tmp_path: Path) -> None:
+    recs = _run_priced(tmp_path, "a.jsonl", _priced_backend(0.0004))
+    assert [r.cost_usd for r in recs] == [0.0004] * len(recs)
+    assert recs[0].model_dump()["cost_usd"] == 0.0004
+    # Backends that report no cost leave it unknown rather than guessing.
+    unknown = _run_priced(tmp_path, "b.jsonl", _priced_backend(None))
+    assert all(r.cost_usd is None for r in unknown)
+
+
+def _run_priced(tmp_path: Path, name: str, backend: Any, **kwargs: Any) -> Any:
+    params: dict[str, Any] = {
+        "tasks": build_numeric_core_tasks()[:1],
+        "conditions": ["C1"],
+        "n_agents": 3,
+        "n_rounds": 1,
+        "replicates": 1,
+        "runs_path": tmp_path / name,
+        "backend": backend,
+    }
+    params.update(kwargs)
+    return run_numeric_core(**params)
+
+
+def test_budget_guard_uses_real_cost_not_the_token_estimate(tmp_path: Path) -> None:
+    # Tokens are tiny, so the token estimate is ~1e-5 per call and would never trip $1.
+    with pytest.raises(BudgetExceededError):
+        _run_priced(tmp_path, "dear.jsonl", _priced_backend(0.6), budget_usd=1.0)
+    # A genuinely cheap real cost keeps the same run well inside the cap.
+    ok = _run_priced(tmp_path, "cheap.jsonl", _priced_backend(0.0001), budget_usd=1.0)
+    assert len(ok) == 3
+
+
+def test_estimate_prefers_real_cost_and_falls_back_to_tokens() -> None:
+    resp = {"input_tokens": 1_000_000, "output_tokens": 0}
+    assert _estimate_call_cost_usd({**resp, "cost_usd": 0.02}, TokenPricing(4.0, 1.0)) == 0.02
+    assert _estimate_call_cost_usd({**resp, "cost_usd": 0.0}, TokenPricing(4.0, 1.0)) == 0.0
+    assert _estimate_call_cost_usd({**resp, "cost_usd": None}, TokenPricing(4.0, 1.0)) == 4.0
+    assert _estimate_call_cost_usd(resp, TokenPricing(4.0, 1.0)) == 4.0
+
+
+def test_row_cost_covers_the_format_retry_too(tmp_path: Path) -> None:
+    class RetryOnce(SyntheticEpistemicBackend):
+        calls = 0
+
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            RetryOnce.calls += 1
+            reply = "no number here" if RetryOnce.calls == 1 else "Final estimate: 3000"
+            return {"raw_reply": reply, "cost_usd": 0.001 * RetryOnce.calls, "provider": "p"}
+
+    recs = _run_priced(tmp_path, "r.jsonl", RetryOnce(seed=1), n_agents=1)
+    assert recs[0].cost_usd == pytest.approx(0.001 + 0.002)  # both attempts, not just the last
+
+    # If any attempt reports no cost, the row's cost is unknown rather than understated.
+    class PartlyUnknown(RetryOnce):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            out = super().generate_numeric_reply(**kwargs)
+            if RetryOnce.calls == 1:
+                out["cost_usd"] = None
+            return out
+
+    RetryOnce.calls = 0
+    recs = _run_priced(tmp_path, "u.jsonl", PartlyUnknown(seed=1), n_agents=1)
+    assert recs[0].cost_usd is None
+
+
+def test_resume_counts_saved_real_costs_against_the_budget(tmp_path: Path) -> None:
+    _run_priced(tmp_path, "run.jsonl", _priced_backend(0.4), n_agents=2, budget_usd=5.0)
+    # The saved rows already cost $0.80; with a $0.50 cap the resumed run must refuse to start
+    # new calls (nothing is pending here, so it just returns the saved rows safely).
+    again = _run_priced(tmp_path, "run.jsonl", _priced_backend(0.4), n_agents=2, budget_usd=0.5)
+    assert [r.cost_usd for r in again] == [0.4, 0.4]
+
+
 def test_runner_treats_values_over_three_log_units_away_as_misses(tmp_path: Path) -> None:
     task = build_numeric_core_tasks()[0]
     prompts: list[str] = []

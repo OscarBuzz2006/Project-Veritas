@@ -238,6 +238,13 @@ def _good(_i: int, row: dict[str, Any]) -> None:
         input_tokens=900,
         output_tokens=40,
     )
+    row["cost_usd"] = 0.0001
+
+
+def _good_without_cost(i: int, row: dict[str, Any]) -> None:
+    """A row as written before cost_usd existed."""
+    _good(i, row)
+    row["cost_usd"] = None
 
 
 def test_smoke_report_passes_a_clean_run(tmp_path: Path) -> None:
@@ -250,7 +257,7 @@ def test_smoke_report_passes_a_clean_run(tmp_path: Path) -> None:
         price_out=0.5,
     )
     assert rep["all_automatic_checks_pass"] is True
-    assert rep["checks"]["cost_known_per_call"]["pass"] == "manual"
+    assert rep["checks"]["cost_known_per_call"]["pass"] is True  # every row carries a real cost
     assert 0 < len(rep["sample_rows"]) <= 10
     assert "C1" in rep["checks"]["c3_prompt_size"]["detail"]
 
@@ -285,3 +292,48 @@ def test_smoke_report_cli_exit_codes(tmp_path: Path, capsys: pytest.CaptureFixtu
     assert json.loads(capsys.readouterr().out)["all_automatic_checks_pass"] is True
     assert main(["smoke-report", "--input", str(run), "--expected-provider", "Other"]) == 1
     assert main(["smoke-report", "--input", str(tmp_path / "missing")]) == 2
+
+
+def test_smoke_report_cost_check_is_automatic_when_every_row_has_a_cost(tmp_path: Path) -> None:
+    def priced(i: int, row: dict[str, Any]) -> None:
+        _good(i, row)
+        row["cost_usd"] = 0.0001 * (i + 1)
+
+    rep = build_smoke_report(_smoke_run(tmp_path, priced), price_in=0.1, price_out=0.5)
+    cost = rep["checks"]["cost_known_per_call"]
+    assert cost["pass"] is True
+    assert "actual" in cost["detail"]
+    assert "token estimate" in cost["detail"]
+
+
+def test_smoke_report_falls_back_to_the_request_journal_for_older_runs(tmp_path: Path) -> None:
+    run = _smoke_run(tmp_path, _good_without_cost)
+    journal = [{"response": {"usage": {"cost": 0.0002}}} for _ in range(5)]
+    (run / "provider_requests.jsonl").write_text(
+        "\n".join(json.dumps(j) for j in journal) + "\n", encoding="utf-8"
+    )
+    cost = build_smoke_report(run)["checks"]["cost_known_per_call"]
+    assert cost["pass"] is True
+    assert "0.0010 USD over 5 requests" in cost["detail"]
+    assert "provider_requests.jsonl" in cost["detail"]
+
+
+def test_smoke_report_fails_the_cost_check_when_no_real_cost_exists(tmp_path: Path) -> None:
+    rep = build_smoke_report(_smoke_run(tmp_path, _good_without_cost))
+    assert rep["checks"]["cost_known_per_call"]["pass"] is False
+    assert rep["all_automatic_checks_pass"] is False
+
+    journal_without_cost = {"response": {"usage": {"prompt_tokens": 3}}}
+    (tmp_path / "provider_requests.jsonl").write_text(
+        json.dumps(journal_without_cost) + "\n", encoding="utf-8"
+    )
+    assert build_smoke_report(tmp_path)["checks"]["cost_known_per_call"]["pass"] is False
+
+
+def test_selection_records_the_cost_of_each_cold_reply() -> None:
+    class Priced(Scripted):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            return {**super().generate_numeric_reply(**kwargs), "cost_usd": 0.0003}
+
+    out = run_cold_selection([_task("a", 10.0)], Priced({"a": 2.0}), repeats=2, keep=1)
+    assert [r["cost_usd"] for r in out["candidates"][0]["replies"]] == [0.0003, 0.0003]

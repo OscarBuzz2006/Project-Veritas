@@ -88,6 +88,7 @@ def run_cold_selection(
                     "parsed_value": parsed.value,
                     "miss": parsed.miss,
                     "finish_reason": str(resp.get("finish_reason", "") or ""),
+                    "cost_usd": resp.get("cost_usd"),
                     "model_slug": str(resp.get("model_slug", "")),
                     "provider": str(resp.get("provider", "")),
                 }

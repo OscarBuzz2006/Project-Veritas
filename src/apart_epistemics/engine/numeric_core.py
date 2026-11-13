@@ -134,11 +134,14 @@ class TokenPricing:
 
 
 def _estimate_call_cost_usd(resp: dict[str, Any], pricing: TokenPricing | None = None) -> float:
-    """Estimate one call's cost.
+    """Cost of one call (or one saved record): the provider's real charge when reported.
 
-    `output_tokens` (completion tokens) already includes hidden reasoning tokens, so
-    `reasoning_tokens` is a breakdown for reporting and is not added again here.
+    Otherwise estimated from tokens. `output_tokens` (completion tokens) already includes hidden
+    reasoning tokens, so `reasoning_tokens` is a breakdown and is not added again here.
     """
+    real = resp.get("cost_usd")
+    if real is not None:
+        return float(real)
     price = pricing or TokenPricing()
     in_tok = int(resp.get("input_tokens", 0) or 0)
     out_tok = int(resp.get("output_tokens", 0) or 0)
@@ -181,6 +184,8 @@ def _query_with_retry(
 ) -> tuple[dict[str, Any], Any]:
     """Query backend once, retrying with an explicit format reminder on parse failure."""
 
+    costs: list[float | None] = []
+
     def call(user_prompt: str) -> tuple[dict[str, Any], Any]:
         resp = backend.generate_numeric_reply(
             system_prompt=sys_p,
@@ -194,6 +199,7 @@ def _query_with_retry(
             max_tokens=max_tokens,
         )
         tracker.add(_estimate_call_cost_usd(resp, pricing))
+        costs.append(resp.get("cost_usd"))
         return resp, _parse_reply(str(resp.get("raw_reply", "")), cur_x)
 
     resp, parsed = call(usr_p)
@@ -202,7 +208,9 @@ def _query_with_retry(
         resp, parsed = call(
             f"{usr_p}\n\nRespond with a single positive number prefixed by 'Final estimate: '."
         )
-    return resp, parsed
+    # The row's cost covers every attempt; unknown if any attempt did not report one.
+    row_cost = sum(c for c in costs if c is not None) if all(c is not None for c in costs) else None
+    return {**resp, "cost_usd": row_cost}, parsed
 
 
 @dataclass(frozen=True)
@@ -297,6 +305,7 @@ def _make_record(
         input_tokens=int(resp.get("input_tokens", 0) or 0),
         output_tokens=int(resp.get("output_tokens", 0) or 0),
         finish_reason=str(resp.get("finish_reason", "") or ""),
+        cost_usd=resp.get("cost_usd"),
     )
 
 

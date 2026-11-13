@@ -89,9 +89,13 @@ def extract_openai_chat_fields(
     reasoning = details.get("reasoning_tokens")
     if reasoning is None:
         reasoning = usage.get("reasoning_tokens", 0)
+    # OpenRouter reports the actual charge per call; other providers do not.
+    raw_cost = usage.get("cost")
+    cost_usd = float(raw_cost) if isinstance(raw_cost, int | float) and raw_cost >= 0 else None
     return {
         "text": text,
         "finish_reason": finish_reason,
+        "cost_usd": cost_usd,
         "provider": str(data.get("provider") or default_provider),
         "model_slug": str(data.get("model") or default_model),
         "input_tokens": int(usage.get("prompt_tokens", 0) or 0),
@@ -190,6 +194,7 @@ class _HTTPChatBackend(ABC):
             "model_slug": resp["model_slug"],
             "provider": resp["provider"],
             "finish_reason": resp.get("finish_reason", ""),
+            "cost_usd": resp.get("cost_usd"),
             "reasoning_tokens": resp["reasoning_tokens"],
             "input_tokens": resp["input_tokens"],
             "output_tokens": resp["output_tokens"],

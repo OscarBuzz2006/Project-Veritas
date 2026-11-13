@@ -19,6 +19,23 @@ def _load(path: Path) -> list[NumericEstimateRecord]:
     ]
 
 
+def _journal_costs(run_dir: Path) -> list[float] | None:
+    """Real per-request costs from the provider request journal, if it has them all."""
+    path = run_dir / "provider_requests.jsonl"
+    if not path.exists():
+        return None
+    costs: list[float] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        usage = (json.loads(line).get("response") or {}).get("usage") or {}
+        cost = usage.get("cost")
+        if not isinstance(cost, int | float):
+            return None
+        costs.append(float(cost))
+    return costs or None
+
+
 def build_smoke_report(
     run_dir: Path,
     expected_model: str | None = None,
@@ -55,6 +72,38 @@ def build_smoke_report(
     step = max(1, n // sample)
     picked = records[::step][:sample]
 
+    costs = [r.cost_usd for r in records]
+    known = [c for c in costs if c is not None]
+    ledger_note = f"; ledger reserved {ledger.get('reserved_usd')}" if ledger else ""
+    if len(known) == n:
+        actual = sum(known)
+        cost_check: dict[str, Any] = {
+            "pass": True,
+            "detail": (
+                f"actual {actual:.4f} USD ({actual / n:.6f}/row, max {max(known):.6f}); "
+                f"token estimate at the given prices {est_cost:.4f} USD"
+                f"{ledger_note}; confirm the total on the provider dashboard"
+            ),
+        }
+    elif (journal := _journal_costs(run_dir)) is not None:
+        # Older runs did not store cost on each row; the request journal has every charge.
+        cost_check = {
+            "pass": True,
+            "detail": (
+                f"actual {sum(journal):.4f} USD over {len(journal)} requests "
+                f"({sum(journal) / len(journal):.6f}/request, max {max(journal):.6f}), from "
+                f"provider_requests.jsonl; token estimate at the given prices {est_cost:.4f} USD"
+                f"{ledger_note}; confirm the total on the provider dashboard"
+            ),
+        }
+    else:
+        cost_check = {
+            "pass": False,
+            "detail": (
+                f"{n - len(known)}/{n} rows have no provider-reported cost_usd; "
+                f"token estimate {est_cost:.4f} USD{ledger_note}"
+            ),
+        }
     checks = {
         "miss_rate_near_zero": {
             "pass": misses / n <= max_miss_rate,
@@ -73,14 +122,7 @@ def build_smoke_report(
             "pass": truncated == 0,
             "detail": f"{truncated}/{n} truncated; {no_reason} rows have no finish_reason",
         },
-        "cost_known_per_call": {
-            "pass": "manual",
-            "detail": (
-                f"repo estimate {est_cost:.4f} USD for {n} rows "
-                f"({est_cost / n:.6f}/row); compare with the OpenRouter dashboard"
-                + (f"; ledger reserved {ledger.get('reserved_usd')}" if ledger else "")
-            ),
-        },
+        "cost_known_per_call": cost_check,
         "ten_replies_read_by_a_person": {"pass": "manual", "detail": "see sample_rows"},
         "c3_prompt_size": {
             "pass": "manual",
