@@ -44,8 +44,8 @@ class OpenRouterBackend(_HTTPChatBackend):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -54,14 +54,23 @@ class OpenRouterBackend(_HTTPChatBackend):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": float(temperature),
-            "top_p": float(top_p),
             "max_tokens": int(max_tokens),
         }
+        if temperature is not None:
+            payload["temperature"] = float(temperature)
+        if top_p is not None:
+            payload["top_p"] = float(top_p)
         if self.reasoning_effort:
             payload["reasoning"] = {"effort": self.reasoning_effort}
+        provider_prefs: dict[str, Any] = {}
         if self.pin_provider:
-            payload["provider"] = {"order": [self.pin_provider], "allow_fallbacks": False}
+            provider_prefs.update({"order": [self.pin_provider], "allow_fallbacks": False})
+        if temperature is not None or top_p is not None:
+            # OpenRouter silently drops unsupported parameters unless told otherwise. A run that
+            # sets sampling on purpose must fail loudly, not log a setting that never applied.
+            provider_prefs["require_parameters"] = True
+        if provider_prefs:
+            payload["provider"] = provider_prefs
 
         headers = {
             "Authorization": f"Bearer {self._api_key}",
@@ -100,8 +109,8 @@ class OllamaBackend(_HTTPChatBackend):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
         url = f"{self.base_url}/api/chat"
@@ -112,12 +121,12 @@ class OllamaBackend(_HTTPChatBackend):
                 {"role": "user", "content": user_prompt},
             ],
             "stream": False,
-            "options": {
-                "temperature": float(temperature),
-                "top_p": float(top_p),
-                "num_predict": int(max_tokens),
-            },
+            "options": {"num_predict": int(max_tokens)},
         }
+        if temperature is not None:
+            payload["options"]["temperature"] = float(temperature)
+        if top_p is not None:
+            payload["options"]["top_p"] = float(top_p)
         data = self._post(
             url,
             {"Content-Type": "application/json"},
@@ -162,20 +171,22 @@ class OpenAICompatibleBackend(_HTTPChatBackend):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
-        payload = {
+        payload: dict[str, Any] = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": float(temperature),
-            "top_p": float(top_p),
             "max_tokens": int(max_tokens),
         }
+        if temperature is not None:
+            payload["temperature"] = float(temperature)
+        if top_p is not None:
+            payload["top_p"] = float(top_p)
         headers = {
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",
@@ -210,18 +221,20 @@ class AnthropicBackend(_HTTPChatBackend):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "model": self.model,
             "system": system_prompt,
             "messages": [{"role": "user", "content": user_prompt}],
-            "temperature": float(temperature),
-            "top_p": float(top_p),
             "max_tokens": int(max_tokens),
         }
+        if temperature is not None:
+            payload["temperature"] = float(temperature)
+        if top_p is not None:
+            payload["top_p"] = float(top_p)
         headers = {
             "x-api-key": self._api_key,
             "anthropic-version": "2023-06-01",
@@ -267,8 +280,8 @@ class GeminiBackend(_HTTPChatBackend):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
         url = (
@@ -278,12 +291,12 @@ class GeminiBackend(_HTTPChatBackend):
         payload = {
             "systemInstruction": {"parts": [{"text": system_prompt}]},
             "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
-            "generationConfig": {
-                "temperature": float(temperature),
-                "topP": float(top_p),
-                "maxOutputTokens": int(max_tokens),
-            },
+            "generationConfig": {"maxOutputTokens": int(max_tokens)},
         }
+        if temperature is not None:
+            payload["generationConfig"]["temperature"] = float(temperature)
+        if top_p is not None:
+            payload["generationConfig"]["topP"] = float(top_p)
         data = self._post(
             url,
             {"Content-Type": "application/json"},

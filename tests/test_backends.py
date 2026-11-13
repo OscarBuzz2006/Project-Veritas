@@ -57,7 +57,11 @@ def test_openrouter_backend_enforces_pinning_no_online_and_safe_errors(
     assert resp["provider"] == "OpenAI"
     assert resp["reasoning_tokens"] == 8
     assert ":online" not in captured["payload"]["model"]
-    assert captured["payload"]["provider"] == {"order": ["OpenAI"], "allow_fallbacks": False}
+    assert captured["payload"]["provider"] == {
+        "order": ["OpenAI"],
+        "allow_fallbacks": False,
+        "require_parameters": True,  # sampling was set explicitly, so it must be honoured
+    }
     assert captured["payload"]["reasoning"] == {"effort": "low"}
     assert captured["payload"]["temperature"] == pytest.approx(0.8)
     assert captured["payload"]["top_p"] == pytest.approx(0.95)
@@ -164,3 +168,79 @@ def test_direct_vendor_adapters_and_factory_validation(monkeypatch: pytest.Monke
         .generate_numeric_reply(system_prompt="s", user_prompt="u")["raw_reply"]
         .endswith("144")
     )
+
+
+def _capturing_backend(monkeypatch: pytest.MonkeyPatch, name: str, captured: dict[str, Any]) -> Any:
+    for env_var in ("OPENROUTER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"):
+        monkeypatch.setenv(env_var, "dummy-value")
+
+    def tx(_u: str, _h: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:
+        captured["payload"] = payload
+        return {
+            "choices": [{"message": {"content": "Final estimate: 5"}}],
+            "message": {"content": "Final estimate: 5"},
+            "content": [{"text": "Final estimate: 5"}],
+            "candidates": [{"content": {"parts": [{"text": "Final estimate: 5"}]}}],
+        }
+
+    return create_backend(name, transport=tx)
+
+
+def _sampling_keys(name: str, payload: dict[str, Any]) -> dict[str, Any]:
+    if name == "ollama":
+        return payload["options"]
+    if name == "gemini":
+        return payload["generationConfig"]
+    return payload
+
+
+@pytest.mark.parametrize("name", ["openrouter", "openai", "anthropic", "gemini", "ollama"])
+def test_sampling_params_are_omitted_unless_set(monkeypatch: pytest.MonkeyPatch, name: str) -> None:
+    captured: dict[str, Any] = {}
+    backend = _capturing_backend(monkeypatch, name, captured)
+    sampling = ("temperature", "top_p", "topP")
+
+    # Numeric path with defaults: nothing about sampling may be sent.
+    backend.generate_numeric_reply(system_prompt="s", user_prompt="u")
+    assert not any(k in _sampling_keys(name, captured["payload"]) for k in sampling)
+
+    # Explicit settings (e.g. the T=0 ablation) are sent, including zero.
+    backend.generate_chat("s", "u", temperature=0.0, top_p=0.9)
+    sent = _sampling_keys(name, captured["payload"])
+    assert sent["temperature"] == 0.0
+    assert sent["topP" if name == "gemini" else "top_p"] == pytest.approx(0.9)
+
+    # Only one of the two set: the other stays out.
+    backend.generate_chat("s", "u", temperature=0.3)
+    sent = _sampling_keys(name, captured["payload"])
+    assert sent["temperature"] == pytest.approx(0.3)
+    assert "top_p" not in sent
+    assert "topP" not in sent
+
+
+def test_openrouter_requires_parameters_only_when_sampling_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "dummy-value")
+    captured: dict[str, Any] = {}
+
+    def tx(_u: str, _h: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:
+        captured["payload"] = payload
+        return {"choices": [{"message": {"content": "Final estimate: 5"}}]}
+
+    pinned = OpenRouterBackend(model="m", pin_provider="OpenAI", transport=tx)
+    pinned.generate_numeric_reply(system_prompt="s", user_prompt="u")
+    assert captured["payload"]["provider"] == {"order": ["OpenAI"], "allow_fallbacks": False}
+
+    pinned.generate_chat("s", "u", temperature=0.0)
+    assert captured["payload"]["provider"] == {
+        "order": ["OpenAI"],
+        "allow_fallbacks": False,
+        "require_parameters": True,
+    }
+
+    unpinned = OpenRouterBackend(model="m", reasoning_effort="", transport=tx)
+    unpinned.generate_numeric_reply(system_prompt="s", user_prompt="u")
+    assert "provider" not in captured["payload"]
+    unpinned.generate_chat("s", "u", top_p=0.9)
+    assert captured["payload"]["provider"] == {"require_parameters": True}

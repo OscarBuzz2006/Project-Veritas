@@ -105,8 +105,8 @@ class _HTTPChatBackend(ABC):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
         """Execute one chat completion turn and return normalized text and usage fields."""
@@ -115,8 +115,8 @@ class _HTTPChatBackend(ABC):
         self,
         system_prompt: str,
         user_prompt: str,
-        temperature: float = 0.8,
-        top_p: float = 0.95,
+        temperature: float | None = None,
+        top_p: float | None = None,
         max_tokens: int = 256,
         **_: Any,
     ) -> dict[str, Any]:
