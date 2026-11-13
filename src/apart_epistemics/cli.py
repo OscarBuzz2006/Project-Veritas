@@ -188,6 +188,7 @@ def _serialize_numeric_analysis(analysis: dict[str, Any]) -> dict[str, Any]:
     return {
         "max_identity_residual": analysis["max_identity_residual"],
         "h4_assistant_agent_corr": analysis["h4_assistant_agent_corr"],
+        "h4_slopes": analysis["h4_slopes"],
         "by_condition_final": analysis["by_condition_final"],
         "condition_round_metrics": analysis["condition_round_metrics"],
         "contrasts": [

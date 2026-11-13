@@ -19,6 +19,7 @@ from apart_epistemics.backends import BackendConfigError, BudgetExceededError
 from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
 from apart_epistemics.datasets import generate_agent_population
 from apart_epistemics.engine.contrasts import compute_paired_holm_contrasts
+from apart_epistemics.engine.h4 import compute_h4_slopes
 from apart_epistemics.metrics import compute_page_decomposition, pearson_corr, quantile_sorted
 from apart_epistemics.models import AgentProfile, NumericEstimateRecord, TaskItem
 from apart_epistemics.parsers import NumericParseResult, parse_numeric_estimate
@@ -290,6 +291,7 @@ def _make_record(
         assistant_log10=asst_log,
         agent_log10_before=before_log,
         agent_log10_after=after_log,
+        pop_median_log10=math.log10(ctx.pop_stats[0]),
         miss=is_miss,
         reasoning_tokens=int(resp.get("reasoning_tokens", 0) or 0),
         input_tokens=int(resp.get("input_tokens", 0) or 0),
@@ -578,7 +580,11 @@ def analyze_numeric_core(
     return {
         "completion_status": "complete" if complete else "incomplete_or_unverified",
         "missing_or_incomplete_cells": len(expected_cells - complete_cells),
-        "h4_interpretation": "Descriptive correlation, mechanically coupled by update; not causal.",
+        "h4_interpretation": (
+            "Legacy pooled correlation, kept for the dashboard: mechanically coupled by the "
+            "update rule and pooled across questions. Use h4_slopes instead."
+        ),
+        "h4_slopes": compute_h4_slopes(records, tasks),
         "max_identity_residual": max_resid,
         "h4_assistant_agent_corr": round(h4_corr, 4),
         "by_condition_final": by_condition_final,

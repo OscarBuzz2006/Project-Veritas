@@ -144,6 +144,8 @@ class NumericEstimateRecord(BaseModel):
     assistant_log10: float | None = None
     agent_log10_before: float
     agent_log10_after: float
+    # log10 of the population median shown (C2/C3) or computed (C1) at the start of the round.
+    pop_median_log10: float | None = None
     miss: bool = False
     reasoning_tokens: int = Field(default=0, ge=0)
     input_tokens: int = Field(default=0, ge=0)
