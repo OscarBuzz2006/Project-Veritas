@@ -54,6 +54,8 @@ class TaskItem(BaseModel):
     numeric_truth: float | None = Field(default=None, gt=0.0)
     unit: str = ""
     source_note: str = ""
+    # Set by question selection: "high_spread" or "low_spread". Empty when not stratified.
+    selection_stratum: str = ""
     popular_misconception_bias: float = Field(default=0.0, ge=-1.0, le=1.0)
     global_north_prior: float = Field(default=0.5, ge=0.0, le=1.0)
     canonical_topics: list[str] = Field(default_factory=list)
@@ -99,6 +101,15 @@ class ExperimentSuiteConfig(BaseModel):
     num_rounds: int = Field(default=5, ge=1, le=20)
     peer_degree: int = Field(default=3, ge=0, le=20)
     tasks_per_track: int = Field(default=6, ge=1, le=50)
+    # Numeric-track questions. None falls back to tasks_per_track (the old behaviour).
+    numeric_tasks: int | None = Field(default=None, ge=1, le=50)
+    # Path to a JSON list of numeric questions (e.g. selected_tasks.json from select-questions).
+    # When set it replaces the built-in bank; numeric_tasks then caps how many are used.
+    numeric_tasks_file: str | None = None
+    # Starting estimates are log_truth + weight * popular_misconception_bias + N(0, sd).
+    # Set the weight to 0 for a crowd that starts centred on the truth.
+    numeric_start_bias_weight: float = Field(default=0.22, ge=0.0, le=1.0)
+    numeric_start_sd: float = Field(default=0.24, gt=0.0, le=2.0)
     numeric_replicates: int = Field(default=2, ge=1, le=10)
     alpha: float = Field(default=0.3, ge=0.0, le=1.0)
     conditions: list[ConditionConfig]
@@ -144,12 +155,19 @@ class NumericEstimateRecord(BaseModel):
     assistant_log10: float | None = None
     agent_log10_before: float
     agent_log10_after: float
+    # log10 of the population median shown (C2/C3) or computed (C1) at the start of the round.
+    pop_median_log10: float | None = None
     miss: bool = False
     reasoning_tokens: int = Field(default=0, ge=0)
     input_tokens: int = Field(default=0, ge=0)
     output_tokens: int = Field(default=0, ge=0)
-    temperature: float = Field(default=0.8, ge=0.0, le=2.0)
-    top_p: float = Field(default=0.95, ge=0.0, le=1.0)
+    finish_reason: str = ""
+    # Actual charge reported by the provider, summed over every call this row needed (including
+    # a format retry). None when the provider does not report cost.
+    cost_usd: float | None = Field(default=None, ge=0.0)
+    # None means the setting was not sent to the model (provider default applied).
+    temperature: float | None = Field(default=None, ge=0.0, le=2.0)
+    top_p: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 class ConditionSummary(BaseModel):

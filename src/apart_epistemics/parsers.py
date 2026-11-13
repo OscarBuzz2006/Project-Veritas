@@ -10,29 +10,33 @@ from typing import Any
 
 from apart_epistemics.metrics import clamp
 
+# Only spelled-out multipliers are honoured. Single letters are never multipliers because
+# "m" is metres (10,935 m), not million.
 _MULTIPLIERS = {
-    "k": 1e3,
     "thousand": 1e3,
-    "m": 1e6,
     "mn": 1e6,
     "million": 1e6,
-    "b": 1e9,
     "bn": 1e9,
     "billion": 1e9,
-    "t": 1e12,
     "trillion": 1e12,
 }
 
 _NUMBER_PATTERN = re.compile(
     r"(?P<sign>[-+])?\s*\$?\s*~?\s*"
     r"(?P<num>(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?|\.\d+)"
-    r"(?:\s*[eE]\s*(?P<exp>[+-]?\d+))?"
-    r"(?:\s*(?P<unit>thousand|million|billion|trillion|mn|bn|[kmbt])\b)?",
+    r"(?:\s*[eE]\s*(?P<exp>[+-]?\d+)"
+    r"|\s*[\u00d7xX*]\s*10\s*\^\s*\{?\s*(?P<pow>[+-]?\d+)\s*\}?)?"
+    r"(?:\s*(?P<unit>thousand|million|billion|trillion|mn|bn)\b)?",
     re.IGNORECASE,
 )
 
+# A range such as "2,840-2,900" or "10 to 20" right after the first number is ambiguous.
+_RANGE_AFTER_NUMBER = re.compile(r"\s*(?:[-\u2013\u2014~]|to\b)\s*\$?\s*~?\d", re.IGNORECASE)
+# "12.5k" / "3b" / "2t": an attached single-letter multiplier we refuse to guess at.
+_AMBIGUOUS_SUFFIX = re.compile(r"[kbt]\b", re.IGNORECASE)
+
 _FINAL_PREFIX_PATTERN = re.compile(
-    r"(?:final\s+estimate|final\s+answer|estimate)\s*[:=]\s*(?P<tail>[^\n]+)",
+    r"(?:final\s+estimate|final\s+answer)\s*[:=]\s*(?P<tail>[^\n]+)",
     re.IGNORECASE,
 )
 
@@ -56,10 +60,16 @@ def _parse_single_number_segment(segment: str) -> tuple[float | None, str]:
         return None, ""
     sign = -1.0 if match.group("sign") == "-" else 1.0
     raw_num = match.group("num").replace(",", "")
+    after = segment[match.end() :]
+    if _RANGE_AFTER_NUMBER.match(after) or (
+        match.group("unit") is None and _AMBIGUOUS_SUFFIX.match(after)
+    ):
+        return None, match.group(0).strip()
     try:
         base = float(raw_num)
-        if match.group("exp") is not None:
-            base *= 10.0 ** int(match.group("exp"))
+        exponent = match.group("exp") if match.group("exp") is not None else match.group("pow")
+        if exponent is not None:
+            base *= 10.0 ** int(exponent)
     except (ValueError, OverflowError):
         return None, ""
     unit = (match.group("unit") or "").lower()
@@ -69,19 +79,18 @@ def _parse_single_number_segment(segment: str) -> tuple[float | None, str]:
 
 
 def parse_numeric_estimate(text: str, require_positive: bool = True) -> NumericParseResult:
-    """Extract numeric estimate handling commas, unit suffixes, scientific notation, and misses."""
+    """Extract the number after a 'Final estimate:' prefix, or report a miss.
+
+    Handles commas, spelled-out multipliers, e-notation and 'a x 10^n'. Replies with no
+    prefix, a range, or an ambiguous single-letter suffix are misses, never guesses.
+    """
     if not text or not text.strip():
         return NumericParseResult(value=None, log10_value=None, miss=True)
 
     prefix_matches = list(_FINAL_PREFIX_PATTERN.finditer(text))
-    if prefix_matches:
-        tail = prefix_matches[-1].group("tail").strip()
-        val, span = _parse_single_number_segment(tail)
-    else:
-        matches = list(_NUMBER_PATTERN.finditer(text))
-        val, span = (None, "")
-        if matches:
-            val, span = _parse_single_number_segment(matches[-1].group(0))
+    if not prefix_matches:
+        return NumericParseResult(value=None, log10_value=None, miss=True)
+    val, span = _parse_single_number_segment(prefix_matches[-1].group("tail").strip())
 
     if val is None or not math.isfinite(val):
         return NumericParseResult(value=None, log10_value=None, miss=True)

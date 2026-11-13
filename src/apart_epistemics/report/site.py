@@ -111,6 +111,8 @@ def build_static_site(
             "h4_interpretation": "Descriptive, mechanically coupled correlation; not causal.",
             "max_identity_residual": numeric_analysis.get("max_identity_residual", 0.0),
             "h4_assistant_agent_corr": numeric_analysis.get("h4_assistant_agent_corr", 0.0),
+            "h4_slopes": numeric_analysis.get("h4_slopes", {}),
+            "by_stratum": numeric_analysis.get("by_stratum", {}),
             "by_condition_final": numeric_analysis.get("by_condition_final", {}),
             "condition_round_metrics": numeric_analysis.get("condition_round_metrics", []),
             "contrasts": [

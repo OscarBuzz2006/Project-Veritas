@@ -8,6 +8,7 @@ from typing import Any
 from apart_epistemics.backends.base import (
     BackendConfigError,
     BudgetExceededError,
+    TransientBackendError,
     TransportFn,
 )
 from apart_epistemics.backends.providers import (
@@ -78,6 +79,7 @@ __all__ = [
     "OpenRouterBackend",
     "ReplayBackend",
     "SyntheticEpistemicBackend",
+    "TransientBackendError",
     "TransportFn",
     "create_backend",
 ]

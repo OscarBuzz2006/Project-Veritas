@@ -12,8 +12,306 @@ import pytest
 
 from apart_epistemics.backends import BudgetExceededError, SyntheticEpistemicBackend
 from apart_epistemics.datasets import build_numeric_core_tasks
-from apart_epistemics.engine import analyze_numeric_core, build_numeric_prompts, run_numeric_core
+from apart_epistemics.engine import (
+    TokenPricing,
+    analyze_numeric_core,
+    build_numeric_prompts,
+    run_numeric_core,
+)
+from apart_epistemics.engine.numeric_core import _estimate_call_cost_usd
 from apart_epistemics.models import AgentProfile
+
+
+def test_c1_c2_c3_share_one_system_prompt_and_c3_only_appends_profile(
+    sample_agent: AgentProfile,
+) -> None:
+    def system_for(cond: str) -> str:
+        return build_numeric_prompts(
+            condition_id=cond,
+            agent=sample_agent,
+            question="Length of river in km?",
+            current_x=1500.0,
+            pop_stats=(2100.0, 1400.0, 3100.0),
+            history=[],
+        )[0]
+
+    sys_c1, sys_c2, sys_c3 = system_for("C1"), system_for("C2"), system_for("C3")
+    assert sys_c1 == sys_c2
+    # C3 keeps the shared prompt verbatim as a prefix and only adds the profile sentence.
+    assert sys_c3.startswith(sys_c1)
+    added = sys_c3[len(sys_c1) :]
+    assert sample_agent.profession in added
+    assert sample_agent.region in added
+    assert sample_agent.age_band in added
+    # No role/persona change: C3 must not swap in a different "advisor" framing.
+    assert "advisor" not in sys_c3.lower()
+
+
+def test_numeric_prompt_asks_for_best_estimate_in_task_unit(sample_agent: AgentProfile) -> None:
+    _, usr = build_numeric_prompts(
+        condition_id="C1",
+        agent=sample_agent,
+        question="Maximum depth of Lake Baikal?",
+        current_x=1500.0,
+        pop_stats=None,
+        history=[],
+        unit="meters",
+    )
+    assert "My current estimate is 1500 meters." in usr
+    assert "What is your best estimate of the true value?" in usr
+    assert "Final estimate: <plain number in meters>" in usr
+    assert "nothing after the number" in usr
+    assert "updated" not in usr
+
+    _, usr_no_unit = build_numeric_prompts(
+        condition_id="C1",
+        agent=sample_agent,
+        question="q",
+        current_x=2.0,
+        pop_stats=None,
+        history=[],
+    )
+    assert "Final estimate: <plain number>" in usr_no_unit
+
+
+def test_runner_passes_task_unit_into_prompt(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    seen: list[str] = []
+
+    class Spy(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            seen.append(kwargs["user_prompt"])
+            return super().generate_numeric_reply(**kwargs)
+
+    run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "runs.jsonl",
+        backend=Spy(seed=1),
+    )
+    assert seen
+    assert all(f"Final estimate: <plain number in {task.unit}>" in p for p in seen)
+
+
+def test_cost_estimate_does_not_double_count_reasoning_tokens() -> None:
+    # completion_tokens (output_tokens) already includes the 400 reasoning tokens.
+    resp = {"input_tokens": 1000, "output_tokens": 500, "reasoning_tokens": 400}
+    cost = _estimate_call_cost_usd(resp, TokenPricing(input_per_m=1.0, output_per_m=2.0))
+    assert cost == pytest.approx((1000 * 1.0 + 500 * 2.0) / 1_000_000)
+    # Reasoning tokens alone change nothing.
+    no_reasoning = {**resp, "reasoning_tokens": 0}
+    assert _estimate_call_cost_usd(no_reasoning) == pytest.approx(_estimate_call_cost_usd(resp))
+
+
+def test_prices_are_configurable_and_drive_the_budget_guard(tmp_path: Path) -> None:
+    resp = {"input_tokens": 1_000_000, "output_tokens": 0}
+    assert _estimate_call_cost_usd(resp, TokenPricing(0.1, 0.5)) == pytest.approx(0.1)
+    assert _estimate_call_cost_usd(resp, TokenPricing(4.0, 0.5)) == pytest.approx(4.0)
+
+    task = build_numeric_core_tasks()[0]
+
+    class Costly(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            out = super().generate_numeric_reply(**kwargs)
+            out["input_tokens"], out["output_tokens"] = 1_000_000, 0
+            return out
+
+    def run(pricing: TokenPricing, name: str) -> None:
+        run_numeric_core(
+            tasks=[task],
+            conditions=["C1"],
+            n_agents=2,
+            n_rounds=1,
+            replicates=1,
+            runs_path=tmp_path / name,
+            backend=Costly(seed=1),
+            budget_usd=1.0,
+            pricing=pricing,
+        )
+
+    run(TokenPricing(0.1, 0.5), "cheap.jsonl")  # 2 calls x $0.10 stays under the $1 cap
+    with pytest.raises(BudgetExceededError):
+        run(TokenPricing(4.0, 0.5), "dear.jsonl")  # first call alone exceeds the cap
+
+
+def test_runner_records_finish_reason_and_forwards_max_tokens(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    seen_max_tokens: list[int] = []
+
+    class Backend(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            seen_max_tokens.append(kwargs["max_tokens"])
+            out = super().generate_numeric_reply(**kwargs)
+            out["finish_reason"] = "length"
+            return out
+
+    default_recs = run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "a.jsonl",
+        backend=Backend(seed=1),
+    )
+    assert set(seen_max_tokens) == {1024}
+    assert all(r.finish_reason == "length" for r in default_recs)
+    # Sampling was never sent, so it must not be logged as if it had been.
+    assert all(r.temperature is None and r.top_p is None for r in default_recs)
+
+    seen_max_tokens.clear()
+    run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "b.jsonl",
+        backend=Backend(seed=1),
+        max_tokens=4096,
+    )
+    assert set(seen_max_tokens) == {4096}
+
+
+def test_changing_max_tokens_requires_a_new_output_folder(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    kwargs: dict[str, Any] = {
+        "tasks": [task],
+        "conditions": ["C1"],
+        "n_agents": 2,
+        "n_rounds": 1,
+        "replicates": 1,
+        "runs_path": tmp_path / "runs.jsonl",
+        "backend": SyntheticEpistemicBackend(seed=1),
+    }
+    run_numeric_core(**kwargs, max_tokens=1024)
+    run_numeric_core(**kwargs, max_tokens=1024)  # same settings resume fine
+    with pytest.raises(RuntimeError, match="new output directory"):
+        run_numeric_core(**kwargs, max_tokens=2048)
+
+
+def _priced_backend(cost: float | None, per_attempt: list[float | None] | None = None) -> Any:
+    class Priced(SyntheticEpistemicBackend):
+        calls = 0
+
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            out = super().generate_numeric_reply(**kwargs)
+            out["input_tokens"], out["output_tokens"] = 10, 10
+            seq = per_attempt if per_attempt is not None else [cost]
+            out["cost_usd"] = seq[min(Priced.calls, len(seq) - 1)]
+            Priced.calls += 1
+            return out
+
+    return Priced(seed=1)
+
+
+def test_records_store_the_providers_real_cost(tmp_path: Path) -> None:
+    recs = _run_priced(tmp_path, "a.jsonl", _priced_backend(0.0004))
+    assert [r.cost_usd for r in recs] == [0.0004] * len(recs)
+    assert recs[0].model_dump()["cost_usd"] == 0.0004
+    # Backends that report no cost leave it unknown rather than guessing.
+    unknown = _run_priced(tmp_path, "b.jsonl", _priced_backend(None))
+    assert all(r.cost_usd is None for r in unknown)
+
+
+def _run_priced(tmp_path: Path, name: str, backend: Any, **kwargs: Any) -> Any:
+    params: dict[str, Any] = {
+        "tasks": build_numeric_core_tasks()[:1],
+        "conditions": ["C1"],
+        "n_agents": 3,
+        "n_rounds": 1,
+        "replicates": 1,
+        "runs_path": tmp_path / name,
+        "backend": backend,
+    }
+    params.update(kwargs)
+    return run_numeric_core(**params)
+
+
+def test_budget_guard_uses_real_cost_not_the_token_estimate(tmp_path: Path) -> None:
+    # Tokens are tiny, so the token estimate is ~1e-5 per call and would never trip $1.
+    with pytest.raises(BudgetExceededError):
+        _run_priced(tmp_path, "dear.jsonl", _priced_backend(0.6), budget_usd=1.0)
+    # A genuinely cheap real cost keeps the same run well inside the cap.
+    ok = _run_priced(tmp_path, "cheap.jsonl", _priced_backend(0.0001), budget_usd=1.0)
+    assert len(ok) == 3
+
+
+def test_estimate_prefers_real_cost_and_falls_back_to_tokens() -> None:
+    resp = {"input_tokens": 1_000_000, "output_tokens": 0}
+    assert _estimate_call_cost_usd({**resp, "cost_usd": 0.02}, TokenPricing(4.0, 1.0)) == 0.02
+    assert _estimate_call_cost_usd({**resp, "cost_usd": 0.0}, TokenPricing(4.0, 1.0)) == 0.0
+    assert _estimate_call_cost_usd({**resp, "cost_usd": None}, TokenPricing(4.0, 1.0)) == 4.0
+    assert _estimate_call_cost_usd(resp, TokenPricing(4.0, 1.0)) == 4.0
+
+
+def test_row_cost_covers_the_format_retry_too(tmp_path: Path) -> None:
+    class RetryOnce(SyntheticEpistemicBackend):
+        calls = 0
+
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            RetryOnce.calls += 1
+            reply = "no number here" if RetryOnce.calls == 1 else "Final estimate: 3000"
+            return {"raw_reply": reply, "cost_usd": 0.001 * RetryOnce.calls, "provider": "p"}
+
+    recs = _run_priced(tmp_path, "r.jsonl", RetryOnce(seed=1), n_agents=1)
+    assert recs[0].cost_usd == pytest.approx(0.001 + 0.002)  # both attempts, not just the last
+
+    # If any attempt reports no cost, the row's cost is unknown rather than understated.
+    class PartlyUnknown(RetryOnce):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            out = super().generate_numeric_reply(**kwargs)
+            if RetryOnce.calls == 1:
+                out["cost_usd"] = None
+            return out
+
+    RetryOnce.calls = 0
+    recs = _run_priced(tmp_path, "u.jsonl", PartlyUnknown(seed=1), n_agents=1)
+    assert recs[0].cost_usd is None
+
+
+def test_resume_counts_saved_real_costs_against_the_budget(tmp_path: Path) -> None:
+    _run_priced(tmp_path, "run.jsonl", _priced_backend(0.4), n_agents=2, budget_usd=5.0)
+    # The saved rows already cost $0.80; with a $0.50 cap the resumed run must refuse to start
+    # new calls (nothing is pending here, so it just returns the saved rows safely).
+    again = _run_priced(tmp_path, "run.jsonl", _priced_backend(0.4), n_agents=2, budget_usd=0.5)
+    assert [r.cost_usd for r in again] == [0.4, 0.4]
+
+
+def test_runner_treats_values_over_three_log_units_away_as_misses(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    prompts: list[str] = []
+
+    class UnitSlipBackend(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            prompts.append(kwargs["user_prompt"])
+            # A metres-read-as-millions style slip: roughly 1e9 times the true size.
+            return {
+                "raw_reply": f"Final estimate: {task.numeric_truth * 1e9:g}",
+                "model_slug": "m",
+                "provider": "p",
+                "reasoning_tokens": 0,
+            }
+
+    records = run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "runs.jsonl",
+        backend=UnitSlipBackend(seed=1),
+    )
+    assert len(records) == 2
+    assert all(r.miss for r in records)
+    assert all(r.parsed_value is None and r.assistant_log10 is None for r in records)
+    # Each implausible reply is retried once before being recorded as a miss.
+    assert len(prompts) == 4
+    # A miss leaves the agent's belief unchanged.
+    assert all(r.agent_log10_after == r.agent_log10_before for r in records)
 
 
 def test_numeric_prompt_builder_and_crash_resumable_runner(

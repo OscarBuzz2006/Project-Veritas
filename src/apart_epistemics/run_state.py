@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,7 @@ class BudgetLedger:
                 "Budget must be finite and nonnegative; request allowance must be positive."
             )
         self.path, self.cap, self.per_request = path, cap, per_request
+        self._lock = threading.Lock()  # reserve() is called from worker threads
         state = (
             json.loads(path.read_text()) if path.exists() else {"reserved_usd": 0.0, "requests": 0}
         )
@@ -60,23 +62,24 @@ class BudgetLedger:
     def reserve(self) -> None:
         from apart_epistemics.backends.base import BudgetExceededError
 
-        if self.reserved + self.per_request > self.cap + 1e-12:
-            raise BudgetExceededError(
-                f"Request allowance exceeds budget (reserved={self.reserved:g}, "
-                f"next={self.per_request:g}, cap={self.cap:g})."
+        with self._lock:
+            if self.reserved + self.per_request > self.cap + 1e-12:
+                raise BudgetExceededError(
+                    f"Request allowance exceeds budget (reserved={self.reserved:g}, "
+                    f"next={self.per_request:g}, cap={self.cap:g})."
+                )
+            self.reserved += self.per_request
+            self.requests += 1
+            write_json_atomic(
+                self.path,
+                {
+                    "reserved_usd": self.reserved,
+                    "requests": self.requests,
+                    "cap_usd": self.cap,
+                    "per_request_allowance_usd": self.per_request,
+                    "accounting": "conservative request allowances, not actual billing",
+                },
             )
-        self.reserved += self.per_request
-        self.requests += 1
-        write_json_atomic(
-            self.path,
-            {
-                "reserved_usd": self.reserved,
-                "requests": self.requests,
-                "cap_usd": self.cap,
-                "per_request_allowance_usd": self.per_request,
-                "accounting": "conservative request allowances, not actual billing",
-            },
-        )
 
 
 def configure_budget(backend: Any, out_dir: Path, cap: float, per_request: float = 1.0) -> None:

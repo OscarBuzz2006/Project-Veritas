@@ -125,9 +125,12 @@ def test_question_selection_bias_audit_detects_model_a_handicap() -> None:
         ("Final estimate: 4.5 billion", 4_500_000_000.0),
         ("Final estimate: ~350 thousand", 350_000.0),
         ("Final estimate: 3.2e5", 320_000.0),
-        ("Final estimate: $12.5k", 12_500.0),
+        ("Final estimate: 10,935 m", 10_935.0),
+        ("Final estimate: 1522 m/s", 1_522.0),
+        ("Final estimate: 5.4 \u00d7 10^4", 54_000.0),
+        ("Final estimate: 5.4 x 10^4", 54_000.0),
+        ("Final estimate: 10,900 m, as measured in 2019.", 10_900.0),
         ("My reasoning covers 1990 to 2020. Final estimate: 42,500", 42_500.0),
-        ("Estimate without prefix is 87500.", 87_500.0),
     ],
 )
 def test_numeric_parser_handles_units_commas_and_distractors(text: str, expected: float) -> None:
@@ -145,6 +148,11 @@ def test_numeric_parser_handles_units_commas_and_distractors(text: str, expected
         "Final estimate: -150",  # negative cannot enter log10
         "Final estimate: N/A",
         "Final estimate: 1e9999",  # float overflow must become a clean miss
+        "Final estimate: 2,840-2,900 km",  # range, not a single estimate
+        "Final estimate: 10 to 20",  # range written in words
+        "Final estimate: $12.5k",  # ambiguous single-letter multiplier
+        "The depth is roughly 10,900 m, as measured in 2019.",  # no prefix: never use last number
+        "Estimate without prefix is 87500.",
     ],
 )
 def test_numeric_parser_marks_misses_safely_without_crashing(bad_text: str) -> None:

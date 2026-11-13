@@ -75,3 +75,27 @@ def test_cli_run_missing_secret_returns_clean_error_and_module_entrypoint(
     assert proc.returncode == 0
     assert "demo" in proc.stdout
     assert "audit-selection" in proc.stdout
+
+
+def test_cli_run_pin_provider_requires_openrouter_and_max_tokens_is_parsed(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from apart_epistemics.cli import build_parser
+
+    ns = build_parser().parse_args(["run", "--pin-provider", "OpenAI", "--max-tokens", "2048"])
+    assert ns.pin_provider == "OpenAI"
+    assert ns.max_tokens == 2048
+    assert build_parser().parse_args(["run"]).max_tokens == 1024
+
+    rc = main(["run", "--backend", "synthetic", "--pin-provider", "OpenAI", "--out", str(tmp_path)])
+    assert rc == 2
+    assert "only supported with --backend openrouter" in capsys.readouterr().err
+
+
+def test_cli_run_price_flags_default_and_parse() -> None:
+    from apart_epistemics.cli import build_parser
+
+    default = build_parser().parse_args(["run"])
+    assert (default.price_in, default.price_out) == (0.5, 1.5)
+    ns = build_parser().parse_args(["run", "--price-in", "0.1", "--price-out", "0.5"])
+    assert (ns.price_in, ns.price_out) == (0.1, 0.5)
