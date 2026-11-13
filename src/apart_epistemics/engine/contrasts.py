@@ -27,15 +27,12 @@ def compute_paired_holm_contrasts(
         cells_b = cell_metric_fn(cond_b, metric)
         common = sorted(set(cells_a) & set(cells_b))
         if not common:
-            if not include_empty:
-                continue
-            xs = [0.0]
-            ys = [0.0]
-            p_val = 1.0
-        else:
-            xs = [cells_a[k] for k in common]
-            ys = [cells_b[k] for k in common]
-            p_val = paired_wilcoxon_p(xs, ys)
+            # Missing observations are not evidence of a zero effect, even when
+            # older callers request include_empty.
+            continue
+        xs = [cells_a[k] for k in common]
+        ys = [cells_b[k] for k in common]
+        p_val = paired_wilcoxon_p(xs, ys)
 
         diffs = [y - x for x, y in zip(xs, ys, strict=True)]
         ci_lo, ci_hi = bootstrap_ci(diffs, seed=seed)

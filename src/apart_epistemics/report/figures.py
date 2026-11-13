@@ -110,7 +110,7 @@ def _render_dissociation_svg(summaries: list[ConditionSummary]) -> str:
     chart_w = w - left - right
     lines = _svg_header_lines(
         "Decoding Dissociation: Lexical Veil vs Monoculture",
-        "T=0.8 sampling adds text variation while monolithic models stay epistemically flat",
+        "Recorded lexical and topic metrics; effective-source values are assumption-based proxies",
     )
 
     for tick in (0.0, 0.25, 0.5, 0.75, 1.0):
@@ -175,7 +175,7 @@ def _render_epistemic_quadrant_svg(summaries: list[ConditionSummary]) -> str:
 
     lines = _svg_header_lines(
         "Epistemic Quadrant: Topic Breadth vs Calibration Quality",
-        "Bubble radius proportional to Goldman effective independent sources (N_eff)",
+        "Bubble radius shows assumption-based source proxy (N_eff), not measured independence",
     )
 
     for i in range(5):
@@ -285,7 +285,7 @@ def _render_round_trajectories_svg(summaries: list[ConditionSummary]) -> str:
 
     lines = _svg_header_lines(
         "Multi-Round Topic Decay vs Structural Preservation",
-        "Monolithic provenance narrows agenda diversity while cross-national pools preserve it",
+        "Recorded topic trajectories; synthetic runs reflect simulator assumptions",
     )
 
     for r in range(max_r + 1):

@@ -176,6 +176,23 @@ def test_runner_records_finish_reason_and_forwards_max_tokens(tmp_path: Path) ->
     assert set(seen_max_tokens) == {4096}
 
 
+def test_changing_max_tokens_requires_a_new_output_folder(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    kwargs: dict[str, Any] = {
+        "tasks": [task],
+        "conditions": ["C1"],
+        "n_agents": 2,
+        "n_rounds": 1,
+        "replicates": 1,
+        "runs_path": tmp_path / "runs.jsonl",
+        "backend": SyntheticEpistemicBackend(seed=1),
+    }
+    run_numeric_core(**kwargs, max_tokens=1024)
+    run_numeric_core(**kwargs, max_tokens=1024)  # same settings resume fine
+    with pytest.raises(RuntimeError, match="new output directory"):
+        run_numeric_core(**kwargs, max_tokens=2048)
+
+
 def test_runner_treats_values_over_three_log_units_away_as_misses(tmp_path: Path) -> None:
     task = build_numeric_core_tasks()[0]
     prompts: list[str] = []

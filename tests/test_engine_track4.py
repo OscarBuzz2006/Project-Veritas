@@ -122,7 +122,8 @@ def test_synthetic_suite_verifies_decoding_dissociation_heterogeneity_and_person
     assert peer.brier_score > advisor.brier_score
 
     # Blinded dual-judge diagnostics and artifact exports.
-    assert out["topic_audit"]["inter_rater_kappa"] >= 0.70
+    assert out["topic_audit"]["inter_rater_kappa"] is None
+    assert out["topic_audit"]["reliability_status"] == "not_independently_judged"
     assert (tmp_path / "runs.jsonl").exists()
     assert (tmp_path / "summary.json").exists()
     assert (tmp_path / "summary.csv").exists()

@@ -35,6 +35,7 @@ from apart_epistemics.models import (
     RoundRecord,
 )
 from apart_epistemics.report import build_static_site, generate_figures
+from apart_epistemics.run_state import configure_budget
 from apart_epistemics.summarizer import evaluate_dual_judge_topics
 
 # (condition_id, label, heterogeneity, nationality, num_models, group, temperature, top_p)
@@ -245,13 +246,18 @@ def _run_both_tracks(
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
+    if not hasattr(backend, "generate_numeric_reply"):
+        raise BackendConfigError(
+            "Replay supports Track 4 only; numeric and combined replay are unsupported."
+        )
+    configure_budget(backend, out_dir, budget_usd, getattr(backend, "request_allowance", 1.0))
     out_dir.mkdir(parents=True, exist_ok=True)
     suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
     num_analysis, num_recs = _execute_numeric_track(
         cfg,
         backend,
         out_dir,
-        n_agents=max(8, cfg.num_agents),
+        n_agents=cfg.num_agents,
         budget_usd=budget_usd,
         max_tokens=max_tokens,
         pricing=pricing,
@@ -319,6 +325,12 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 )
             backend_kwargs["pin_provider"] = args.pin_provider
         backend = create_backend(args.backend, **backend_kwargs)
+        if args.backend == "replay":
+            raise BackendConfigError(
+                "The run command includes numeric execution; replay is Track "
+                "4-only. Use analyze/report for archived runs."
+            )
+        backend.request_allowance = args.request_allowance
     except (BackendConfigError, FileNotFoundError, ValueError) as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
@@ -327,6 +339,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     pricing = TokenPricing(input_per_m=args.price_in, output_per_m=args.price_out)
     try:
         if args.numeric_only:
+            configure_budget(backend, out_dir, args.budget, args.request_allowance)
             _execute_numeric_track(
                 cfg,
                 backend,
@@ -378,14 +391,22 @@ def _load_saved_artifacts(
         if line.strip()
     ]
 
-    num_analysis = (
-        analyze_numeric_core(num_records, build_numeric_core_tasks()) if num_records else {}
+    manifest_path = num_runs_file.with_suffix(".manifest.json")
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    from apart_epistemics.models import TaskItem
+
+    numeric_tasks = (
+        [TaskItem.model_validate(t) for t in manifest["tasks"]]
+        if manifest
+        else build_numeric_core_tasks()
     )
+    num_analysis = analyze_numeric_core(num_records, numeric_tasks) if num_records else {}
     topic_audit = (
         evaluate_dual_judge_topics(records) if records else summary_json.get("topic_audit", {})
     )
     summaries = [ConditionSummary.model_validate(s) for s in summary_json.get("summaries", [])]
     suite_result = {
+        "backend": summary_json.get("backend", {"class": "unrecorded"}),
         "summaries": summaries,
         "records": records,
         "comparisons": summary_json.get("comparisons", []),
@@ -507,6 +528,15 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=TokenPricing().output_per_m,
         help="USD per 1M output tokens (reasoning tokens included), for the budget guard.",
+    )
+    p_run.add_argument(
+        "--request-allowance",
+        type=float,
+        default=1.0,
+        help=(
+            "USD reserved before every HTTP attempt (default 1). Set at least "
+            "the maximum possible request charge; not actual billing."
+        ),
     )
     p_run.add_argument("--numeric-only", action="store_true")
 

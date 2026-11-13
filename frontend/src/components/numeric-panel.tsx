@@ -46,6 +46,13 @@ export function NumericPanel({
           improved.
         </p>
       </section>
+      {numeric.completion_status &&
+        numeric.completion_status !== "complete" && (
+          <p className="empty-state" role="status">
+            This run is incomplete or unverified. Final comparisons are
+            unavailable.
+          </p>
+        )}
       {!finals.length && (
         <p className="empty-state">No numeric results are available.</p>
       )}

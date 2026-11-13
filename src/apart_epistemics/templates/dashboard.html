@@ -638,7 +638,7 @@
             <h3>How to read this plot</h3>
             <p><strong>Further right</strong> means more effective topics (Hill N1).</p>
             <p><strong>Higher up</strong> means better calibration (1 − Brier).</p>
-            <p><strong>Larger bubbles</strong> indicate more effective independent sources (Goldman N_eff).</p>
+            <p><strong>Larger bubbles</strong> indicate a larger assumption-based source proxy (Goldman N_eff), not measured independence.</p>
             <div class="quadrant-status" id="quadrant-status" aria-live="polite">
               <span>Select a condition to inspect its scores.</span>
             </div>
@@ -749,7 +749,7 @@
           <dt>Brier</dt><dd>Squared probability error. Lower Brier is better; confident errors are penalized.</dd>
           <dt>Confident wrong</dt><dd>Rate of confident but incorrect answers; lower is better.</dd>
           <dt>Effective topics</dt><dd>Hill N1: topic diversity expressed as an effective number of equally common topics.</dd>
-          <dt>Goldman N_eff</dt><dd>Effective independent sources; correlated sources reduce this value.</dd>
+          <dt>Goldman N_eff</dt><dd>Assumption-based source redundancy proxy, not measured independence.</dd>
           <dt>Jaccard distance</dt><dd>Lexical difference between responses, not a measure of factual accuracy.</dd>
         </dl>
       </details>
@@ -826,7 +826,7 @@
         const items = [
           ["Conditions", String(summaries.length)],
           ["Track 4 Records", String(DATA.metadata?.n_track4_records || 0)],
-          ["Blind Judge Kappa", Number(audit.inter_rater_kappa || 0).toFixed(3)],
+          ["Blind Judge Kappa", audit.reliability_status === "independently_judged" && audit.inter_rater_kappa != null ? Number(audit.inter_rater_kappa).toFixed(3) : "Unavailable"],
           ["Numeric Records", String(DATA.metadata?.n_numeric_records || 0)],
           ["Max Page Residual", Number(numeric.max_identity_residual || 0).toExponential(2)],
         ];

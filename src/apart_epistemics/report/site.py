@@ -51,6 +51,7 @@ def _sample_trace_specimens(
                     "agent_region": r.agent_region,
                     "model_assigned": r.model_assigned,
                     "model_family": r.model_family,
+                    "provenance": r.metadata,
                     "extracted_topics": r.extracted_topics,
                     "stance_prob": r.stance_prob,
                     "confidence": r.confidence,
@@ -86,13 +87,16 @@ def build_static_site(
 
     clean_audit = {
         "canonical_topics": topic_audit.get("canonical_topics", []),
-        "inter_rater_kappa": topic_audit.get("inter_rater_kappa", 0.0),
+        "inter_rater_kappa": topic_audit.get("inter_rater_kappa"),
+        "reliability_status": topic_audit.get("reliability_status", "not_independently_judged"),
         "reliability_warning": topic_audit.get("reliability_warning", False),
         "n_evaluated": topic_audit.get("n_evaluated", len(records)),
     }
 
     payload = {
         "metadata": {
+            "backend": suite_result.get("backend", {"class": "unrecorded"}),
+            "metric_basis": "Source diversity and persuasion are assumption-based proxies.",
             "title": "Epistemic Prism",
             "subtitle": "Multi-Agent Model Diversity, Decoding Illusions, and Crowd Wisdom",
             "n_conditions": len(summaries),
@@ -103,6 +107,8 @@ def build_static_site(
         "comparisons": [c.model_dump() if hasattr(c, "model_dump") else c for c in comparisons],
         "topic_audit": clean_audit,
         "numeric_analysis": {
+            "completion_status": numeric_analysis.get("completion_status", "unverified"),
+            "h4_interpretation": "Descriptive, mechanically coupled correlation; not causal.",
             "max_identity_residual": numeric_analysis.get("max_identity_residual", 0.0),
             "h4_assistant_agent_corr": numeric_analysis.get("h4_assistant_agent_corr", 0.0),
             "by_condition_final": numeric_analysis.get("by_condition_final", {}),

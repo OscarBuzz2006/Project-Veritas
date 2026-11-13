@@ -511,7 +511,7 @@ class SyntheticEpistemicBackend:
 
         flat_peer_topics = [t for sublist in peer_topics for t in sublist]
         if flat_peer_topics and cond.heterogeneity_type == HeterogeneityType.SHARED_FEEDBACK:
-            most_common = max(set(flat_peer_topics), key=flat_peer_topics.count)
+            most_common = max(sorted(set(flat_peer_topics)), key=flat_peer_topics.count)
             topics = [most_common]
 
         prose = self._compose_prose(

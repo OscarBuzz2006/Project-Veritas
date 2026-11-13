@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import random
+from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -87,22 +88,29 @@ def evaluate_dual_judge_topics(
         text = item["judge_payload"]["text"]
         pred_a = judge_a(text, canonical)
         pred_b = judge_b(text, canonical)
-        # If seed topics exist from structured extraction, align primary label deterministically
-        if not judge_a_override and item["seed_topics"]:
-            pred_a = item["seed_topics"]
-        if not judge_b_override and item["seed_topics"]:
-            # Cross-origin second judge verifies keyword grounding or falls back cleanly
-            grounded = _secondary_keyword_judge(text, canonical)
-            pred_b = item["seed_topics"] if grounded else pred_b
-        labels_a.append(pred_a[0] if pred_a else "none")
-        labels_b.append(pred_b[0] if pred_b else "none")
+        # Seed labels may describe content, but cannot verify their own reliability.
+        if judge_a_override is None:
+            pred_a = item["seed_topics"] or pred_a
+        labels_a.append("|".join(sorted(set(pred_a))))
+        labels_b.append("|".join(sorted(set(pred_b))))
         assignments[item["orig_index"]] = pred_a
 
-    kappa = cohens_kappa(labels_a, labels_b)
+    independent = (
+        judge_a_override is not None
+        and judge_b_override is not None
+        and judge_a_override is not judge_b_override
+    )
+    kappa = cohens_kappa(labels_a, labels_b) if independent and records else None
     return {
         "canonical_topics": canonical,
-        "inter_rater_kappa": round(kappa, 4),
-        "reliability_warning": kappa < kappa_threshold,
+        "inter_rater_kappa": round(kappa, 4) if kappa is not None else None,
+        "reliability_status": "independently_judged"
+        if kappa is not None
+        else "not_independently_judged",
+        "label_basis": "independent judge"
+        if judge_a_override
+        else "self-reported or synthetic seed topics",
+        "reliability_warning": kappa is None or kappa < kappa_threshold,
         "assignments": assignments,
         "n_evaluated": len(blinded),
     }
@@ -114,13 +122,24 @@ def export_audit_sample(
     out_path: Path,
     seed: int = 42,
 ) -> Path:
-    """Export stratified blinded responses for human verification of LLM topic labels."""
+    """Export condition-stratified blinded responses for human verification of LLM topic labels."""
     blinded = blind_and_shuffle_records(records, seed=seed)
-    sample = blinded[: min(n, len(blinded))]
+    strata: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for item in blinded:
+        rec = records[item["orig_index"]]
+        strata[rec.condition_id].append(item)
+    keys = sorted(strata)
+    random.Random(seed).shuffle(keys)
+    sample: list[dict[str, Any]] = []
+    while len(sample) < min(max(0, n), len(blinded)):
+        for key in keys:
+            if strata[key] and len(sample) < n:
+                sample.append(strata[key].pop())
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(
             fh,
+            lineterminator="\n",
             fieldnames=["blind_id", "task_id", "response_text", "llm_topics", "human_topics"],
         )
         writer.writeheader()

@@ -143,7 +143,11 @@ function SpecimenMessages({
                   <FileText />
                 </TraceIcon>
                 <TraceTitle>System prompts</TraceTitle>
-                <Badge variant="outline">Not recorded</Badge>
+                <Badge variant="outline">
+                  {typeof specimen.provenance?.agent_system_prompt === "string"
+                    ? "Recorded"
+                    : "Not recorded"}
+                </Badge>
               </TraceLine>
             </TraceCollapsibleTrigger>
             <TraceCollapsibleContent>
@@ -152,13 +156,16 @@ function SpecimenMessages({
                 <p>
                   {specimen.model_assigned === "none"
                     ? "Not applicable: this baseline has no AI assistant in the loop."
-                    : "The exact assistant system prompt is not included in this saved trace."}
+                    : typeof specimen.provenance?.assistant_system_prompt ===
+                        "string"
+                      ? specimen.provenance.assistant_system_prompt
+                      : "The exact assistant system prompt is not included in this saved trace."}
                 </p>
                 <h3>Simulated-agent system prompt</h3>
                 <p>
-                  The exact agent system prompt is not included in this saved
-                  trace. Response text and model identity cannot establish which
-                  instructions were used.
+                  {typeof specimen.provenance?.agent_system_prompt === "string"
+                    ? specimen.provenance.agent_system_prompt
+                    : "The exact agent system prompt is not included in this saved trace. Response text and model identity cannot establish which instructions were used."}
                 </p>
               </div>
             </TraceCollapsibleContent>
@@ -176,6 +183,21 @@ function SpecimenMessages({
             </TraceCollapsibleTrigger>
             <TraceCollapsibleContent>
               <dl className="key-values">
+                {specimen.provenance &&
+                  [
+                    "assistant_model_actual",
+                    "assistant_provider_actual",
+                    "agent_model_actual",
+                    "parse_status",
+                  ].map(
+                    (key) =>
+                      typeof specimen.provenance?.[key] === "string" && (
+                        <div key={key}>
+                          <dt>{humanize(key)}</dt>
+                          <dd>{String(specimen.provenance[key])}</dd>
+                        </div>
+                      ),
+                  )}
                 <div>
                   <dt>Model family</dt>
                   <dd>{specimen.model_family}</dd>
