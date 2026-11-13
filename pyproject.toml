@@ -47,6 +47,7 @@ source = ["apart_epistemics"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = ["propaganda-eval"]  # vendored third-party code (Nous Research)
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C90", "PT", "RUF"]
