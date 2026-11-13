@@ -6,6 +6,7 @@ import math
 import random
 import statistics
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -116,10 +117,24 @@ def _load_existing_numeric_records(
     return existing
 
 
-def _estimate_call_cost_usd(resp: dict[str, Any]) -> float:
+@dataclass(frozen=True)
+class TokenPricing:
+    """USD per 1M tokens. Set per model; the defaults are a rough placeholder, not a price list."""
+
+    input_per_m: float = 0.5
+    output_per_m: float = 1.5
+
+
+def _estimate_call_cost_usd(resp: dict[str, Any], pricing: TokenPricing | None = None) -> float:
+    """Estimate one call's cost.
+
+    `output_tokens` (completion tokens) already includes hidden reasoning tokens, so
+    `reasoning_tokens` is a breakdown for reporting and is not added again here.
+    """
+    price = pricing or TokenPricing()
     in_tok = int(resp.get("input_tokens", 0) or 0)
-    out_tok = int(resp.get("output_tokens", 0) or 0) + int(resp.get("reasoning_tokens", 0) or 0)
-    return max(1e-5, (in_tok * 0.5 + out_tok * 1.5) / 1_000_000.0)
+    out_tok = int(resp.get("output_tokens", 0) or 0)
+    return max(1e-5, (in_tok * price.input_per_m + out_tok * price.output_per_m) / 1_000_000.0)
 
 
 def _query_with_retry(
@@ -135,6 +150,7 @@ def _query_with_retry(
     spent_usd: float,
     budget_usd: float,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
+    pricing: TokenPricing | None = None,
 ) -> tuple[dict[str, Any], Any, float]:
     """Query backend once, retrying with an explicit format reminder on parse failure."""
     resp = backend.generate_numeric_reply(
@@ -148,7 +164,7 @@ def _query_with_retry(
         agent=agent,
         max_tokens=max_tokens,
     )
-    spent_usd += _estimate_call_cost_usd(resp)
+    spent_usd += _estimate_call_cost_usd(resp, pricing)
     raw_reply = str(resp.get("raw_reply", ""))
     parsed = _parse_reply(raw_reply, cur_x)
 
@@ -169,7 +185,7 @@ def _query_with_retry(
             agent=agent,
             max_tokens=max_tokens,
         )
-        spent_usd += _estimate_call_cost_usd(resp)
+        spent_usd += _estimate_call_cost_usd(resp, pricing)
         raw_reply = str(resp.get("raw_reply", ""))
         parsed = _parse_reply(raw_reply, cur_x)
 
@@ -188,6 +204,7 @@ def run_numeric_core(
     budget_usd: float = 50.0,
     seed: int = 42,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
+    pricing: TokenPricing | None = None,
 ) -> list[NumericEstimateRecord]:
     """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap."""
     runs_path.parent.mkdir(parents=True, exist_ok=True)
@@ -267,6 +284,7 @@ def run_numeric_core(
                                 spent_usd,
                                 budget_usd,
                                 max_tokens,
+                                pricing,
                             )
                             raw_reply = str(resp.get("raw_reply", ""))
 

@@ -19,7 +19,12 @@ from apart_epistemics.backends import (
 )
 from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
 from apart_epistemics.datasets import audit_question_selection_bias, build_numeric_core_tasks
-from apart_epistemics.engine import analyze_numeric_core, run_numeric_core, run_suite
+from apart_epistemics.engine import (
+    TokenPricing,
+    analyze_numeric_core,
+    run_numeric_core,
+    run_suite,
+)
 from apart_epistemics.models import (
     ConditionConfig,
     ConditionSummary,
@@ -206,6 +211,7 @@ def _execute_numeric_track(
     n_agents: int,
     budget_usd: float,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
+    pricing: TokenPricing | None = None,
 ) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
@@ -221,6 +227,7 @@ def _execute_numeric_track(
         budget_usd=budget_usd,
         seed=cfg.seed,
         max_tokens=max_tokens,
+        pricing=pricing,
     )
     num_analysis = analyze_numeric_core(num_recs, num_tasks)
     (out_dir / "numeric_analysis.json").write_text(
@@ -236,6 +243,7 @@ def _run_both_tracks(
     out_dir: Path,
     budget_usd: float = 50.0,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
+    pricing: TokenPricing | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
@@ -246,6 +254,7 @@ def _run_both_tracks(
         n_agents=max(8, cfg.num_agents),
         budget_usd=budget_usd,
         max_tokens=max_tokens,
+        pricing=pricing,
     )
     return suite_res, num_analysis, num_recs
 
@@ -315,6 +324,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
         return 2
 
     out_dir = Path(args.out)
+    pricing = TokenPricing(input_per_m=args.price_in, output_per_m=args.price_out)
     try:
         if args.numeric_only:
             _execute_numeric_track(
@@ -324,10 +334,16 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 n_agents=cfg.num_agents,
                 budget_usd=args.budget,
                 max_tokens=args.max_tokens,
+                pricing=pricing,
             )
         else:
             _run_both_tracks(
-                cfg, backend, out_dir, budget_usd=args.budget, max_tokens=args.max_tokens
+                cfg,
+                backend,
+                out_dir,
+                budget_usd=args.budget,
+                max_tokens=args.max_tokens,
+                pricing=pricing,
             )
     except (BudgetExceededError, RuntimeError, BackendConfigError) as exc:
         print(f"Execution failed: {exc}", file=sys.stderr)
@@ -480,6 +496,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--replay-jsonl", default=None)
     p_run.add_argument("--out", default="reports/results")
     p_run.add_argument("--budget", type=float, default=15.0)
+    p_run.add_argument(
+        "--price-in",
+        type=float,
+        default=TokenPricing().input_per_m,
+        help="USD per 1M input tokens, for the budget guard. Set this for your model.",
+    )
+    p_run.add_argument(
+        "--price-out",
+        type=float,
+        default=TokenPricing().output_per_m,
+        help="USD per 1M output tokens (reasoning tokens included), for the budget guard.",
+    )
     p_run.add_argument("--numeric-only", action="store_true")
 
     p_analyze = sub.add_parser("analyze", help="Analyze persisted JSONL logs and verify metrics.")

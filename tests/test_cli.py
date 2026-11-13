@@ -90,3 +90,12 @@ def test_cli_run_pin_provider_requires_openrouter_and_max_tokens_is_parsed(
     rc = main(["run", "--backend", "synthetic", "--pin-provider", "OpenAI", "--out", str(tmp_path)])
     assert rc == 2
     assert "only supported with --backend openrouter" in capsys.readouterr().err
+
+
+def test_cli_run_price_flags_default_and_parse() -> None:
+    from apart_epistemics.cli import build_parser
+
+    default = build_parser().parse_args(["run"])
+    assert (default.price_in, default.price_out) == (0.5, 1.5)
+    ns = build_parser().parse_args(["run", "--price-in", "0.1", "--price-out", "0.5"])
+    assert (ns.price_in, ns.price_out) == (0.1, 0.5)

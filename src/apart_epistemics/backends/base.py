@@ -69,6 +69,12 @@ def extract_openai_chat_fields(
         else:
             text = str(content)
     usage = data.get("usage") or {}
+    # OpenAI-format APIs report reasoning tokens under completion_tokens_details (and already
+    # include them in completion_tokens); some gateways put them at the top level of usage.
+    details = usage.get("completion_tokens_details") or {}
+    reasoning = details.get("reasoning_tokens")
+    if reasoning is None:
+        reasoning = usage.get("reasoning_tokens", 0)
     return {
         "text": text,
         "finish_reason": finish_reason,
@@ -76,7 +82,7 @@ def extract_openai_chat_fields(
         "model_slug": str(data.get("model") or default_model),
         "input_tokens": int(usage.get("prompt_tokens", 0) or 0),
         "output_tokens": int(usage.get("completion_tokens", 0) or 0),
-        "reasoning_tokens": int(usage.get("reasoning_tokens", 0) or 0),
+        "reasoning_tokens": int(reasoning or 0),
     }
 
 

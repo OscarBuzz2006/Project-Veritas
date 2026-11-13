@@ -299,3 +299,28 @@ def test_create_backend_passes_pin_provider_to_openrouter(monkeypatch: pytest.Mo
     backend = create_backend("openrouter", pin_provider="OpenAI", transport=tx)
     backend.generate_numeric_reply(system_prompt="s", user_prompt="u")
     assert captured["payload"]["provider"] == {"order": ["OpenAI"], "allow_fallbacks": False}
+
+
+@pytest.mark.parametrize(
+    ("usage", "expected_reasoning"),
+    [
+        ({"completion_tokens_details": {"reasoning_tokens": 40}}, 40),  # OpenAI format
+        ({"reasoning_tokens": 8}, 8),  # flat fallback
+        ({"completion_tokens_details": {"reasoning_tokens": 40}, "reasoning_tokens": 8}, 40),
+        ({"completion_tokens_details": {"reasoning_tokens": 0}, "reasoning_tokens": 8}, 0),
+        ({"completion_tokens_details": None}, 0),
+        ({}, 0),
+    ],
+)
+def test_reasoning_tokens_read_from_nested_usage_with_flat_fallback(
+    usage: dict[str, Any], expected_reasoning: int
+) -> None:
+    from apart_epistemics.backends.base import extract_openai_chat_fields
+
+    data = {
+        "choices": [{"message": {"content": "x"}}],
+        "usage": {"prompt_tokens": 10, "completion_tokens": 100, **usage},
+    }
+    out = extract_openai_chat_fields(data, "p", "m")
+    assert out["reasoning_tokens"] == expected_reasoning
+    assert out["output_tokens"] == 100

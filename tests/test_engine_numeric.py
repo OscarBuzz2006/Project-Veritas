@@ -12,7 +12,13 @@ import pytest
 
 from apart_epistemics.backends import BudgetExceededError, SyntheticEpistemicBackend
 from apart_epistemics.datasets import build_numeric_core_tasks
-from apart_epistemics.engine import analyze_numeric_core, build_numeric_prompts, run_numeric_core
+from apart_epistemics.engine import (
+    TokenPricing,
+    analyze_numeric_core,
+    build_numeric_prompts,
+    run_numeric_core,
+)
+from apart_epistemics.engine.numeric_core import _estimate_call_cost_usd
 from apart_epistemics.models import AgentProfile
 
 
@@ -88,6 +94,47 @@ def test_runner_passes_task_unit_into_prompt(tmp_path: Path) -> None:
     )
     assert seen
     assert all(f"Final estimate: <plain number in {task.unit}>" in p for p in seen)
+
+
+def test_cost_estimate_does_not_double_count_reasoning_tokens() -> None:
+    # completion_tokens (output_tokens) already includes the 400 reasoning tokens.
+    resp = {"input_tokens": 1000, "output_tokens": 500, "reasoning_tokens": 400}
+    cost = _estimate_call_cost_usd(resp, TokenPricing(input_per_m=1.0, output_per_m=2.0))
+    assert cost == pytest.approx((1000 * 1.0 + 500 * 2.0) / 1_000_000)
+    # Reasoning tokens alone change nothing.
+    no_reasoning = {**resp, "reasoning_tokens": 0}
+    assert _estimate_call_cost_usd(no_reasoning) == pytest.approx(_estimate_call_cost_usd(resp))
+
+
+def test_prices_are_configurable_and_drive_the_budget_guard(tmp_path: Path) -> None:
+    resp = {"input_tokens": 1_000_000, "output_tokens": 0}
+    assert _estimate_call_cost_usd(resp, TokenPricing(0.1, 0.5)) == pytest.approx(0.1)
+    assert _estimate_call_cost_usd(resp, TokenPricing(4.0, 0.5)) == pytest.approx(4.0)
+
+    task = build_numeric_core_tasks()[0]
+
+    class Costly(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            out = super().generate_numeric_reply(**kwargs)
+            out["input_tokens"], out["output_tokens"] = 1_000_000, 0
+            return out
+
+    def run(pricing: TokenPricing, name: str) -> None:
+        run_numeric_core(
+            tasks=[task],
+            conditions=["C1"],
+            n_agents=2,
+            n_rounds=1,
+            replicates=1,
+            runs_path=tmp_path / name,
+            backend=Costly(seed=1),
+            budget_usd=1.0,
+            pricing=pricing,
+        )
+
+    run(TokenPricing(0.1, 0.5), "cheap.jsonl")  # 2 calls x $0.10 stays under the $1 cap
+    with pytest.raises(BudgetExceededError):
+        run(TokenPricing(4.0, 0.5), "dear.jsonl")  # first call alone exceeds the cap
 
 
 def test_runner_records_finish_reason_and_forwards_max_tokens(tmp_path: Path) -> None:
