@@ -90,6 +90,45 @@ def test_runner_passes_task_unit_into_prompt(tmp_path: Path) -> None:
     assert all(f"Final estimate: <plain number in {task.unit}>" in p for p in seen)
 
 
+def test_runner_records_finish_reason_and_forwards_max_tokens(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    seen_max_tokens: list[int] = []
+
+    class Backend(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            seen_max_tokens.append(kwargs["max_tokens"])
+            out = super().generate_numeric_reply(**kwargs)
+            out["finish_reason"] = "length"
+            return out
+
+    default_recs = run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "a.jsonl",
+        backend=Backend(seed=1),
+    )
+    assert set(seen_max_tokens) == {1024}
+    assert all(r.finish_reason == "length" for r in default_recs)
+    # Sampling was never sent, so it must not be logged as if it had been.
+    assert all(r.temperature is None and r.top_p is None for r in default_recs)
+
+    seen_max_tokens.clear()
+    run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "b.jsonl",
+        backend=Backend(seed=1),
+        max_tokens=4096,
+    )
+    assert set(seen_max_tokens) == {4096}
+
+
 def test_runner_treats_values_over_three_log_units_away_as_misses(tmp_path: Path) -> None:
     task = build_numeric_core_tasks()[0]
     prompts: list[str] = []

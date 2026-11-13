@@ -9,6 +9,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any
 
+# Reasoning models may spend hidden reasoning tokens out of this budget, so keep it generous.
+DEFAULT_NUMERIC_MAX_TOKENS = 1024
+
 TransportFn = Callable[[str, dict[str, str], dict[str, Any]], dict[str, Any]]
 
 
@@ -54,7 +57,9 @@ def extract_openai_chat_fields(
     """Normalize an OpenAI-compatible chat-completions JSON response."""
     choices = data.get("choices") or []
     text = ""
+    finish_reason = ""
     if choices and isinstance(choices, list):
+        finish_reason = str(choices[0].get("finish_reason") or "")
         msg = choices[0].get("message") or {}
         content = msg.get("content", "")
         if isinstance(content, list):
@@ -66,6 +71,7 @@ def extract_openai_chat_fields(
     usage = data.get("usage") or {}
     return {
         "text": text,
+        "finish_reason": finish_reason,
         "provider": str(data.get("provider") or default_provider),
         "model_slug": str(data.get("model") or default_model),
         "input_tokens": int(usage.get("prompt_tokens", 0) or 0),
@@ -117,7 +123,7 @@ class _HTTPChatBackend(ABC):
         user_prompt: str,
         temperature: float | None = None,
         top_p: float | None = None,
-        max_tokens: int = 256,
+        max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
         **_: Any,
     ) -> dict[str, Any]:
         """Run one quantitative estimation query reusing `generate_chat`."""
@@ -132,6 +138,7 @@ class _HTTPChatBackend(ABC):
             "raw_reply": resp["text"],
             "model_slug": resp["model_slug"],
             "provider": resp["provider"],
+            "finish_reason": resp.get("finish_reason", ""),
             "reasoning_tokens": resp["reasoning_tokens"],
             "input_tokens": resp["input_tokens"],
             "output_tokens": resp["output_tokens"],

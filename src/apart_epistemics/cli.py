@@ -17,6 +17,7 @@ from apart_epistemics.backends import (
     SyntheticEpistemicBackend,
     create_backend,
 )
+from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
 from apart_epistemics.datasets import audit_question_selection_bias, build_numeric_core_tasks
 from apart_epistemics.engine import analyze_numeric_core, run_numeric_core, run_suite
 from apart_epistemics.models import (
@@ -204,6 +205,7 @@ def _execute_numeric_track(
     *,
     n_agents: int,
     budget_usd: float,
+    max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
 ) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
@@ -218,6 +220,7 @@ def _execute_numeric_track(
         alpha=cfg.alpha,
         budget_usd=budget_usd,
         seed=cfg.seed,
+        max_tokens=max_tokens,
     )
     num_analysis = analyze_numeric_core(num_recs, num_tasks)
     (out_dir / "numeric_analysis.json").write_text(
@@ -232,11 +235,17 @@ def _run_both_tracks(
     backend: Any,
     out_dir: Path,
     budget_usd: float = 50.0,
+    max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
 ) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
     num_analysis, num_recs = _execute_numeric_track(
-        cfg, backend, out_dir, n_agents=max(8, cfg.num_agents), budget_usd=budget_usd
+        cfg,
+        backend,
+        out_dir,
+        n_agents=max(8, cfg.num_agents),
+        budget_usd=budget_usd,
+        max_tokens=max_tokens,
     )
     return suite_res, num_analysis, num_recs
 
@@ -294,6 +303,12 @@ def _cmd_run(args: argparse.Namespace) -> int:
             backend_kwargs["model"] = args.model
         if args.replay_jsonl:
             backend_kwargs["jsonl_path"] = args.replay_jsonl
+        if args.pin_provider:
+            if args.backend != "openrouter":
+                raise BackendConfigError(
+                    "--pin-provider is only supported with --backend openrouter."
+                )
+            backend_kwargs["pin_provider"] = args.pin_provider
         backend = create_backend(args.backend, **backend_kwargs)
     except (BackendConfigError, FileNotFoundError, ValueError) as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
@@ -303,10 +318,17 @@ def _cmd_run(args: argparse.Namespace) -> int:
     try:
         if args.numeric_only:
             _execute_numeric_track(
-                cfg, backend, out_dir, n_agents=cfg.num_agents, budget_usd=args.budget
+                cfg,
+                backend,
+                out_dir,
+                n_agents=cfg.num_agents,
+                budget_usd=args.budget,
+                max_tokens=args.max_tokens,
             )
         else:
-            _run_both_tracks(cfg, backend, out_dir, budget_usd=args.budget)
+            _run_both_tracks(
+                cfg, backend, out_dir, budget_usd=args.budget, max_tokens=args.max_tokens
+            )
     except (BudgetExceededError, RuntimeError, BackendConfigError) as exc:
         print(f"Execution failed: {exc}", file=sys.stderr)
         return 2
@@ -444,6 +466,17 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["synthetic", "replay", "ollama", "openrouter", "openai", "anthropic", "gemini"],
     )
     p_run.add_argument("--model", default=None)
+    p_run.add_argument(
+        "--pin-provider",
+        default=None,
+        help="OpenRouter only: route every call to this provider with no fallbacks.",
+    )
+    p_run.add_argument(
+        "--max-tokens",
+        type=int,
+        default=DEFAULT_NUMERIC_MAX_TOKENS,
+        help="Output token limit per numeric call (reasoning tokens may count against it).",
+    )
     p_run.add_argument("--replay-jsonl", default=None)
     p_run.add_argument("--out", default="reports/results")
     p_run.add_argument("--budget", type=float, default=15.0)

@@ -244,3 +244,58 @@ def test_openrouter_requires_parameters_only_when_sampling_is_set(
     assert "provider" not in captured["payload"]
     unpinned.generate_chat("s", "u", top_p=0.9)
     assert captured["payload"]["provider"] == {"require_parameters": True}
+
+
+def test_numeric_reply_defaults_to_1024_max_tokens_and_is_configurable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, Any] = {}
+    backend = _capturing_backend(monkeypatch, "openrouter", captured)
+    backend.generate_numeric_reply(system_prompt="s", user_prompt="u")
+    assert captured["payload"]["max_tokens"] == 1024
+    backend.generate_numeric_reply(system_prompt="s", user_prompt="u", max_tokens=2048)
+    assert captured["payload"]["max_tokens"] == 2048
+
+
+@pytest.mark.parametrize(
+    ("name", "response", "expected"),
+    [
+        (
+            "openrouter",
+            {"choices": [{"message": {"content": "x"}, "finish_reason": "length"}]},
+            "length",
+        ),
+        ("openai", {"choices": [{"message": {"content": "x"}, "finish_reason": "stop"}]}, "stop"),
+        ("anthropic", {"content": [{"text": "x"}], "stop_reason": "max_tokens"}, "max_tokens"),
+        (
+            "gemini",
+            {"candidates": [{"content": {"parts": [{"text": "x"}]}, "finishReason": "MAX_TOKENS"}]},
+            "MAX_TOKENS",
+        ),
+        ("ollama", {"message": {"content": "x"}, "done_reason": "length"}, "length"),
+        ("openai", {"choices": [{"message": {"content": "x"}}]}, ""),
+    ],
+)
+def test_finish_reason_is_reported_by_every_adapter(
+    monkeypatch: pytest.MonkeyPatch, name: str, response: dict[str, Any], expected: str
+) -> None:
+    for env_var in ("OPENROUTER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"):
+        monkeypatch.setenv(env_var, "dummy-value")
+    backend = create_backend(name, transport=lambda _u, _h, _p: response)
+    assert backend.generate_chat("s", "u")["finish_reason"] == expected
+    assert backend.generate_numeric_reply(system_prompt="s", user_prompt="u")["finish_reason"] == (
+        expected
+    )
+
+
+def test_create_backend_passes_pin_provider_to_openrouter(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "dummy-value")
+    captured: dict[str, Any] = {}
+
+    def tx(_u: str, _h: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:
+        captured["payload"] = payload
+        return {"choices": [{"message": {"content": "Final estimate: 5"}}]}
+
+    backend = create_backend("openrouter", pin_provider="OpenAI", transport=tx)
+    backend.generate_numeric_reply(system_prompt="s", user_prompt="u")
+    assert captured["payload"]["provider"] == {"order": ["OpenAI"], "allow_fallbacks": False}

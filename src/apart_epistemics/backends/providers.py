@@ -136,6 +136,7 @@ class OllamaBackend(_HTTPChatBackend):
         msg = data.get("message") or {}
         return {
             "text": str(msg.get("content", "")),
+            "finish_reason": str(data.get("done_reason") or ""),
             "provider": "ollama_local",
             "model_slug": str(data.get("model") or self.model),
             "input_tokens": int(data.get("prompt_eval_count", 0) or 0),
@@ -251,6 +252,7 @@ class AnthropicBackend(_HTTPChatBackend):
         usage = data.get("usage") or {}
         return {
             "text": text,
+            "finish_reason": str(data.get("stop_reason") or ""),
             "provider": "anthropic",
             "model_slug": str(data.get("model") or self.model),
             "input_tokens": int(usage.get("input_tokens", 0) or 0),
@@ -309,6 +311,7 @@ class GeminiBackend(_HTTPChatBackend):
         usage = data.get("usageMetadata") or {}
         return {
             "text": text,
+            "finish_reason": str((cands[0].get("finishReason") if cands else "") or ""),
             "provider": "google_gemini",
             "model_slug": self.model,
             "input_tokens": int(usage.get("promptTokenCount", 0) or 0),

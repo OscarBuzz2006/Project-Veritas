@@ -147,8 +147,10 @@ class NumericEstimateRecord(BaseModel):
     reasoning_tokens: int = Field(default=0, ge=0)
     input_tokens: int = Field(default=0, ge=0)
     output_tokens: int = Field(default=0, ge=0)
-    temperature: float = Field(default=0.8, ge=0.0, le=2.0)
-    top_p: float = Field(default=0.95, ge=0.0, le=1.0)
+    finish_reason: str = ""
+    # None means the setting was not sent to the model (provider default applied).
+    temperature: float | None = Field(default=None, ge=0.0, le=2.0)
+    top_p: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 class ConditionSummary(BaseModel):

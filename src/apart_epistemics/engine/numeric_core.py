@@ -12,6 +12,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from apart_epistemics.backends import BudgetExceededError
+from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
 from apart_epistemics.datasets import generate_agent_population
 from apart_epistemics.engine.contrasts import compute_paired_holm_contrasts
 from apart_epistemics.metrics import compute_page_decomposition, pearson_corr, quantile_sorted
@@ -133,6 +134,7 @@ def _query_with_retry(
     agent: AgentProfile,
     spent_usd: float,
     budget_usd: float,
+    max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
 ) -> tuple[dict[str, Any], Any, float]:
     """Query backend once, retrying with an explicit format reminder on parse failure."""
     resp = backend.generate_numeric_reply(
@@ -144,6 +146,7 @@ def _query_with_retry(
         current_x=cur_x,
         pop_stats=pop_stats,
         agent=agent,
+        max_tokens=max_tokens,
     )
     spent_usd += _estimate_call_cost_usd(resp)
     raw_reply = str(resp.get("raw_reply", ""))
@@ -164,6 +167,7 @@ def _query_with_retry(
             current_x=cur_x,
             pop_stats=pop_stats,
             agent=agent,
+            max_tokens=max_tokens,
         )
         spent_usd += _estimate_call_cost_usd(resp)
         raw_reply = str(resp.get("raw_reply", ""))
@@ -183,6 +187,7 @@ def run_numeric_core(
     alpha: float = 0.3,
     budget_usd: float = 50.0,
     seed: int = 42,
+    max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
 ) -> list[NumericEstimateRecord]:
     """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap."""
     runs_path.parent.mkdir(parents=True, exist_ok=True)
@@ -261,6 +266,7 @@ def run_numeric_core(
                                 agent,
                                 spent_usd,
                                 budget_usd,
+                                max_tokens,
                             )
                             raw_reply = str(resp.get("raw_reply", ""))
 
@@ -297,6 +303,7 @@ def run_numeric_core(
                                 reasoning_tokens=int(resp.get("reasoning_tokens", 0) or 0),
                                 input_tokens=int(resp.get("input_tokens", 0) or 0),
                                 output_tokens=int(resp.get("output_tokens", 0) or 0),
+                                finish_reason=str(resp.get("finish_reason", "") or ""),
                             )
                             existing[key] = rec
                             ordered_records.append(rec)
