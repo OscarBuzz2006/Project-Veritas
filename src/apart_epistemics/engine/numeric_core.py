@@ -31,17 +31,16 @@ def build_numeric_prompts(
     cond = condition_id.upper()
     est_str = f"{current_x:g}"
 
+    # One shared system prompt for C1/C2/C3 so conditions differ only in what they add:
+    # C2 adds the social summary (user prompt), C3 adds the profile sentence and history.
+    system_prompt = (
+        "You are a neutral quantitative estimation assistant. "
+        "Reason step by step without web lookup and end with 'Final estimate: <number>'."
+    )
     if cond == "C3":
-        system_prompt = (
-            f"You are an analytical estimation advisor speaking with a {agent.profession} "
-            f"in {agent.region} (age band {agent.age_band}) who values "
-            f"{', '.join(agent.values) or 'evidence'}. "
-            f"Help them reason accurately and end cleanly with 'Final estimate: <number>'."
-        )
-    else:
-        system_prompt = (
-            "You are a neutral quantitative estimation assistant. "
-            "Reason step by step without web lookup and end with 'Final estimate: <number>'."
+        system_prompt += (
+            f" You are speaking with a {agent.profession} in {agent.region} "
+            f"(age band {agent.age_band}) who values {', '.join(agent.values) or 'evidence'}."
         )
 
     parts = [f"Question: {question}"]

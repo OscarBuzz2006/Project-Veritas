@@ -16,6 +16,31 @@ from apart_epistemics.engine import analyze_numeric_core, build_numeric_prompts,
 from apart_epistemics.models import AgentProfile
 
 
+def test_c1_c2_c3_share_one_system_prompt_and_c3_only_appends_profile(
+    sample_agent: AgentProfile,
+) -> None:
+    def system_for(cond: str) -> str:
+        return build_numeric_prompts(
+            condition_id=cond,
+            agent=sample_agent,
+            question="Length of river in km?",
+            current_x=1500.0,
+            pop_stats=(2100.0, 1400.0, 3100.0),
+            history=[],
+        )[0]
+
+    sys_c1, sys_c2, sys_c3 = system_for("C1"), system_for("C2"), system_for("C3")
+    assert sys_c1 == sys_c2
+    # C3 keeps the shared prompt verbatim as a prefix and only adds the profile sentence.
+    assert sys_c3.startswith(sys_c1)
+    added = sys_c3[len(sys_c1) :]
+    assert sample_agent.profession in added
+    assert sample_agent.region in added
+    assert sample_agent.age_band in added
+    # No role/persona change: C3 must not swap in a different "advisor" framing.
+    assert "advisor" not in sys_c3.lower()
+
+
 def test_numeric_prompt_builder_and_crash_resumable_runner(
     tmp_path: Path, sample_agent: AgentProfile
 ) -> None:
