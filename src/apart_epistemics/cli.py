@@ -29,6 +29,7 @@ from apart_epistemics.models import (
     RoundRecord,
 )
 from apart_epistemics.report import build_static_site, generate_figures
+from apart_epistemics.run_state import configure_budget
 from apart_epistemics.summarizer import evaluate_dual_judge_topics
 
 # (condition_id, label, heterogeneity, nationality, num_models, group, temperature, top_p)
@@ -233,10 +234,15 @@ def _run_both_tracks(
     out_dir: Path,
     budget_usd: float = 50.0,
 ) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
+    if not hasattr(backend, "generate_numeric_reply"):
+        raise BackendConfigError(
+            "Replay supports Track 4 only; numeric and combined replay are unsupported."
+        )
+    configure_budget(backend, out_dir, budget_usd, getattr(backend, "request_allowance", 1.0))
     out_dir.mkdir(parents=True, exist_ok=True)
     suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
     num_analysis, num_recs = _execute_numeric_track(
-        cfg, backend, out_dir, n_agents=max(8, cfg.num_agents), budget_usd=budget_usd
+        cfg, backend, out_dir, n_agents=cfg.num_agents, budget_usd=budget_usd
     )
     return suite_res, num_analysis, num_recs
 
@@ -295,6 +301,12 @@ def _cmd_run(args: argparse.Namespace) -> int:
         if args.replay_jsonl:
             backend_kwargs["jsonl_path"] = args.replay_jsonl
         backend = create_backend(args.backend, **backend_kwargs)
+        if args.backend == "replay":
+            raise BackendConfigError(
+                "The run command includes numeric execution; replay is Track "
+                "4-only. Use analyze/report for archived runs."
+            )
+        backend.request_allowance = args.request_allowance
     except (BackendConfigError, FileNotFoundError, ValueError) as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
@@ -302,6 +314,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     out_dir = Path(args.out)
     try:
         if args.numeric_only:
+            configure_budget(backend, out_dir, args.budget, args.request_allowance)
             _execute_numeric_track(
                 cfg, backend, out_dir, n_agents=cfg.num_agents, budget_usd=args.budget
             )
@@ -340,14 +353,22 @@ def _load_saved_artifacts(
         if line.strip()
     ]
 
-    num_analysis = (
-        analyze_numeric_core(num_records, build_numeric_core_tasks()) if num_records else {}
+    manifest_path = num_runs_file.with_suffix(".manifest.json")
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    from apart_epistemics.models import TaskItem
+
+    numeric_tasks = (
+        [TaskItem.model_validate(t) for t in manifest["tasks"]]
+        if manifest
+        else build_numeric_core_tasks()
     )
+    num_analysis = analyze_numeric_core(num_records, numeric_tasks) if num_records else {}
     topic_audit = (
         evaluate_dual_judge_topics(records) if records else summary_json.get("topic_audit", {})
     )
     summaries = [ConditionSummary.model_validate(s) for s in summary_json.get("summaries", [])]
     suite_result = {
+        "backend": summary_json.get("backend", {"class": "unrecorded"}),
         "summaries": summaries,
         "records": records,
         "comparisons": summary_json.get("comparisons", []),
@@ -447,6 +468,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--replay-jsonl", default=None)
     p_run.add_argument("--out", default="reports/results")
     p_run.add_argument("--budget", type=float, default=15.0)
+    p_run.add_argument(
+        "--request-allowance",
+        type=float,
+        default=1.0,
+        help=(
+            "USD reserved before every HTTP attempt (default 1). Set at least "
+            "the maximum possible request charge; not actual billing."
+        ),
+    )
     p_run.add_argument("--numeric-only", action="store_true")
 
     p_analyze = sub.add_parser("analyze", help="Analyze persisted JSONL logs and verify metrics.")

@@ -189,16 +189,17 @@ def test_blinded_dual_judge_summarizer_strips_metadata_and_checks_kappa(
         assert "condition_id" not in item["judge_payload"]
         assert "model_assigned" not in item["judge_payload"]
 
-    # High-agreement judge run
+    # Seed labels do not establish independent reliability
     result = evaluate_dual_judge_topics(records, seed=42)
     assert len(result["canonical_topics"]) >= 3
-    assert result["inter_rater_kappa"] >= 0.70
-    assert result["reliability_warning"] is False
+    assert result["inter_rater_kappa"] is None
+    assert result["reliability_warning"] is True
 
     # Disagreement flag when judge_b returns mismatched labels
     noisy = evaluate_dual_judge_topics(
         records,
         seed=42,
+        judge_a_override=lambda _txt, vocab: [vocab[0]],
         judge_b_override=lambda _txt, _vocab: ["unrelated_noise"],
     )
     assert noisy["inter_rater_kappa"] < 0.70

@@ -103,14 +103,17 @@ def parse_structured_belief(text: str) -> dict[str, Any]:
 
     if candidate:
         try:
-            payload = json.loads(candidate)
+            payload, _end = json.JSONDecoder().raw_decode(candidate)
             if isinstance(payload, dict):
                 stance = float(payload.get("stance_prob", 0.5))
                 conf = float(payload.get("confidence", max(stance, 1.0 - stance)))
+                if not math.isfinite(stance) or not math.isfinite(conf):
+                    raise ValueError("Non-finite belief")
                 topics = payload.get("topics", [])
                 if not isinstance(topics, list):
                     topics = []
                 return {
+                    "parse_status": "parsed",
                     "stance_prob": clamp(stance, 0.0, 1.0),
                     "confidence": clamp(conf, 0.5, 1.0),
                     "rationale": str(payload.get("rationale", cleaned)).strip(),
@@ -120,6 +123,7 @@ def parse_structured_belief(text: str) -> dict[str, Any]:
             pass
 
     return {
+        "parse_status": "invalid",
         "stance_prob": float("nan"),
         "confidence": 0.5,
         "rationale": cleaned,

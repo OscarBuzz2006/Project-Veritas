@@ -139,6 +139,7 @@ class NumericEstimateRecord(BaseModel):
     model_slug: str
     provider: str
     raw_reply: str
+    run_spec: dict[str, Any] = Field(default_factory=dict)
     parsed_value: float | None = None
     assistant_log10: float | None = None
     agent_log10_before: float

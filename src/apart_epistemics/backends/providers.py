@@ -40,6 +40,9 @@ class OpenRouterBackend(_HTTPChatBackend):
         self.base_url = base_url.rstrip("/")
         self._transport = transport
 
+    def for_model(self, model: str) -> OpenRouterBackend:
+        return super().for_model(re.sub(r":online$", "", model.strip()))
+
     def generate_chat(
         self,
         system_prompt: str,
@@ -272,8 +275,7 @@ class GeminiBackend(_HTTPChatBackend):
         max_tokens: int = 512,
     ) -> dict[str, Any]:
         url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{self.model}:generateContent?key={self._api_key}"
+            f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
         )
         payload = {
             "systemInstruction": {"parts": [{"text": system_prompt}]},
@@ -286,7 +288,7 @@ class GeminiBackend(_HTTPChatBackend):
         }
         data = self._post(
             url,
-            {"Content-Type": "application/json"},
+            {"Content-Type": "application/json", "x-goog-api-key": self._api_key},
             payload,
             "Gemini request failed",
         )

@@ -7,10 +7,12 @@ import json
 import math
 import random
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from apart_epistemics.backends import ReplayBackend
+from apart_epistemics.backends import BackendConfigError, ReplayBackend
+from apart_epistemics.backends.base import _HTTPChatBackend
 from apart_epistemics.datasets import (
     assign_models_for_condition,
     build_ground_truth_tasks,
@@ -42,6 +44,7 @@ from apart_epistemics.models import (
     TaskKind,
 )
 from apart_epistemics.parsers import parse_structured_belief
+from apart_epistemics.run_state import backend_identity
 from apart_epistemics.summarizer import evaluate_dual_judge_topics, export_audit_sample
 
 _SUMMARY_CSV_FIELDS = (
@@ -101,6 +104,8 @@ def _step_live_llm(
     """Execute one assistant + agent step via a live chat-completions backend."""
     canonical = task.canonical_topics or ["general_analysis"]
     assistant_text = "No AI assistant in loop."
+    asst_sys = asst_usr = ""
+    asst_resp: dict[str, Any] = {}
     if cond.heterogeneity_type != HeterogeneityType.NO_AI and round_idx > 0:
         style = (
             "Offer balanced, calibrated Socratic counter-arguments noting base rates."
@@ -120,7 +125,12 @@ def _step_live_llm(
             f"Hypothesis A: {task.hypothesis_a}\nHypothesis B: {task.hypothesis_b}\n"
             f"User context: region={agent.region}, current probability p(B)={prev_stance:.2f}."
         )
-        asst_resp = backend.generate_chat(
+        routed = (
+            backend.for_model(model_assigned.split("@persona-", 1)[0])
+            if isinstance(backend, _HTTPChatBackend)
+            else backend
+        )
+        asst_resp = routed.generate_chat(
             system_prompt=asst_sys,
             user_prompt=asst_usr,
             temperature=cond.temperature,
@@ -166,6 +176,18 @@ def _step_live_llm(
         "stated_answer": 1 if stance >= 0.5 else 0,
         "goldman_source_overlap": 0.6 if cond.num_models == 1 else 0.25,
         "persuasion_bias_exposure": 0.5,
+        "metadata": {
+            "assistant_model_actual": asst_resp.get("model_slug"),
+            "assistant_provider_actual": asst_resp.get("provider"),
+            "agent_model_actual": agent_resp.get("model_slug"),
+            "agent_provider_actual": agent_resp.get("provider"),
+            "parse_status": parsed["parse_status"],
+            "assistant_system_prompt": asst_sys,
+            "assistant_user_prompt": asst_usr,
+            "agent_system_prompt": agent_sys,
+            "agent_user_prompt": agent_usr,
+            "metric_basis": "assumption-based source and persuasion proxies",
+        },
     }
 
 
@@ -362,12 +384,18 @@ def _run_condition_rounds(
     agents: list[AgentProfile],
     peer_graph: dict[int, list[int]],
     backend: Any,
+    on_record: Callable[[RoundRecord], None] | None = None,
 ) -> list[RoundRecord]:
     """Execute rounds `0..cfg.num_rounds` for a single Track 4 condition."""
     model_pool = assign_models_for_condition(
         nationality_type=cond.nationality_type,
         num_models=cond.num_models,
-        explicit_models=cond.models or None,
+        explicit_models=cond.models
+        or (
+            [backend.model]
+            if isinstance(backend, _HTTPChatBackend) and cond.num_models == 1
+            else None
+        ),
     )
     is_personalized = cond.heterogeneity_type in (
         HeterogeneityType.PERSONALIZED_ADVISOR,
@@ -454,6 +482,7 @@ def _run_condition_rounds(
                         goldman_source_overlap=step["goldman_source_overlap"],
                         persuasion_bias_exposure=step["persuasion_bias_exposure"],
                         metadata={
+                            **step.get("metadata", {}),
                             "temperature": cond.temperature,
                             "top_p": cond.top_p,
                             "heterogeneity_type": cond.heterogeneity_type.value,
@@ -465,6 +494,8 @@ def _run_condition_rounds(
                 agent_conf[a_idx] = rec.confidence
                 agent_topics[a_idx] = list(rec.extracted_topics)
                 cond_records.append(rec)
+                if on_record is not None:
+                    on_record(rec)
 
     return cond_records
 
@@ -475,7 +506,30 @@ def run_suite(
     out_dir: Path,
 ) -> dict[str, Any]:
     """Run all Track 4 experimental conditions end-to-end and export summary artifacts."""
+    if len({c.condition_id for c in cfg.conditions}) != len(cfg.conditions):
+        raise BackendConfigError("Condition IDs must be unique.")
+    if isinstance(backend, _HTTPChatBackend):
+        for cond in cfg.conditions:
+            if cond.heterogeneity_type != HeterogeneityType.NO_AI:
+                if (
+                    cond.nationality_type.value == "none"
+                    or cond.num_models < 1
+                    or (cond.num_models > 1 and not cond.models)
+                ):
+                    raise BackendConfigError(
+                        "Live multi-model conditions require explicit provider-compatible "
+                        "model IDs in models."
+                    )
+                if cond.models and len(set(cond.models)) != cond.num_models:
+                    raise BackendConfigError(
+                        "Live num_models must match the distinct explicit model IDs."
+                    )
     out_dir.mkdir(parents=True, exist_ok=True)
+    if (out_dir / "runs.jsonl").exists():
+        raise RuntimeError(
+            "Track 4 output already exists; use a new output directory. "
+            "Existing traces are preserved."
+        )
     tasks = (
         build_ground_truth_tasks()[: cfg.tasks_per_track]
         + (build_open_debate_tasks()[: cfg.tasks_per_track])
@@ -490,16 +544,22 @@ def run_suite(
         defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     )
 
-    with (out_dir / "runs.jsonl").open("w", encoding="utf-8") as fh:
+    with (out_dir / "runs.jsonl").open("x", encoding="utf-8") as fh:
+
+        def persist(rec: RoundRecord) -> None:
+            fh.write(rec.model_dump_json() + "\n")
+            fh.flush()
+
         for cond in cfg.conditions:
-            cond_recs = _run_condition_rounds(cfg, cond, tasks, agents, peer_graph, backend)
+            cond_recs = _run_condition_rounds(
+                cfg, cond, tasks, agents, peer_graph, backend, on_record=persist
+            )
             for rec in cond_recs:
                 global_idx = len(all_records)
                 all_records.append(rec)
                 by_cond_round_task[cond.condition_id][rec.round_idx][rec.task_id].append(
                     (global_idx, rec)
                 )
-                fh.write(rec.model_dump_json() + "\n")
 
     topic_audit = evaluate_dual_judge_topics(all_records, seed=cfg.seed)
     export_audit_sample(
@@ -564,6 +624,8 @@ def run_suite(
     )
 
     summary_payload = {
+        "backend": backend_identity(backend),
+        "metric_basis": "assumption-based source and persuasion proxies",
         "suite_name": cfg.suite_name,
         "seed": cfg.seed,
         "num_agents": cfg.num_agents,
@@ -571,6 +633,7 @@ def run_suite(
         "summaries": [s.model_dump() for s in summaries],
         "comparisons": [c.model_dump() for c in comparisons],
         "topic_audit": {
+            "reliability_status": topic_audit["reliability_status"],
             "canonical_topics": topic_audit["canonical_topics"],
             "inter_rater_kappa": topic_audit["inter_rater_kappa"],
             "reliability_warning": topic_audit["reliability_warning"],
@@ -587,6 +650,7 @@ def run_suite(
             writer.writerow({k: data[k] for k in _SUMMARY_CSV_FIELDS})
 
     return {
+        "backend": backend_identity(backend),
         "summaries": summaries,
         "records": all_records,
         "topic_audit": topic_audit,

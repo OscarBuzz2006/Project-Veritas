@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 import random
 import statistics
@@ -11,12 +12,13 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from apart_epistemics.backends import BudgetExceededError
+from apart_epistemics.backends import BackendConfigError, BudgetExceededError
 from apart_epistemics.datasets import generate_agent_population
 from apart_epistemics.engine.contrasts import compute_paired_holm_contrasts
 from apart_epistemics.metrics import compute_page_decomposition, pearson_corr, quantile_sorted
 from apart_epistemics.models import AgentProfile, NumericEstimateRecord, TaskItem
 from apart_epistemics.parsers import parse_numeric_estimate
+from apart_epistemics.run_state import backend_identity, configure_budget, validate_manifest
 
 
 def build_numeric_prompts(
@@ -78,8 +80,11 @@ def _load_existing_numeric_records(
         except ValidationError:
             # Tolerate a single truncated final line if a previous run died mid-write.
             if idx == len(raw_lines) - 1:
-                had_truncated_tail = True
-                continue
+                try:
+                    json.loads(stripped)
+                except json.JSONDecodeError:
+                    had_truncated_tail = True
+                    continue
             raise
         key = (rec.condition_id, rec.question_id, rec.replicate, rec.round_idx, rec.agent_id)
         existing[key] = rec
@@ -161,14 +166,50 @@ def run_numeric_core(
     seed: int = 42,
 ) -> list[NumericEstimateRecord]:
     """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap."""
+    if not hasattr(backend, "generate_numeric_reply"):
+        raise BackendConfigError(
+            "This backend does not support numeric replay; use a numeric-capable backend."
+        )
+    if not 0 <= alpha <= 1 or not math.isfinite(budget_usd) or budget_usd < 0:
+        raise BackendConfigError("Invalid alpha or budget.")
+    if (
+        not tasks
+        or len({t.id for t in tasks}) != len(tasks)
+        or any(t.numeric_truth is None for t in tasks)
+    ):
+        raise BackendConfigError("Numeric tasks need unique IDs and numeric truth.")
+    if (
+        min(n_agents, n_rounds, replicates) < 1
+        or not conditions
+        or len(set(conditions)) != len(conditions)
+    ):
+        raise BackendConfigError("Numeric dimensions must be positive and conditions unique.")
     runs_path.parent.mkdir(parents=True, exist_ok=True)
+    spec = {
+        "version": 1,
+        "seed": seed,
+        "alpha": alpha,
+        "n_agents": n_agents,
+        "n_rounds": n_rounds,
+        "replicates": replicates,
+        "conditions": conditions,
+        "tasks": [t.model_dump(mode="json") for t in tasks],
+        "backend": backend_identity(backend),
+    }
+    validate_manifest(runs_path.with_suffix(".manifest.json"), spec, runs_path)
+    ledger = getattr(backend, "budget_ledger", None)
+    configure_budget(backend, runs_path.parent, budget_usd, ledger.per_request if ledger else 1.0)
     agents = generate_agent_population(num_agents=n_agents, seed=seed)
     existing = _load_existing_numeric_records(runs_path)
 
-    spent_usd = 0.0
+    spent_usd = sum(_estimate_call_cost_usd(r.model_dump()) for r in existing.values())
+    if any(r.run_spec != spec for r in existing.values()):
+        raise RuntimeError("Record run specification differs from manifest.")
     ordered_records: list[NumericEstimateRecord] = []
 
     with runs_path.open("a", encoding="utf-8") as fh:
+        if runs_path.stat().st_size and not runs_path.read_bytes().endswith(b"\n"):
+            fh.write("\n")
         for cond_id in conditions:
             for task in tasks:
                 truth = task.numeric_truth or 100.0
@@ -256,6 +297,7 @@ def run_numeric_core(
                             )
 
                             rec = NumericEstimateRecord(
+                                run_spec=spec,
                                 condition_id=cond_id,
                                 question_id=task.id,
                                 replicate=rep,
@@ -291,13 +333,43 @@ def analyze_numeric_core(
     for rec in records:
         by_cell[(rec.condition_id, rec.question_id, rec.replicate, rec.round_idx)].append(rec)
 
+    specs = {json.dumps(r.run_spec, sort_keys=True) for r in records}
+    spec = records[0].run_spec if records and len(specs) == 1 else {}
+    expected_agents = (
+        {a.agent_id for a in generate_agent_population(spec["n_agents"], seed=spec["seed"])}
+        if spec
+        else set()
+    )
+    expected_cells = {
+        (c, t["id"], rep, rnd)
+        for c in spec.get("conditions", [])
+        for t in spec.get("tasks", [])
+        for rep in range(spec.get("replicates", 0))
+        for rnd in range(1, spec.get("n_rounds", 0) + 1)
+    }
+    complete_cells = {
+        key
+        for key, rows in by_cell.items()
+        if expected_agents
+        and len(rows) == len(expected_agents)
+        and {r.agent_id for r in rows} == expected_agents
+    }
+    complete = (
+        bool(expected_cells) and set(by_cell) == expected_cells and complete_cells == expected_cells
+    )
+    if spec and any(
+        truth_by_qid.get(t["id"]) != math.log10(t["numeric_truth"]) for t in spec["tasks"]
+    ):
+        raise RuntimeError("Analysis ground truth differs from the saved run specification.")
+    if any(r.question_id not in truth_by_qid for r in records):
+        raise RuntimeError("Cannot analyze records without their question ground truth.")
     cell_metrics: dict[tuple[str, str, int, int], dict[str, float]] = {}
     max_resid = 0.0
     for key, cell_recs in by_cell.items():
         _, qid, _, _ = key
         decomp = compute_page_decomposition(
             [r.agent_log10_after for r in cell_recs],
-            log_truth=truth_by_qid.get(qid, 0.0),
+            log_truth=truth_by_qid[qid],
         )
         decomp["miss_rate"] = sum(1 for r in cell_recs if r.miss) / len(cell_recs)
         max_resid = max(max_resid, decomp["identity_residual"])
@@ -309,7 +381,7 @@ def analyze_numeric_core(
         [r.agent_log10_after for r in valid_recs],
     )
 
-    max_round = max((r.round_idx for r in records), default=1)
+    max_round = spec.get("n_rounds", max((r.round_idx for r in records), default=1))
     by_cond_round: dict[tuple[str, int], list[dict[str, float]]] = defaultdict(list)
     for (cond_id, _qid, _rep, r_idx), m in cell_metrics.items():
         by_cond_round[(cond_id, r_idx)].append(m)
@@ -330,7 +402,9 @@ def analyze_numeric_core(
         )
 
     by_condition_final = {
-        row["condition_id"]: row for row in condition_round_metrics if row["round_idx"] == max_round
+        row["condition_id"]: row
+        for row in condition_round_metrics
+        if complete and row["round_idx"] == max_round
     }
 
     core_pairs = [
@@ -344,7 +418,7 @@ def analyze_numeric_core(
         return {
             (qid, rep): m[metric]
             for (c, qid, rep, r_idx), m in cell_metrics.items()
-            if c == cond_id and r_idx == max_round
+            if complete and c == cond_id and r_idx == max_round
         }
 
     contrasts = compute_paired_holm_contrasts(
@@ -352,10 +426,13 @@ def analyze_numeric_core(
         _cell_metric,
         seed=42,
         effect_decimals=6,
-        include_empty=True,
+        include_empty=False,
     )
 
     return {
+        "completion_status": "complete" if complete else "incomplete_or_unverified",
+        "missing_or_incomplete_cells": len(expected_cells - complete_cells),
+        "h4_interpretation": "Descriptive correlation, mechanically coupled by update; not causal.",
         "max_identity_residual": max_resid,
         "h4_assistant_agent_corr": round(h4_corr, 4),
         "by_condition_final": by_condition_final,

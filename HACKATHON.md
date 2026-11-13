@@ -130,8 +130,9 @@ session or use the Linux CI runner. Do not disable/skip the test to make CI gree
 - `make demo` deliberately rewrites tracked full results and `docs/`. Use it
   only when updating the shared demonstration, and review the resulting diff.
 - Give each experiment a separate output directory under `tmp/`. Numeric runs
-  resume existing JSONL cells: do not reuse an output directory after changing
-  config, seed, model, or backend, or you may mix old and new results.
+  resume only when the saved manifest matches config, seed, model, and backend.
+  Incompatible or legacy unmanifested logs are rejected. Track 4 requires a new
+  output directory and preserves completed records on failure.
 - `make clean` deletes `tmp/` including your local experiments. Archive anything
   you need outside that directory first.
 
@@ -140,12 +141,21 @@ session or use the Linux CI runner. Do not disable/skip the test to make CI gree
 - Cloud keys are read from exported environment variables. Merely creating a
   `.env` file does not load it. Never paste credentials into issues or commits.
 - There is no `--backend live`. See `apart-epistemics run --help` for adapters.
-- The CLI creates one backend/model per invocation; condition provenance labels
-  do not automatically route requests to a pool of real models. Implement and
-  verify routing before claiming a multi-model live experiment.
-- `--budget` is an approximate numeric-track cost guard, not a provider-enforced
-  or whole-run spending limit. Track 4 is not covered, and a completed call may
-  exceed the estimate. Use provider-side limits and small, explicitly approved runs.
+- Live assistant calls route to the explicit `models` list in each condition.
+  For multi-model conditions, `num_models` must match distinct provider-compatible
+  IDs. The CLI `--model` selects the agent simulator and numeric assistant; it is
+  also the single-model fallback. Synthetic placeholder pools are rejected for
+  live multi-model runs. Actual response identities and prompts are recorded.
+- `--budget` applies to both tracks through persisted `budget.json` reservations.
+  Every HTTP attempt reserves `--request-allowance` USD (default 1), including
+  failed requests and retries. Set this allowance at least as high as the maximum
+  possible request charge for every configured model. Reservations are not actual
+  billing, and provider-side account limits remain the billing authority. A zero
+  budget makes no HTTP calls. Resuming never resets reserved spending.
+- `provider_requests.jsonl` preserves successful provider responses and prompts,
+  even when a later call in the agent step fails. Treat these as experiment data.
+- CLI numeric/combined replay is rejected before execution. Archived Track 4
+  replay remains available through `run_suite`; use `analyze`/`report` for saved runs.
 - Start live numeric experimentation with `--numeric-only`, an explicit real
   model ID, a small config, and a new output directory. Availability of default
   model IDs is not guaranteed. No cloud inference is part of onboarding.

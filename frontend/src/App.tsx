@@ -250,7 +250,20 @@ export default function App({ data }: { data: Benchmark }) {
               <p>
                 <strong>Interpretation note.</strong> Synthetic runs demonstrate
                 simulator assumptions, not real-model findings. Verify
-                provenance before interpreting a run.
+                provenance before interpreting a run. Source diversity and
+                persuasion metrics are assumption-based proxies. Topic
+                reliability is unavailable unless independent judges were
+                recorded.
+                {data.metadata.backend && (
+                  <>
+                    {" "}
+                    Backend: {data.metadata.backend.class}
+                    {data.metadata.backend.model
+                      ? ` / ${data.metadata.backend.model}`
+                      : ""}
+                    .
+                  </>
+                )}
               </p>
             </div>
             <div className="stats-grid" aria-label="Run summary">
@@ -378,14 +391,21 @@ export default function App({ data }: { data: Benchmark }) {
                   <h2>Topic-label audit</h2>
                   <p>
                     Judge agreement κ ={" "}
-                    {format(data.topic_audit.inter_rater_kappa)} across{" "}
+                    {data.topic_audit.reliability_status ===
+                    "independently_judged"
+                      ? format(data.topic_audit.inter_rater_kappa)
+                      : "Unavailable"}{" "}
+                    across{" "}
                     {data.topic_audit.n_evaluated.toLocaleString("en-US")}{" "}
                     evaluated records.
                   </p>
                   <p>
-                    {data.topic_audit.reliability_warning
-                      ? "Warning: topic-label reliability is below threshold."
-                      : "Synthetic agreement does not replace independent human validation."}
+                    {data.topic_audit.reliability_status !==
+                    "independently_judged"
+                      ? "No independent topic-label reliability evaluation was recorded."
+                      : data.topic_audit.reliability_warning
+                        ? "Warning: topic-label reliability is below threshold."
+                        : "Synthetic agreement does not replace independent human validation."}
                   </p>
                 </div>
                 <div>

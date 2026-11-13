@@ -36,9 +36,11 @@ test-e2e: ## Run only browser checks (requires make install-browser)
 check: lint test-fast smoke ## Run the offline teammate acceptance checks
 
 smoke: ## Build a small offline demo in ignored tmp/ (never overwrite published results)
-	$(CLI) setup --out tmp/smoke.yaml --agents 8 --rounds 2 --tasks 2
-	$(CLI) demo --config tmp/smoke.yaml --out tmp/smoke-results --site tmp/smoke-site
-	$(CLI) analyze --input tmp/smoke-results
+	@mkdir -p tmp
+	@smoke_dir=$$(mktemp -d tmp/smoke-XXXXXX); \
+	$(CLI) setup --out "$$smoke_dir/suite.yaml" --agents 8 --rounds 2 --tasks 2 && \
+	$(CLI) demo --config "$$smoke_dir/suite.yaml" --out "$$smoke_dir/results" --site "$$smoke_dir/site" && \
+	$(CLI) analyze --input "$$smoke_dir/results"
 
 serve: ## Preview the checked-in full dashboard at http://127.0.0.1:8000
 	$(PYTHON) -m http.server $(PORT) --bind 127.0.0.1 --directory docs
@@ -65,7 +67,10 @@ cov: ## Run full test suite with statement + branch coverage report
 	$(PYTEST) --cov=apart_epistemics --cov-report=term-missing -v
 
 demo: ## Regenerate offline benchmark results, SVG figures, and docs site
-	$(CLI) demo --out reports/results --site docs
+	@mkdir -p tmp reports/results
+	@demo_dir=$$(mktemp -d tmp/demo-XXXXXX); \
+	$(CLI) demo --out "$$demo_dir" --site docs --figures reports/figures && \
+	cp "$$demo_dir/summary.json" "$$demo_dir/summary.csv" "$$demo_dir/numeric_analysis.json" "$$demo_dir/audit_human_check.csv" reports/results/
 
 clean: ## Remove local cache and temporary test artifacts
 	rm -rf .pytest_cache .ruff_cache .coverage htmlcov tmp build dist

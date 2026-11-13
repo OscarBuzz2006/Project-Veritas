@@ -1,5 +1,10 @@
 {
   "metadata": {
+    "backend": {
+      "class": "SyntheticEpistemicBackend",
+      "seed": 42
+    },
+    "metric_basis": "Source diversity and persuasion are assumption-based proxies.",
     "title": "Epistemic Prism",
     "subtitle": "Multi-Agent Model Diversity, Decoding Illusions, and Crowd Wisdom",
     "n_conditions": 11,
@@ -1589,13 +1594,16 @@
       "upstream_downstream_tradeoff",
       "wetland_retention"
     ],
-    "inter_rater_kappa": 1.0,
-    "reliability_warning": false,
+    "inter_rater_kappa": null,
+    "reliability_status": "not_independently_judged",
+    "reliability_warning": true,
     "n_evaluated": 19008
   },
   "numeric_analysis": {
+    "completion_status": "complete",
+    "h4_interpretation": "Descriptive, mechanically coupled correlation; not causal.",
     "max_identity_residual": 1.0928757898653885e-16,
-    "h4_assistant_agent_corr": 0.993,
+    "h4_assistant_agent_corr": 0.9927,
     "by_condition_final": {
       "C1": {
         "condition_id": "C1",
@@ -1618,10 +1626,10 @@
       "C3": {
         "condition_id": "C3",
         "round_idx": 4,
-        "crowd_error": 0.000949,
-        "avg_individual_error": 0.019802,
-        "diversity": 0.018854,
-        "iqr": 0.18499,
+        "crowd_error": 0.000716,
+        "avg_individual_error": 0.017813,
+        "diversity": 0.017098,
+        "iqr": 0.164375,
         "miss_rate": 0.0
       }
     },
@@ -1701,37 +1709,37 @@
       {
         "condition_id": "C3",
         "round_idx": 1,
-        "crowd_error": 0.001275,
-        "avg_individual_error": 0.045949,
-        "diversity": 0.044674,
-        "iqr": 0.279158,
+        "crowd_error": 0.001196,
+        "avg_individual_error": 0.04458,
+        "diversity": 0.043384,
+        "iqr": 0.270323,
         "miss_rate": 0.0
       },
       {
         "condition_id": "C3",
         "round_idx": 2,
-        "crowd_error": 0.001214,
-        "avg_individual_error": 0.034723,
-        "diversity": 0.033509,
-        "iqr": 0.24417,
+        "crowd_error": 0.001004,
+        "avg_individual_error": 0.032707,
+        "diversity": 0.031703,
+        "iqr": 0.229324,
         "miss_rate": 0.0
       },
       {
         "condition_id": "C3",
         "round_idx": 3,
-        "crowd_error": 0.001111,
-        "avg_individual_error": 0.02547,
-        "diversity": 0.024359,
-        "iqr": 0.207968,
+        "crowd_error": 0.000762,
+        "avg_individual_error": 0.023109,
+        "diversity": 0.022348,
+        "iqr": 0.185732,
         "miss_rate": 0.0
       },
       {
         "condition_id": "C3",
         "round_idx": 4,
-        "crowd_error": 0.000949,
-        "avg_individual_error": 0.019802,
-        "diversity": 0.018854,
-        "iqr": 0.18499,
+        "crowd_error": 0.000716,
+        "avg_individual_error": 0.017813,
+        "diversity": 0.017098,
+        "iqr": 0.164375,
         "miss_rate": 0.0
       }
     ],
@@ -1765,11 +1773,11 @@
         "metric": "diversity",
         "condition_a": "C1",
         "condition_b": "C3",
-        "mean_diff": 8.9e-05,
-        "ci_low": -0.001566,
-        "ci_high": 0.00216,
-        "wilcoxon_p": 0.850098,
-        "holm_adjusted_p": 0.850098,
+        "mean_diff": -0.001667,
+        "ci_low": -0.003532,
+        "ci_high": 0.000249,
+        "wilcoxon_p": 0.17627,
+        "holm_adjusted_p": 0.17627,
         "n_cells": 12
       },
       {
@@ -1777,11 +1785,11 @@
         "metric": "crowd_error",
         "condition_a": "C1",
         "condition_b": "C3",
-        "mean_diff": -0.002464,
-        "ci_low": -0.003539,
-        "ci_high": -0.001466,
-        "wilcoxon_p": 0.000977,
-        "holm_adjusted_p": 0.00293,
+        "mean_diff": -0.002697,
+        "ci_low": -0.004201,
+        "ci_high": -0.001278,
+        "wilcoxon_p": 0.003418,
+        "holm_adjusted_p": 0.010254,
         "n_cells": 12
       }
     ]
@@ -1796,6 +1804,12 @@
       "agent_region": "north_america",
       "model_assigned": "none",
       "model_family": "independent",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "no_ai",
+        "nationality_type": "none"
+      },
       "extracted_topics": [
         "recycling_credits",
         "grid_carbon_intensity"
@@ -1814,6 +1828,12 @@
       "agent_region": "western_europe",
       "model_assigned": "none",
       "model_family": "independent",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "no_ai",
+        "nationality_type": "none"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt",
         "mineral_refining"
@@ -1832,6 +1852,12 @@
       "agent_region": "east_asia",
       "model_assigned": "none",
       "model_family": "independent",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "no_ai",
+        "nationality_type": "none"
+      },
       "extracted_topics": [
         "grid_carbon_intensity",
         "recycling_credits"
@@ -1850,6 +1876,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.0,
+        "top_p": 0.0,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1867,6 +1899,12 @@
       "agent_region": "western_europe",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.0,
+        "top_p": 0.0,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1884,6 +1922,12 @@
       "agent_region": "east_asia",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.0,
+        "top_p": 0.0,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1901,6 +1945,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1918,6 +1968,12 @@
       "agent_region": "western_europe",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1935,6 +1991,12 @@
       "agent_region": "east_asia",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1952,6 +2014,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -1969,6 +2037,12 @@
       "agent_region": "western_europe",
       "model_assigned": "anthropic/claude-frontier",
       "model_family": "us_anthropic",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "recycling_credits"
       ],
@@ -1986,6 +2060,12 @@
       "agent_region": "east_asia",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt"
       ],
@@ -2003,6 +2083,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "battery_manufacturing_debt",
         "grid_carbon_intensity"
@@ -2021,6 +2107,12 @@
       "agent_region": "western_europe",
       "model_assigned": "anthropic/claude-frontier",
       "model_family": "us_anthropic",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "recycling_credits",
         "battery_manufacturing_debt"
@@ -2039,6 +2131,12 @@
       "agent_region": "east_asia",
       "model_assigned": "google/gemini-frontier",
       "model_family": "us_google",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "mineral_refining"
       ],
@@ -2056,6 +2154,12 @@
       "agent_region": "north_america",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_alibaba",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "cn_only"
+      },
       "extracted_topics": [
         "drivetrain_efficiency"
       ],
@@ -2073,6 +2177,12 @@
       "agent_region": "western_europe",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_alibaba",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "cn_only"
+      },
       "extracted_topics": [
         "drivetrain_efficiency"
       ],
@@ -2090,6 +2200,12 @@
       "agent_region": "east_asia",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_alibaba",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "monolithic_shared",
+        "nationality_type": "cn_only"
+      },
       "extracted_topics": [
         "drivetrain_efficiency"
       ],
@@ -2107,6 +2223,12 @@
       "agent_region": "north_america",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_alibaba",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "cn_only"
+      },
       "extracted_topics": [
         "drivetrain_efficiency",
         "mineral_refining"
@@ -2125,6 +2247,12 @@
       "agent_region": "western_europe",
       "model_assigned": "deepseek/deepseek-v3",
       "model_family": "cn_deepseek",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "cn_only"
+      },
       "extracted_topics": [
         "recycling_credits",
         "battery_manufacturing_debt"
@@ -2143,6 +2271,12 @@
       "agent_region": "east_asia",
       "model_assigned": "zhipu/glm-4",
       "model_family": "cn_zhipu",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "multi_lab_mix",
+        "nationality_type": "cn_only"
+      },
       "extracted_topics": [
         "lifetime_mileage_crossover"
       ],
@@ -2160,6 +2294,12 @@
       "agent_region": "north_america",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_qwen_base",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "divergent_sft_pair",
+        "nationality_type": "divergent_sft"
+      },
       "extracted_topics": [
         "mineral_refining",
         "drivetrain_efficiency"
@@ -2178,6 +2318,12 @@
       "agent_region": "western_europe",
       "model_assigned": "nous/arete-27b",
       "model_family": "us_arete_sft",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "divergent_sft_pair",
+        "nationality_type": "divergent_sft"
+      },
       "extracted_topics": [
         "grid_carbon_intensity",
         "recycling_credits"
@@ -2196,6 +2342,12 @@
       "agent_region": "east_asia",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_qwen_base",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "divergent_sft_pair",
+        "nationality_type": "divergent_sft"
+      },
       "extracted_topics": [
         "drivetrain_efficiency",
         "battery_manufacturing_debt"
@@ -2214,6 +2366,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "cultural_regional_mix",
+        "nationality_type": "cross_national"
+      },
       "extracted_topics": [
         "grid_carbon_intensity",
         "recycling_credits"
@@ -2232,6 +2390,12 @@
       "agent_region": "western_europe",
       "model_assigned": "qwen/qwen3.8-27b",
       "model_family": "cn_alibaba",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "cultural_regional_mix",
+        "nationality_type": "cross_national"
+      },
       "extracted_topics": [
         "drivetrain_efficiency",
         "battery_manufacturing_debt"
@@ -2250,6 +2414,12 @@
       "agent_region": "east_asia",
       "model_assigned": "mistral/mistral-large",
       "model_family": "eu_mistral",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "cultural_regional_mix",
+        "nationality_type": "cross_national"
+      },
       "extracted_topics": [
         "recycling_credits",
         "mineral_refining"
@@ -2268,6 +2438,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier@persona-agent_00",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "personalized_advisor",
+        "nationality_type": "cross_national"
+      },
       "extracted_topics": [
         "drivetrain_efficiency",
         "lifetime_mileage_crossover"
@@ -2286,6 +2462,12 @@
       "agent_region": "western_europe",
       "model_assigned": "qwen/qwen3.8-27b@persona-agent_01",
       "model_family": "cn_alibaba",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "personalized_advisor",
+        "nationality_type": "cross_national"
+      },
       "extracted_topics": [
         "lifetime_mileage_crossover",
         "battery_manufacturing_debt"
@@ -2304,6 +2486,12 @@
       "agent_region": "east_asia",
       "model_assigned": "mistral/mistral-large@persona-agent_02",
       "model_family": "eu_mistral",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "personalized_advisor",
+        "nationality_type": "cross_national"
+      },
       "extracted_topics": [
         "lifetime_mileage_crossover",
         "battery_manufacturing_debt"
@@ -2322,6 +2510,12 @@
       "agent_region": "north_america",
       "model_assigned": "openai/gpt-frontier@persona-agent_00",
       "model_family": "us_openai",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "personalized_peer",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "drivetrain_efficiency",
         "lifetime_mileage_crossover"
@@ -2340,6 +2534,12 @@
       "agent_region": "western_europe",
       "model_assigned": "anthropic/claude-frontier@persona-agent_01",
       "model_family": "us_anthropic",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "personalized_peer",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "lifetime_mileage_crossover",
         "battery_manufacturing_debt"
@@ -2358,6 +2558,12 @@
       "agent_region": "east_asia",
       "model_assigned": "google/gemini-frontier@persona-agent_02",
       "model_family": "us_google",
+      "provenance": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "heterogeneity_type": "personalized_peer",
+        "nationality_type": "us_only"
+      },
       "extracted_topics": [
         "lifetime_mileage_crossover",
         "battery_manufacturing_debt"

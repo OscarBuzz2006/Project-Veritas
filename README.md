@@ -255,7 +255,10 @@ loaded. Read the safety limitations in [HACKATHON.md](HACKATHON.md) first.
 
 ## Testing
 
-The Python suite has 44 automated tests (43 fast unit/integration checks covering math invariants, overflow/adversarial parsing, blinded summarizer, mocked provider contracts, crash recovery, cross-process `PYTHONHASHSEED` determinism, and CLI commands, plus live Playwright responsive DOM/keyboard E2E checks) run offline with zero API charges. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`Makefile`](Makefile) for workflows:
+The Python suite includes regression coverage for actual model routing, prompted JSON parsing,
+manifest-validated resume, incomplete analysis, persistent request budgets, secret
+redaction, trace preservation, and independent-judge availability, alongside the
+math, provider, CLI, and browser checks. Tests run offline with zero API charges. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`Makefile`](Makefile) for workflows:
 
 ```bash
 make lint       # ruff check . && ruff format --check .
@@ -263,7 +266,7 @@ make test-fast  # pytest -m "not e2e" -v (~2s)
 make cov        # pytest --cov=apart_epistemics --cov-report=term-missing -v
 ```
 
-The React frontend adds 17 unit tests and 10 desktop/mobile browser checks:
+The React frontend adds 20 unit tests and 10 desktop/mobile browser checks:
 
 ```bash
 make ui-check   # TypeScript, formatting, unit tests, production build
@@ -287,3 +290,27 @@ to launch subprocesses; fast tests do not require a browser binary.
 - Decoupling surface phrasing variance (`pairwise_jaccard_distance`) from conceptual agenda diversity (`effective_topic_count`, `goldman_effective_sources`) immediately flags temperature-induced diversity illusions.
 - Treating LLM numeric/JSON parsing and resume state as first-class crash-safe contracts eliminates expensive lost runs before multi-model API budgets are touched.
 - Inspecting actual Playwright screenshots at both `1440px` and `390px` catches SVG label overlap and right-edge button clipping that pure DOM unit tests miss.
+
+
+## Experiment integrity
+
+Live multi-model conditions require explicit provider-compatible `models` lists;
+`--model` selects the agent simulator and numeric assistant. Actual model/provider
+identities, parse status, and prompts are saved in new live traces.
+
+Numeric resumes validate a saved manifest. Track 4 refuses to overwrite existing
+traces and flushes each completed observation. Incomplete or legacy unverified
+numeric runs do not publish final comparisons. Default seed labels do not qualify
+as independent topic judging: reliability is unavailable until two judges run.
+Source-diversity and persuasion metrics remain explicitly labeled assumption-based
+proxies; pooled H4 correlation is descriptive, not a causal effect.
+
+`--budget` reserves `--request-allowance` USD before every HTTP attempt across both
+tracks (default allowance: 1 USD). Reservations persist in `budget.json` and include
+failed requests. Set the allowance above the largest possible per-request charge
+for your selected models. This controls authorized request allowances, not actual
+provider billing. See [live-run details](HACKATHON.md#5-live-run-limitations--agree-with-the-team-before-spending).
+
+The [audit and resolution notes](docs/codebase-audit.md) explain the failures and
+regression coverage. Gemini credentials now use the API header documented in the
+[official reference](https://ai.google.dev/api), rather than request URLs.

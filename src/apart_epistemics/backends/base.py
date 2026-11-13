@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import urllib.error
 import urllib.request
@@ -81,6 +82,15 @@ class _HTTPChatBackend(ABC):
     _transport: TransportFn | None
     _secret_to_redact: str | None = None
 
+    budget_ledger: Any = None
+    request_log: Any = None
+
+    def for_model(self, model: str) -> _HTTPChatBackend:
+        """Clone routing settings while sharing the run budget and request journal."""
+        routed = copy.copy(self)
+        routed.model = model
+        return routed
+
     def _post(
         self,
         url: str,
@@ -88,17 +98,27 @@ class _HTTPChatBackend(ABC):
         payload: dict[str, Any],
         error_prefix: str,
     ) -> dict[str, Any]:
+        if self.budget_ledger is not None:
+            self.budget_ledger.reserve()
         try:
-            return (
+            result = (
                 self._transport(url, headers, payload)
                 if self._transport is not None
                 else post_json(url, headers, payload)
             )
+            if self.request_log is not None:
+                entry = json.dumps({"model": self.model, "request": payload, "response": result})
+                if self._secret_to_redact:
+                    entry = entry.replace(self._secret_to_redact, "[REDACTED]")
+                with self.request_log.open("a", encoding="utf-8") as fh:
+                    fh.write(entry + "\n")
+                    fh.flush()
+            return result
         except Exception as exc:
             msg = str(exc)
             if self._secret_to_redact:
                 msg = msg.replace(self._secret_to_redact, "[REDACTED]")
-            raise RuntimeError(f"{error_prefix}: {msg}") from exc
+            raise RuntimeError(f"{error_prefix}: {msg}") from None
 
     @abstractmethod
     def generate_chat(
