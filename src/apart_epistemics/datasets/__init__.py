@@ -8,6 +8,7 @@ from apart_epistemics.datasets.population import (
     audit_question_selection_bias,
     generate_agent_population,
 )
+from apart_epistemics.datasets.selection import run_cold_selection, validate_candidates
 from apart_epistemics.datasets.task_bank import (
     build_ground_truth_tasks,
     build_numeric_core_tasks,
@@ -22,4 +23,6 @@ __all__ = [
     "build_numeric_core_tasks",
     "build_open_debate_tasks",
     "generate_agent_population",
+    "run_cold_selection",
+    "validate_candidates",
 ]

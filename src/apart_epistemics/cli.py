@@ -18,7 +18,11 @@ from apart_epistemics.backends import (
     create_backend,
 )
 from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
-from apart_epistemics.datasets import audit_question_selection_bias, build_numeric_core_tasks
+from apart_epistemics.datasets import (
+    audit_question_selection_bias,
+    build_numeric_core_tasks,
+    run_cold_selection,
+)
 from apart_epistemics.engine import (
     TokenPricing,
     analyze_numeric_core,
@@ -33,9 +37,11 @@ from apart_epistemics.models import (
     NationalityType,
     NumericEstimateRecord,
     RoundRecord,
+    TaskItem,
 )
 from apart_epistemics.report import build_static_site, generate_figures
-from apart_epistemics.run_state import configure_budget
+from apart_epistemics.run_state import backend_identity, configure_budget
+from apart_epistemics.smoke_report import build_smoke_report
 from apart_epistemics.summarizer import evaluate_dual_judge_topics
 
 # (condition_id, label, heterogeneity, nationality, num_models, group, temperature, top_p)
@@ -325,21 +331,81 @@ def _cmd_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def _backend_from_args(args: argparse.Namespace, seed: int) -> Any:
+    backend_kwargs: dict[str, Any] = {"seed": seed}
+    if args.model:
+        backend_kwargs["model"] = args.model
+    if getattr(args, "replay_jsonl", None):
+        backend_kwargs["jsonl_path"] = args.replay_jsonl
+    if args.pin_provider:
+        if args.backend != "openrouter":
+            raise BackendConfigError("--pin-provider is only supported with --backend openrouter.")
+        backend_kwargs["pin_provider"] = args.pin_provider
+    return create_backend(args.backend, **backend_kwargs)
+
+
+def _load_candidates(path: Path) -> list[TaskItem]:
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if isinstance(raw, dict):
+        raw = raw.get("candidates", [])
+    if not isinstance(raw, list):
+        raise ValueError("Candidates file must hold a list of questions (JSON or YAML).")
+    return [
+        TaskItem.model_validate({"kind": "numeric_estimate", "domain": "candidate", **row})
+        for row in raw
+    ]
+
+
+def _cmd_select_questions(args: argparse.Namespace) -> int:
+    out_dir = Path(args.out)
+    try:
+        backend = _backend_from_args(args, seed=42)
+        if args.backend == "replay":
+            raise BackendConfigError("Replay cannot answer new questions.")
+        candidates = _load_candidates(Path(args.candidates))
+        configure_budget(backend, out_dir, args.budget, args.request_allowance)
+        result = run_cold_selection(
+            candidates,
+            backend,
+            repeats=args.repeats,
+            keep=args.keep,
+            max_tokens=args.max_tokens,
+        )
+    except (BackendConfigError, BudgetExceededError, RuntimeError, ValueError, OSError) as exc:
+        print(f"Selection failed: {exc}", file=sys.stderr)
+        return 2
+    result["backend"] = backend_identity(backend)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "selection.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    chosen = [c for c in candidates if c.id in set(result["selected_ids"])]
+    (out_dir / "selected_tasks.json").write_text(
+        json.dumps([c.model_dump(mode="json") for c in chosen], indent=2), encoding="utf-8"
+    )
+    print(f"Kept {len(chosen)} of {len(candidates)} -> {out_dir}/selected_tasks.json")
+    return 0
+
+
+def _cmd_smoke_report(args: argparse.Namespace) -> int:
+    try:
+        report = build_smoke_report(
+            Path(args.input),
+            expected_model=args.expected_model,
+            expected_provider=args.expected_provider,
+            max_miss_rate=args.max_miss_rate,
+            price_in=args.price_in,
+            price_out=args.price_out,
+        )
+    except (OSError, ValueError) as exc:
+        print(f"Smoke report failed: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(report, indent=2))
+    return 0 if report["all_automatic_checks_pass"] else 1
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     try:
         cfg = _load_config(Path(args.config) if args.config else None)
-        backend_kwargs: dict[str, Any] = {"seed": cfg.seed}
-        if args.model:
-            backend_kwargs["model"] = args.model
-        if args.replay_jsonl:
-            backend_kwargs["jsonl_path"] = args.replay_jsonl
-        if args.pin_provider:
-            if args.backend != "openrouter":
-                raise BackendConfigError(
-                    "--pin-provider is only supported with --backend openrouter."
-                )
-            backend_kwargs["pin_provider"] = args.pin_provider
-        backend = create_backend(args.backend, **backend_kwargs)
+        backend = _backend_from_args(args, seed=cfg.seed)
         if args.backend == "replay":
             raise BackendConfigError(
                 "The run command includes numeric execution; replay is Track "
@@ -575,6 +641,35 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument("--site", default="docs")
     p_report.add_argument("--figures", default=None)
 
+    p_sel = sub.add_parser(
+        "select-questions",
+        help="Ask candidate numeric questions cold and keep those the model gets most wrong.",
+    )
+    p_sel.add_argument("--candidates", required=True, help="JSON/YAML list of candidate questions.")
+    p_sel.add_argument(
+        "--backend",
+        default="synthetic",
+        choices=["synthetic", "ollama", "openrouter", "openai", "anthropic", "gemini"],
+    )
+    p_sel.add_argument("--model", default=None)
+    p_sel.add_argument("--pin-provider", default=None)
+    p_sel.add_argument("--repeats", type=int, default=3)
+    p_sel.add_argument("--keep", type=int, default=10)
+    p_sel.add_argument("--max-tokens", type=int, default=DEFAULT_NUMERIC_MAX_TOKENS)
+    p_sel.add_argument("--budget", type=float, default=5.0)
+    p_sel.add_argument("--request-allowance", type=float, default=1.0)
+    p_sel.add_argument("--out", default="tmp/selection")
+
+    p_smoke = sub.add_parser(
+        "smoke-report", help="Check a live numeric smoke run against its pass criteria."
+    )
+    p_smoke.add_argument("--input", required=True, help="Output folder of the smoke run.")
+    p_smoke.add_argument("--expected-model", default=None)
+    p_smoke.add_argument("--expected-provider", default=None)
+    p_smoke.add_argument("--max-miss-rate", type=float, default=0.02)
+    p_smoke.add_argument("--price-in", type=float, default=TokenPricing().input_per_m)
+    p_smoke.add_argument("--price-out", type=float, default=TokenPricing().output_per_m)
+
     p_audit = sub.add_parser(
         "audit-selection", help="Run cold-start question-selection bias audit."
     )
@@ -595,6 +690,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "analyze": _cmd_analyze,
         "report": _cmd_report,
         "audit-selection": _cmd_audit_selection,
+        "select-questions": _cmd_select_questions,
+        "smoke-report": _cmd_smoke_report,
     }
     return dispatch[args.command](args)
 
