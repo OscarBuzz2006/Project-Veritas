@@ -6,7 +6,9 @@ import json
 import math
 import random
 import statistics
+import threading
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -142,6 +144,26 @@ def _estimate_call_cost_usd(resp: dict[str, Any], pricing: TokenPricing | None =
     return max(1e-5, (in_tok * price.input_per_m + out_tok * price.output_per_m) / 1_000_000.0)
 
 
+class _SpendTracker:
+    """Thread-safe running cost estimate checked against the budget before each call."""
+
+    def __init__(self, budget_usd: float, spent_usd: float = 0.0) -> None:
+        self.budget_usd = budget_usd
+        self.spent_usd = spent_usd
+        self._lock = threading.Lock()
+
+    def check(self, message: str = "Budget cap exhausted") -> None:
+        with self._lock:
+            if self.budget_usd <= 0.0 or self.spent_usd >= self.budget_usd:
+                raise BudgetExceededError(
+                    f"{message} (spent={self.spent_usd:.4f}, cap={self.budget_usd:.4f})."
+                )
+
+    def add(self, cost_usd: float) -> None:
+        with self._lock:
+            self.spent_usd += cost_usd
+
+
 def _query_with_retry(
     backend: Any,
     sys_p: str,
@@ -152,36 +174,16 @@ def _query_with_retry(
     cur_x: float,
     pop_stats: tuple[float, float, float],
     agent: AgentProfile,
-    spent_usd: float,
-    budget_usd: float,
+    tracker: _SpendTracker,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
-) -> tuple[dict[str, Any], Any, float]:
+) -> tuple[dict[str, Any], Any]:
     """Query backend once, retrying with an explicit format reminder on parse failure."""
-    resp = backend.generate_numeric_reply(
-        system_prompt=sys_p,
-        user_prompt=usr_p,
-        condition_id=cond_id,
-        task=task,
-        round_idx=round_idx,
-        current_x=cur_x,
-        pop_stats=pop_stats,
-        agent=agent,
-        max_tokens=max_tokens,
-    )
-    spent_usd += _estimate_call_cost_usd(resp, pricing)
-    raw_reply = str(resp.get("raw_reply", ""))
-    parsed = _parse_reply(raw_reply, cur_x)
 
-    if parsed.miss:
-        if spent_usd >= budget_usd:
-            raise BudgetExceededError("Budget cap exhausted during retry.")
-        retry_usr = (
-            f"{usr_p}\n\nRespond with a single positive number prefixed by 'Final estimate: '."
-        )
+    def call(user_prompt: str) -> tuple[dict[str, Any], Any]:
         resp = backend.generate_numeric_reply(
             system_prompt=sys_p,
-            user_prompt=retry_usr,
+            user_prompt=user_prompt,
             condition_id=cond_id,
             task=task,
             round_idx=round_idx,
@@ -190,11 +192,167 @@ def _query_with_retry(
             agent=agent,
             max_tokens=max_tokens,
         )
-        spent_usd += _estimate_call_cost_usd(resp, pricing)
-        raw_reply = str(resp.get("raw_reply", ""))
-        parsed = _parse_reply(raw_reply, cur_x)
+        tracker.add(_estimate_call_cost_usd(resp, pricing))
+        return resp, _parse_reply(str(resp.get("raw_reply", "")), cur_x)
 
-    return resp, parsed, spent_usd
+    resp, parsed = call(usr_p)
+    if parsed.miss:
+        tracker.check("Budget cap exhausted during retry")
+        resp, parsed = call(
+            f"{usr_p}\n\nRespond with a single positive number prefixed by 'Final estimate: '."
+        )
+    return resp, parsed
+
+
+@dataclass(frozen=True)
+class _RoundContext:
+    """Everything that is fixed for one (condition, question, replicate, round) cell."""
+
+    backend: Any
+    agents: list[AgentProfile]
+    cond_id: str
+    task: TaskItem
+    round_idx: int
+    pop_stats: tuple[float, float, float]
+    current_logs: list[float]
+    histories: list[list[tuple[str, str]]]
+    tracker: _SpendTracker
+    max_tokens: int
+    pricing: TokenPricing | None
+    abort: threading.Event
+
+
+def _query_agent(ctx: _RoundContext, a_idx: int) -> tuple[str, Any]:
+    """Query one agent from round-start state; never raises, so a pool can collect outcomes."""
+    if ctx.abort.is_set():
+        return ("skipped", None)
+    try:
+        ctx.tracker.check()
+        cur_x = 10.0 ** ctx.current_logs[a_idx]
+        sys_p, usr_p = build_numeric_prompts(
+            condition_id=ctx.cond_id,
+            agent=ctx.agents[a_idx],
+            question=ctx.task.question,
+            current_x=cur_x,
+            pop_stats=ctx.pop_stats if ctx.cond_id in ("C2", "C3") else None,
+            history=ctx.histories[a_idx],
+            unit=ctx.task.unit,
+        )
+        return (
+            "ok",
+            _query_with_retry(
+                ctx.backend,
+                sys_p,
+                usr_p,
+                ctx.cond_id,
+                ctx.task,
+                ctx.round_idx,
+                cur_x,
+                ctx.pop_stats,
+                ctx.agents[a_idx],
+                ctx.tracker,
+                ctx.max_tokens,
+                ctx.pricing,
+            ),
+        )
+    except Exception as exc:
+        ctx.abort.set()
+        return ("error", exc)
+
+
+def _make_record(
+    spec: dict[str, Any],
+    ctx: _RoundContext,
+    rep: int,
+    a_idx: int,
+    resp: dict[str, Any],
+    parsed: Any,
+    alpha: float,
+) -> NumericEstimateRecord:
+    """Apply the damped update for one answered query and return its record."""
+    before_log = ctx.current_logs[a_idx]
+    if parsed.miss or parsed.log10_value is None:
+        after_log, asst_log, parsed_val, is_miss = before_log, None, None, True
+    else:
+        asst_log, parsed_val, is_miss = parsed.log10_value, parsed.value, False
+        after_log = (1.0 - alpha) * before_log + alpha * asst_log
+    return NumericEstimateRecord(
+        run_spec=spec,
+        condition_id=ctx.cond_id,
+        question_id=ctx.task.id,
+        replicate=rep,
+        round_idx=ctx.round_idx,
+        agent_id=ctx.agents[a_idx].agent_id,
+        model_slug=str(resp.get("model_slug", "synthetic")),
+        provider=str(resp.get("provider", "synthetic_sim")),
+        raw_reply=str(resp.get("raw_reply", "")),
+        parsed_value=parsed_val,
+        assistant_log10=asst_log,
+        agent_log10_before=before_log,
+        agent_log10_after=after_log,
+        miss=is_miss,
+        reasoning_tokens=int(resp.get("reasoning_tokens", 0) or 0),
+        input_tokens=int(resp.get("input_tokens", 0) or 0),
+        output_tokens=int(resp.get("output_tokens", 0) or 0),
+        finish_reason=str(resp.get("finish_reason", "") or ""),
+    )
+
+
+def _run_round(
+    ctx: _RoundContext,
+    spec: dict[str, Any],
+    rep: int,
+    alpha: float,
+    workers: int,
+    existing: dict[tuple[str, str, int, int, str], NumericEstimateRecord],
+    fh: Any,
+) -> list[NumericEstimateRecord]:
+    """Run one round: query pending agents (concurrently if asked), then apply in agent order."""
+
+    def key_for(a_idx: int) -> tuple[str, str, int, int, str]:
+        return (ctx.cond_id, ctx.task.id, rep, ctx.round_idx, ctx.agents[a_idx].agent_id)
+
+    pending = [i for i in range(len(ctx.agents)) if key_for(i) not in existing]
+    if workers > 1 and len(pending) > 1:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(lambda i: _query_agent(ctx, i), pending))
+    else:
+        results = [_query_agent(ctx, i) for i in pending]
+    outcomes = dict(zip(pending, results, strict=True))
+
+    round_records: list[NumericEstimateRecord] = []
+    first_error: Exception | None = None
+    for a_idx in range(len(ctx.agents)):
+        key = key_for(a_idx)
+        if key in existing:
+            rec = existing[key]
+            ctx.histories[a_idx].append(
+                (f"My current estimate is {10.0**rec.agent_log10_before:g}.", rec.raw_reply)
+            )
+            ctx.current_logs[a_idx] = rec.agent_log10_after
+            round_records.append(rec)
+            continue
+        status, payload = outcomes[a_idx]
+        if status == "error":
+            first_error = first_error or payload
+            continue
+        if status == "skipped":
+            continue
+        resp, parsed = payload
+        cur_x = 10.0 ** ctx.current_logs[a_idx]
+        rec = _make_record(spec, ctx, rep, a_idx, resp, parsed, alpha)
+        ctx.current_logs[a_idx] = rec.agent_log10_after
+        ctx.histories[a_idx].append((f"My current estimate is {cur_x:g}.", rec.raw_reply))
+        existing[key] = rec
+        round_records.append(rec)
+        fh.write(rec.model_dump_json() + "\n")
+        fh.flush()
+
+    # Calls that finished are saved above (they were paid for and keep the run resumable);
+    # only then surface the first failure so the run stops cleanly.
+    if first_error is not None:
+        raise first_error
+    return round_records
 
 
 def run_numeric_core(
@@ -210,8 +368,16 @@ def run_numeric_core(
     seed: int = 42,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
+    workers: int = 1,
 ) -> list[NumericEstimateRecord]:
-    """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap."""
+    """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap.
+
+    The agents of one round are independent (the population summary is fixed before the round
+    starts), so `workers > 1` queries them concurrently. Results are applied and written in
+    agent order, so the records and JSONL file are identical to a sequential run.
+    """
+    if workers < 1:
+        raise BackendConfigError("workers must be at least 1.")
     if not hasattr(backend, "generate_numeric_reply"):
         raise BackendConfigError(
             "This backend does not support numeric replay; use a numeric-capable backend."
@@ -249,7 +415,9 @@ def run_numeric_core(
     agents = generate_agent_population(num_agents=n_agents, seed=seed)
     existing = _load_existing_numeric_records(runs_path)
 
-    spent_usd = sum(_estimate_call_cost_usd(r.model_dump()) for r in existing.values())
+    tracker = _SpendTracker(
+        budget_usd, sum(_estimate_call_cost_usd(r.model_dump(), pricing) for r in existing.values())
+    )
     if any(r.run_spec != spec for r in existing.values()):
         raise RuntimeError("Record run specification differs from manifest.")
     ordered_records: list[NumericEstimateRecord] = []
@@ -276,100 +444,27 @@ def run_numeric_core(
 
                     for r_idx in range(1, n_rounds + 1):
                         sorted_x = sorted(10.0**lg for lg in current_logs)
-                        pop_stats = (
-                            statistics.median(sorted_x),
-                            quantile_sorted(sorted_x, 0.25),
-                            quantile_sorted(sorted_x, 0.75),
+                        ctx = _RoundContext(
+                            backend=backend,
+                            agents=agents,
+                            cond_id=cond_id,
+                            task=task,
+                            round_idx=r_idx,
+                            pop_stats=(
+                                statistics.median(sorted_x),
+                                quantile_sorted(sorted_x, 0.25),
+                                quantile_sorted(sorted_x, 0.75),
+                            ),
+                            current_logs=current_logs,
+                            histories=histories,
+                            tracker=tracker,
+                            max_tokens=max_tokens,
+                            pricing=pricing,
+                            abort=threading.Event(),
                         )
-
-                        for a_idx, agent in enumerate(agents):
-                            key = (cond_id, task.id, rep, r_idx, agent.agent_id)
-                            if key in existing:
-                                rec = existing[key]
-                                current_logs[a_idx] = rec.agent_log10_after
-                                histories[a_idx].append(
-                                    (
-                                        f"My current estimate is {10.0**rec.agent_log10_before:g}.",
-                                        rec.raw_reply,
-                                    )
-                                )
-                                ordered_records.append(rec)
-                                continue
-
-                            if budget_usd <= 0.0 or spent_usd >= budget_usd:
-                                raise BudgetExceededError(
-                                    f"Budget cap exhausted (spent={spent_usd:.4f}, "
-                                    f"cap={budget_usd:.4f})."
-                                )
-
-                            before_log = current_logs[a_idx]
-                            cur_x = 10.0**before_log
-                            sys_p, usr_p = build_numeric_prompts(
-                                condition_id=cond_id,
-                                agent=agent,
-                                question=task.question,
-                                current_x=cur_x,
-                                pop_stats=pop_stats if cond_id in ("C2", "C3") else None,
-                                history=histories[a_idx],
-                                unit=task.unit,
-                            )
-                            resp, parsed, spent_usd = _query_with_retry(
-                                backend,
-                                sys_p,
-                                usr_p,
-                                cond_id,
-                                task,
-                                r_idx,
-                                cur_x,
-                                pop_stats,
-                                agent,
-                                spent_usd,
-                                budget_usd,
-                                max_tokens,
-                                pricing,
-                            )
-                            raw_reply = str(resp.get("raw_reply", ""))
-
-                            if parsed.miss or parsed.log10_value is None:
-                                after_log = before_log
-                                asst_log = None
-                                parsed_val = None
-                                is_miss = True
-                            else:
-                                asst_log = parsed.log10_value
-                                parsed_val = parsed.value
-                                after_log = (1.0 - alpha) * before_log + alpha * asst_log
-                                is_miss = False
-
-                            current_logs[a_idx] = after_log
-                            histories[a_idx].append(
-                                (f"My current estimate is {cur_x:g}.", raw_reply)
-                            )
-
-                            rec = NumericEstimateRecord(
-                                run_spec=spec,
-                                condition_id=cond_id,
-                                question_id=task.id,
-                                replicate=rep,
-                                round_idx=r_idx,
-                                agent_id=agent.agent_id,
-                                model_slug=str(resp.get("model_slug", "synthetic")),
-                                provider=str(resp.get("provider", "synthetic_sim")),
-                                raw_reply=raw_reply,
-                                parsed_value=parsed_val,
-                                assistant_log10=asst_log,
-                                agent_log10_before=before_log,
-                                agent_log10_after=after_log,
-                                miss=is_miss,
-                                reasoning_tokens=int(resp.get("reasoning_tokens", 0) or 0),
-                                input_tokens=int(resp.get("input_tokens", 0) or 0),
-                                output_tokens=int(resp.get("output_tokens", 0) or 0),
-                                finish_reason=str(resp.get("finish_reason", "") or ""),
-                            )
-                            existing[key] = rec
-                            ordered_records.append(rec)
-                            fh.write(rec.model_dump_json() + "\n")
-                            fh.flush()
+                        ordered_records.extend(
+                            _run_round(ctx, spec, rep, alpha, workers, existing, fh)
+                        )
 
     return ordered_records
 

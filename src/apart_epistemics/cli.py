@@ -213,6 +213,7 @@ def _execute_numeric_track(
     budget_usd: float,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
+    workers: int = 1,
 ) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
@@ -229,6 +230,7 @@ def _execute_numeric_track(
         seed=cfg.seed,
         max_tokens=max_tokens,
         pricing=pricing,
+        workers=workers,
     )
     num_analysis = analyze_numeric_core(num_recs, num_tasks)
     (out_dir / "numeric_analysis.json").write_text(
@@ -245,6 +247,7 @@ def _run_both_tracks(
     budget_usd: float = 50.0,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
+    workers: int = 1,
 ) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
     if not hasattr(backend, "generate_numeric_reply"):
         raise BackendConfigError(
@@ -261,6 +264,7 @@ def _run_both_tracks(
         budget_usd=budget_usd,
         max_tokens=max_tokens,
         pricing=pricing,
+        workers=workers,
     )
     return suite_res, num_analysis, num_recs
 
@@ -336,6 +340,9 @@ def _cmd_run(args: argparse.Namespace) -> int:
         return 2
 
     out_dir = Path(args.out)
+    if args.workers < 1:
+        print("Configuration error: --workers must be at least 1.", file=sys.stderr)
+        return 2
     pricing = TokenPricing(input_per_m=args.price_in, output_per_m=args.price_out)
     try:
         if args.numeric_only:
@@ -348,6 +355,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 budget_usd=args.budget,
                 max_tokens=args.max_tokens,
                 pricing=pricing,
+                workers=args.workers,
             )
         else:
             _run_both_tracks(
@@ -357,6 +365,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 budget_usd=args.budget,
                 max_tokens=args.max_tokens,
                 pricing=pricing,
+                workers=args.workers,
             )
     except (BudgetExceededError, RuntimeError, BackendConfigError) as exc:
         print(f"Execution failed: {exc}", file=sys.stderr)
@@ -537,6 +546,13 @@ def build_parser() -> argparse.ArgumentParser:
             "USD reserved before every HTTP attempt (default 1). Set at least "
             "the maximum possible request charge; not actual billing."
         ),
+    )
+    p_run.add_argument(
+        "--workers",
+        type=int,
+        default=8,
+        help="Numeric track: agents queried concurrently within a round. Results are identical "
+        "to --workers 1; only speed changes.",
     )
     p_run.add_argument("--numeric-only", action="store_true")
 

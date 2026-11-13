@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import copy
 import json
+import threading
+import time
 import urllib.error
 import urllib.request
 from abc import ABC, abstractmethod
@@ -22,6 +24,14 @@ class BackendConfigError(Exception):
 
 class BudgetExceededError(Exception):
     """Raised when estimated or actual API spend exceeds the configured budget cap."""
+
+
+class TransientBackendError(RuntimeError):
+    """A timeout, connection error, HTTP 429 or 5xx: worth retrying with backoff."""
+
+
+# Serializes appends to the shared provider request journal when calls run in threads.
+_REQUEST_LOG_LOCK = threading.Lock()
 
 
 def post_json(
@@ -45,9 +55,12 @@ def post_json(
             detail = exc.read().decode("utf-8", errors="replace")[:240]
         except OSError:
             detail = str(exc.reason)
-        raise RuntimeError(f"HTTP {exc.code} from {url}: {detail}") from exc
-    except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        error_cls = TransientBackendError if exc.code == 429 or exc.code >= 500 else RuntimeError
+        raise error_cls(f"HTTP {exc.code} from {url}: {detail}") from exc
+    except json.JSONDecodeError as exc:
         raise RuntimeError(f"Request error calling {url}: {exc}") from exc
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise TransientBackendError(f"Request error calling {url}: {exc}") from exc
 
 
 def extract_openai_chat_fields(
@@ -96,6 +109,9 @@ class _HTTPChatBackend(ABC):
 
     budget_ledger: Any = None
     request_log: Any = None
+    # Retries after the first attempt on TransientBackendError, with exponential backoff.
+    max_retries: int = 3
+    retry_sleep: Callable[[float], None] = staticmethod(time.sleep)
 
     def for_model(self, model: str) -> _HTTPChatBackend:
         """Clone routing settings while sharing the run budget and request journal."""
@@ -110,27 +126,36 @@ class _HTTPChatBackend(ABC):
         payload: dict[str, Any],
         error_prefix: str,
     ) -> dict[str, Any]:
-        if self.budget_ledger is not None:
-            self.budget_ledger.reserve()
-        try:
-            result = (
-                self._transport(url, headers, payload)
-                if self._transport is not None
-                else post_json(url, headers, payload)
-            )
-            if self.request_log is not None:
-                entry = json.dumps({"model": self.model, "request": payload, "response": result})
+        attempt = 0
+        while True:
+            # Every HTTP attempt, retries included, reserves budget before it is sent.
+            if self.budget_ledger is not None:
+                self.budget_ledger.reserve()
+            try:
+                result = (
+                    self._transport(url, headers, payload)
+                    if self._transport is not None
+                    else post_json(url, headers, payload)
+                )
+                if self.request_log is not None:
+                    entry = json.dumps(
+                        {"model": self.model, "request": payload, "response": result}
+                    )
+                    if self._secret_to_redact:
+                        entry = entry.replace(self._secret_to_redact, "[REDACTED]")
+                    with _REQUEST_LOG_LOCK, self.request_log.open("a", encoding="utf-8") as fh:
+                        fh.write(entry + "\n")
+                        fh.flush()
+                return result
+            except Exception as exc:
+                if isinstance(exc, TransientBackendError) and attempt < self.max_retries:
+                    self.retry_sleep(min(30.0, 2.0**attempt))
+                    attempt += 1
+                    continue
+                msg = str(exc)
                 if self._secret_to_redact:
-                    entry = entry.replace(self._secret_to_redact, "[REDACTED]")
-                with self.request_log.open("a", encoding="utf-8") as fh:
-                    fh.write(entry + "\n")
-                    fh.flush()
-            return result
-        except Exception as exc:
-            msg = str(exc)
-            if self._secret_to_redact:
-                msg = msg.replace(self._secret_to_redact, "[REDACTED]")
-            raise RuntimeError(f"{error_prefix}: {msg}") from None
+                    msg = msg.replace(self._secret_to_redact, "[REDACTED]")
+                raise RuntimeError(f"{error_prefix}: {msg}") from None
 
     @abstractmethod
     def generate_chat(
