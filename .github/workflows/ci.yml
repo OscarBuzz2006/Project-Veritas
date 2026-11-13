@@ -32,8 +32,10 @@ jobs:
       - name: Install Playwright Chromium for E2E checks
         run: python -m playwright install --with-deps chromium
 
-      - name: Run Ruff lint check
-        run: ruff check .
+      - name: Run Ruff lint and format checks
+        run: |
+          ruff check .
+          ruff format --check .
 
-      - name: Run unit, integration, and Playwright E2E suite
-        run: pytest -v
+      - name: Run unit, integration, and Playwright E2E suite with coverage
+        run: pytest --cov=apart_epistemics --cov-report=term-missing -v

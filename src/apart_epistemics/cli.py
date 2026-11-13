@@ -31,112 +31,149 @@ from apart_epistemics.models import (
 from apart_epistemics.report import build_static_site, generate_figures
 from apart_epistemics.summarizer import evaluate_dual_judge_topics
 
+# (condition_id, label, heterogeneity, nationality, num_models, group, temperature, top_p)
+_DEFAULT_CONDITION_SPECS: tuple[
+    tuple[str, str, HeterogeneityType, NationalityType, int, str, float, float], ...
+] = (
+    (
+        "no_ai",
+        "No AI Baseline (Independent + Peers)",
+        HeterogeneityType.NO_AI,
+        NationalityType.NONE,
+        0,
+        "baseline",
+        0.8,
+        0.95,
+    ),
+    (
+        "us_k1_greedy",
+        "Monolithic US (K=1, T=0.0, top_p=0.0)",
+        HeterogeneityType.MONOLITHIC_SHARED,
+        NationalityType.US_ONLY,
+        1,
+        "decoding_ablation",
+        0.0,
+        0.0,
+    ),
+    (
+        "us_k1",
+        "Monolithic US (K=1, App Default T=0.8)",
+        HeterogeneityType.MONOLITHIC_SHARED,
+        NationalityType.US_ONLY,
+        1,
+        "k_sweep",
+        0.8,
+        0.95,
+    ),
+    (
+        "us_k2",
+        "Multi-Lab US Mix (K=2)",
+        HeterogeneityType.MULTI_LAB_MIX,
+        NationalityType.US_ONLY,
+        2,
+        "k_sweep",
+        0.8,
+        0.95,
+    ),
+    (
+        "us_k4",
+        "Multi-Lab US Mix (K=4)",
+        HeterogeneityType.MULTI_LAB_MIX,
+        NationalityType.US_ONLY,
+        4,
+        "k_sweep",
+        0.8,
+        0.95,
+    ),
+    (
+        "cn_k1",
+        "Monolithic CN Open Model (K=1)",
+        HeterogeneityType.MONOLITHIC_SHARED,
+        NationalityType.CN_ONLY,
+        1,
+        "nationality",
+        0.8,
+        0.95,
+    ),
+    (
+        "cn_k4",
+        "Multi-Lab CN Mix (K=4)",
+        HeterogeneityType.MULTI_LAB_MIX,
+        NationalityType.CN_ONLY,
+        4,
+        "nationality",
+        0.8,
+        0.95,
+    ),
+    (
+        "divergent_sft_pair",
+        "Same-Base Divergent SFT (K=2, Qwen3.8 + Arete-27B)",
+        HeterogeneityType.DIVERGENT_SFT_PAIR,
+        NationalityType.DIVERGENT_SFT,
+        2,
+        "nationality",
+        0.8,
+        0.95,
+    ),
+    (
+        "cross_national_k4",
+        "Cross-National Mix (K=4, US + CN + EU)",
+        HeterogeneityType.CULTURAL_REGIONAL_MIX,
+        NationalityType.CROSS_NATIONAL,
+        4,
+        "nationality",
+        0.8,
+        0.95,
+    ),
+    (
+        "personalized_advisor",
+        "Personalized Advisor (Role-Framed)",
+        HeterogeneityType.PERSONALIZED_ADVISOR,
+        NationalityType.CROSS_NATIONAL,
+        24,
+        "personalization",
+        0.8,
+        0.95,
+    ),
+    (
+        "personalized_peer",
+        "Personalized Peer (Sycophantic)",
+        HeterogeneityType.PERSONALIZED_PEER,
+        NationalityType.US_ONLY,
+        24,
+        "personalization",
+        0.8,
+        0.95,
+    ),
+)
+
 
 def _default_conditions() -> list[ConditionConfig]:
     return [
         ConditionConfig(
-            condition_id="no_ai",
-            label="No AI Baseline (Independent + Peers)",
-            heterogeneity_type=HeterogeneityType.NO_AI,
-            nationality_type=NationalityType.NONE,
-            num_models=0,
-            group="baseline",
-        ),
-        ConditionConfig(
-            condition_id="us_k1_greedy",
-            label="Monolithic US (K=1, T=0.0, top_p=0.0)",
-            heterogeneity_type=HeterogeneityType.MONOLITHIC_SHARED,
-            nationality_type=NationalityType.US_ONLY,
-            num_models=1,
-            temperature=0.0,
-            top_p=0.0,
-            group="decoding_ablation",
-        ),
-        ConditionConfig(
-            condition_id="us_k1",
-            label="Monolithic US (K=1, App Default T=0.8)",
-            heterogeneity_type=HeterogeneityType.MONOLITHIC_SHARED,
-            nationality_type=NationalityType.US_ONLY,
-            num_models=1,
-            group="k_sweep",
-        ),
-        ConditionConfig(
-            condition_id="us_k2",
-            label="Multi-Lab US Mix (K=2)",
-            heterogeneity_type=HeterogeneityType.MULTI_LAB_MIX,
-            nationality_type=NationalityType.US_ONLY,
-            num_models=2,
-            group="k_sweep",
-        ),
-        ConditionConfig(
-            condition_id="us_k4",
-            label="Multi-Lab US Mix (K=4)",
-            heterogeneity_type=HeterogeneityType.MULTI_LAB_MIX,
-            nationality_type=NationalityType.US_ONLY,
-            num_models=4,
-            group="k_sweep",
-        ),
-        ConditionConfig(
-            condition_id="cn_k1",
-            label="Monolithic CN Open Model (K=1)",
-            heterogeneity_type=HeterogeneityType.MONOLITHIC_SHARED,
-            nationality_type=NationalityType.CN_ONLY,
-            num_models=1,
-            group="nationality",
-        ),
-        ConditionConfig(
-            condition_id="cn_k4",
-            label="Multi-Lab CN Mix (K=4)",
-            heterogeneity_type=HeterogeneityType.MULTI_LAB_MIX,
-            nationality_type=NationalityType.CN_ONLY,
-            num_models=4,
-            group="nationality",
-        ),
-        ConditionConfig(
-            condition_id="divergent_sft_pair",
-            label="Same-Base Divergent SFT (K=2, Qwen3.8 + Arete-27B)",
-            heterogeneity_type=HeterogeneityType.DIVERGENT_SFT_PAIR,
-            nationality_type=NationalityType.DIVERGENT_SFT,
-            num_models=2,
-            group="nationality",
-        ),
-        ConditionConfig(
-            condition_id="cross_national_k4",
-            label="Cross-National Mix (K=4, US + CN + EU)",
-            heterogeneity_type=HeterogeneityType.CULTURAL_REGIONAL_MIX,
-            nationality_type=NationalityType.CROSS_NATIONAL,
-            num_models=4,
-            group="nationality",
-        ),
-        ConditionConfig(
-            condition_id="personalized_advisor",
-            label="Personalized Advisor (Role-Framed)",
-            heterogeneity_type=HeterogeneityType.PERSONALIZED_ADVISOR,
-            nationality_type=NationalityType.CROSS_NATIONAL,
-            num_models=24,
-            group="personalization",
-        ),
-        ConditionConfig(
-            condition_id="personalized_peer",
-            label="Personalized Peer (Sycophantic)",
-            heterogeneity_type=HeterogeneityType.PERSONALIZED_PEER,
-            nationality_type=NationalityType.US_ONLY,
-            num_models=24,
-            group="personalization",
-        ),
+            condition_id=cid,
+            label=label,
+            heterogeneity_type=het,
+            nationality_type=nat,
+            num_models=k,
+            temperature=temp,
+            top_p=top_p,
+            group=group,
+        )
+        for cid, label, het, nat, k, group, temp, top_p in _DEFAULT_CONDITION_SPECS
     ]
 
 
 def _load_config(config_path: Path | None) -> ExperimentSuiteConfig:
-    if config_path is not None and config_path.exists():
+    if config_path is not None:
+        if not config_path.exists():
+            raise FileNotFoundError(f"Config file not found: {config_path}")
         raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
         return ExperimentSuiteConfig.model_validate(raw)
     default_yaml = Path("configs/default_suite.yaml")
-    if config_path is None and default_yaml.exists():
+    if default_yaml.exists():
         raw = yaml.safe_load(default_yaml.read_text(encoding="utf-8"))
         return ExperimentSuiteConfig.model_validate(raw)
-    if config_path is not None:
-        raise FileNotFoundError(f"Config file not found: {config_path}")
     return ExperimentSuiteConfig(conditions=_default_conditions())
 
 
@@ -150,6 +187,58 @@ def _serialize_numeric_analysis(analysis: dict[str, Any]) -> dict[str, Any]:
             c.model_dump() if hasattr(c, "model_dump") else c for c in analysis["contrasts"]
         ],
     }
+
+
+def _resolve_fig_dir(args_figures: str | None, out_dir: Path) -> Path:
+    if args_figures is not None:
+        return Path(args_figures)
+    if out_dir == Path("reports/results"):
+        return Path("reports/figures")
+    return out_dir / "figures"
+
+
+def _execute_numeric_track(
+    cfg: ExperimentSuiteConfig,
+    backend: Any,
+    out_dir: Path,
+    *,
+    n_agents: int,
+    budget_usd: float,
+) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
+    num_recs = run_numeric_core(
+        tasks=num_tasks,
+        conditions=["C1", "C2", "C3"],
+        n_agents=n_agents,
+        n_rounds=max(2, min(cfg.num_rounds, 4)),
+        replicates=cfg.numeric_replicates,
+        runs_path=out_dir / "numeric_runs.jsonl",
+        backend=backend,
+        alpha=cfg.alpha,
+        budget_usd=budget_usd,
+        seed=cfg.seed,
+    )
+    num_analysis = analyze_numeric_core(num_recs, num_tasks)
+    (out_dir / "numeric_analysis.json").write_text(
+        json.dumps(_serialize_numeric_analysis(num_analysis), indent=2),
+        encoding="utf-8",
+    )
+    return num_analysis, num_recs
+
+
+def _run_both_tracks(
+    cfg: ExperimentSuiteConfig,
+    backend: Any,
+    out_dir: Path,
+    budget_usd: float = 50.0,
+) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
+    num_analysis, num_recs = _execute_numeric_track(
+        cfg, backend, out_dir, n_agents=max(8, cfg.num_agents), budget_usd=budget_usd
+    )
+    return suite_res, num_analysis, num_recs
 
 
 def _cmd_setup(args: argparse.Namespace) -> int:
@@ -169,43 +258,6 @@ def _cmd_setup(args: argparse.Namespace) -> int:
     )
     print(f"Wrote validated config to {out_path}")
     return 0
-
-
-def _resolve_fig_dir(args_figures: str | None, out_dir: Path) -> Path:
-    if args_figures is not None:
-        return Path(args_figures)
-    if out_dir == Path("reports/results"):
-        return Path("reports/figures")
-    return out_dir / "figures"
-
-
-def _run_both_tracks(
-    cfg: ExperimentSuiteConfig,
-    backend: Any,
-    out_dir: Path,
-    budget_usd: float = 50.0,
-) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
-    num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
-    num_recs = run_numeric_core(
-        tasks=num_tasks,
-        conditions=["C1", "C2", "C3"],
-        n_agents=max(8, cfg.num_agents),
-        n_rounds=max(2, min(cfg.num_rounds, 4)),
-        replicates=cfg.numeric_replicates,
-        runs_path=out_dir / "numeric_runs.jsonl",
-        backend=backend,
-        alpha=cfg.alpha,
-        budget_usd=budget_usd,
-        seed=cfg.seed,
-    )
-    num_analysis = analyze_numeric_core(num_recs, num_tasks)
-    (out_dir / "numeric_analysis.json").write_text(
-        json.dumps(_serialize_numeric_analysis(num_analysis), indent=2),
-        encoding="utf-8",
-    )
-    return suite_res, num_analysis, num_recs
 
 
 def _cmd_demo(args: argparse.Namespace) -> int:
@@ -250,23 +302,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
     out_dir = Path(args.out)
     try:
         if args.numeric_only:
-            num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
-            num_recs = run_numeric_core(
-                tasks=num_tasks,
-                conditions=["C1", "C2", "C3"],
-                n_agents=cfg.num_agents,
-                n_rounds=max(2, min(cfg.num_rounds, 4)),
-                replicates=cfg.numeric_replicates,
-                runs_path=out_dir / "numeric_runs.jsonl",
-                backend=backend,
-                alpha=cfg.alpha,
-                budget_usd=args.budget,
-                seed=cfg.seed,
-            )
-            num_analysis = analyze_numeric_core(num_recs, num_tasks)
-            (out_dir / "numeric_analysis.json").write_text(
-                json.dumps(_serialize_numeric_analysis(num_analysis), indent=2),
-                encoding="utf-8",
+            _execute_numeric_track(
+                cfg, backend, out_dir, n_agents=cfg.num_agents, budget_usd=args.budget
             )
         else:
             _run_both_tracks(cfg, backend, out_dir, budget_usd=args.budget)
@@ -288,17 +325,20 @@ def _load_saved_artifacts(
     summary_json = (
         json.loads(summary_file.read_text(encoding="utf-8")) if summary_file.exists() else {}
     )
-    records: list[RoundRecord] = []
-    if runs_file.exists():
-        for line in runs_file.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                records.append(RoundRecord.model_validate_json(line))
-
-    num_records: list[NumericEstimateRecord] = []
-    if num_runs_file.exists():
-        for line in num_runs_file.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                num_records.append(NumericEstimateRecord.model_validate_json(line))
+    records = [
+        RoundRecord.model_validate_json(line)
+        for line in (
+            runs_file.read_text(encoding="utf-8").splitlines() if runs_file.exists() else []
+        )
+        if line.strip()
+    ]
+    num_records = [
+        NumericEstimateRecord.model_validate_json(line)
+        for line in (
+            num_runs_file.read_text(encoding="utf-8").splitlines() if num_runs_file.exists() else []
+        )
+        if line.strip()
+    ]
 
     num_analysis = (
         analyze_numeric_core(num_records, build_numeric_core_tasks()) if num_records else {}
@@ -353,7 +393,6 @@ def _cmd_report(args: argparse.Namespace) -> int:
 
 
 def _cmd_audit_selection(args: argparse.Namespace) -> int:
-    # Cold-start binary correctness profiles illustrating US vs CN vs EU question-selection skew.
     cold_scores = {
         "openai/gpt-frontier": [0, 0, 0, 1, 0, 0, 1, 0],
         "qwen/qwen3.8-27b": [1, 1, 0, 1, 1, 0, 1, 1],
@@ -374,6 +413,7 @@ def _cmd_audit_selection(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the top-level `apart-epistemics` CLI argument parser."""
     parser = argparse.ArgumentParser(
         prog="apart-epistemics",
         description="Epistemic Prism CLI: Track 4 + Page's Theorem multi-agent testing suite.",
@@ -427,6 +467,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint returning process exit code."""
     parser = build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
     dispatch = {

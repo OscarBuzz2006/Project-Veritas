@@ -1,10 +1,12 @@
 """Tests for domain models, dual-track datasets, and adversarial numeric/JSON parsers."""
 
 import math
+from importlib import resources
 
 import pytest
 from pydantic import ValidationError
 
+import apart_epistemics
 from apart_epistemics.datasets import (
     audit_question_selection_bias,
     build_ground_truth_tasks,
@@ -12,6 +14,7 @@ from apart_epistemics.datasets import (
     build_open_debate_tasks,
     generate_agent_population,
 )
+from apart_epistemics.metrics import clamp, quantile_sorted
 from apart_epistemics.models import (
     ConditionConfig,
     HeterogeneityType,
@@ -141,12 +144,25 @@ def test_numeric_parser_handles_units_commas_and_distractors(text: str, expected
         "Final estimate: 0",  # non-positive cannot enter log10
         "Final estimate: -150",  # negative cannot enter log10
         "Final estimate: N/A",
+        "Final estimate: 1e9999",  # float overflow must become a clean miss
     ],
 )
 def test_numeric_parser_marks_misses_safely_without_crashing(bad_text: str) -> None:
     result = parse_numeric_estimate(bad_text, require_positive=True)
     assert result.miss is True
     assert result.value is None
+
+
+def test_math_helpers_and_public_package_surface() -> None:
+    assert clamp(float("nan"), 0.0, 1.0) == 0.0
+    assert clamp(float("inf"), 0.0, 1.0) == 0.0
+    assert clamp(1.5, 0.0, 1.0) == 1.0
+    assert quantile_sorted([], 0.5) == 0.0
+    assert quantile_sorted([4.2], 0.75) == pytest.approx(4.2)
+    assert quantile_sorted([0.0, 10.0], 0.25) == pytest.approx(2.5)
+    for symbol in apart_epistemics.__all__:
+        assert hasattr(apart_epistemics, symbol)
+    assert (resources.files("apart_epistemics") / "py.typed").is_file()
 
 
 def test_structured_belief_parser_handles_json_and_fenced_text() -> None:

@@ -30,7 +30,7 @@ Verified from `apart-epistemics demo --out reports/results --site docs` (`11` Tr
 
 | Condition | Provenance | $K$ | Temp | Acc | Brier | Conf Wrong | Eff Topics | Goldman $N_{\text{eff}}$ | Jaccard Dist |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| `no_ai` | `none` | 0 | 0.8 | 0.993 | 0.150 | 0.000 | 6.20 | 15.02 | 0.728 |
+| `no_ai` | `none` | 0 | 0.8 | 0.993 | 0.150 | 0.000 | 6.20 | 15.02 | 0.727 |
 | `us_k1_greedy` | `us_only` | 1 | 0.0 | 0.833 | 0.139 | 0.167 | 1.00 | 1.08 | 0.160 |
 | `us_k1` | `us_only` | 1 | 0.8 | 0.799 | 0.167 | 0.201 | 1.00 | 1.08 | 0.691 |
 | `us_k2` | `us_only` | 2 | 0.8 | 0.965 | 0.056 | 0.035 | 2.74 | 1.38 | 0.705 |
@@ -40,7 +40,7 @@ Verified from `apart-epistemics demo --out reports/results --site docs` (`11` Tr
 | `divergent_sft_pair` | `divergent_sft` | 2 | 0.8 | 0.986 | 0.039 | 0.014 | 6.00 | 1.81 | 0.731 |
 | `cross_national_k4` | `cross_national` | 4 | 0.8 | 1.000 | 0.049 | 0.000 | 6.37 | 2.41 | 0.732 |
 | `personalized_advisor` | `cross_national` | 24 | 0.8 | 1.000 | 0.062 | 0.000 | 6.46 | 2.65 | 0.724 |
-| `personalized_peer` | `us_only` | 24 | 0.8 | 0.486 | 0.420 | 0.514 | 6.46 | 1.75 | 0.745 |
+| `personalized_peer` | `us_only` | 24 | 0.8 | 0.486 | 0.420 | 0.514 | 6.46 | 1.75 | 0.744 |
 
 - **Numeric Core (`C1 / C2 / C3` Page Identity)**: Max algebraic identity residual verified at `1.09e-16`; `C2` social median sharing reduces diversity vs `C1` (`mean_diff = -0.0137`, Holm-adjusted `p = 0.00195`), while `C3` persona + conversation history preserves diversity (`0.0189`) and cuts crowd error (`0.00095` vs `0.00341`, Holm `p = 0.00293`).
 - **Live Local Ollama Verification**: Executed single-call live inference against `ollama` (`llama3.1:8b`), extracting `Final estimate: 6853` (`log10 = 3.8359`) via [`parse_numeric_estimate`](src/apart_epistemics/parsers.py).
@@ -49,27 +49,30 @@ Verified from `apart-epistemics demo --out reports/results --site docs` (`11` Tr
 
 ## Features
 
-- **Dual-Track Simulation Engine** ([`engine.py`](src/apart_epistemics/engine.py)): Lightweight peer-exchange communication graph supporting both categorical calibration/open-debate rounds (`GROUND_TRUTH`, `OPEN_DEBATE`) and damped `log10` quantitative belief updating (`C1/C2/C3`).
+- **Dual-Track Simulation Engine** ([`engine/`](src/apart_epistemics/engine/)): Lightweight peer-exchange communication graph supporting both categorical calibration/open-debate rounds (`GROUND_TRUTH`, `OPEN_DEBATE`) and damped `log10` quantitative belief updating (`C1/C2/C3`), with shared Holm-Bonferroni contrast analysis ([`contrasts.py`](src/apart_epistemics/engine/contrasts.py)).
 - **Blinded Dual-Judge Topic Summarizer** ([`summarizer.py`](src/apart_epistemics/summarizer.py)): Strips condition, model family, nationality, and round metadata, hashes deterministic `blind_id`s, consolidates a shared global codebook, enforces Cohen's $\kappa \ge 0.70$, and exports stratified `audit_human_check.csv`.
-- **Protocol-Clean Multi-Backend Adapters** ([`backends.py`](src/apart_epistemics/backends.py)): Deterministic `SyntheticEpistemicBackend`, offline `ReplayBackend`, local `OllamaBackend`, OpenRouter with automatic `:online` suffix stripping and `allow_fallbacks: false` provider pinning, plus OpenAI, Anthropic, and Gemini HTTP adapters.
+- **Protocol-Clean Multi-Backend Adapters** ([`backends/`](src/apart_epistemics/backends/)): Deterministic `SyntheticEpistemicBackend`, offline `ReplayBackend`, local `OllamaBackend`, OpenRouter with automatic `:online` suffix stripping and `allow_fallbacks: false` provider pinning, plus OpenAI, Anthropic, and Gemini adapters built over a shared `_HTTPChatBackend` base with credential masking.
 - **Crash-Resumable JSONL & Budget Guard**: Skips completed `(condition_id, question_id, replicate, round_idx, agent_id)` cells on restart, retries once on unparseable replies, logs `miss=True` safely without corrupting beliefs, and halts cleanly on `BudgetExceededError`.
-- **Self-Contained Interactive Explorer & SVG Pipeline** ([`report.py`](src/apart_epistemics/report.py), [`dashboard.html`](src/apart_epistemics/templates/dashboard.html)): Zero external CDN dependencies; responsive `1440px` desktop and `390px` mobile views with live round scrubber, family filters, sortable ledger, and slide-over trace drawer.
+- **Self-Contained Interactive Explorer & SVG Pipeline** ([`report/`](src/apart_epistemics/report/), [`dashboard.html`](src/apart_epistemics/templates/dashboard.html)): Zero external CDN dependencies; keyboard-accessible `1440px` desktop and `390px` mobile views with live round scrubber, family filters, sortable ledger (`aria-sort`), and slide-over trace drawer.
 
 ---
 
-## Architecture
+## Architecture & Project Structure
 
 ```mermaid
 flowchart LR
-    CFG["YAML Config / Datasets<br/>(datasets.py, models.py)"] --> ENG["Simulation Engine<br/>(engine.py)"]
-    BE["Backends<br/>(synthetic / ollama / openrouter / replay)"] --> ENG
+    CFG["YAML Config / Datasets<br/>(datasets/, models.py)"] --> ENG["Simulation Engine<br/>(engine/)"]
+    BE["Backends<br/>(backends/: synthetic / ollama / openrouter / replay)"] --> ENG
     ENG --> PAR["Strict Parsers<br/>(parsers.py)"]
     ENG --> SUM["Blinded Dual-Judge Summarizer<br/>(summarizer.py)"]
     PAR --> MET["Epistemic & Statistical Metrics<br/>(Page, Hill N1, Goldman, Holm)<br/>(metrics.py)"]
     SUM --> MET
-    MET --> REP["SVG Figures & Lab Notebook<br/>(report.py, dashboard.html)"]
+    MET --> REP["SVG Figures & Lab Notebook<br/>(report/, dashboard.html)"]
     REP --> DOCS["docs/index.html & reports/figures/*.svg"]
 ```
+
+- **Library code ([`src/apart_epistemics/`](src/apart_epistemics/))**: Modular subpackages for [`datasets/`](src/apart_epistemics/datasets/), [`backends/`](src/apart_epistemics/backends/), [`engine/`](src/apart_epistemics/engine/), and [`report/`](src/apart_epistemics/report/), alongside [`models.py`](src/apart_epistemics/models.py), [`parsers.py`](src/apart_epistemics/parsers.py), [`metrics.py`](src/apart_epistemics/metrics.py), [`summarizer.py`](src/apart_epistemics/summarizer.py), [`cli.py`](src/apart_epistemics/cli.py), and PEP 561 [`py.typed`](src/apart_epistemics/py.typed).
+- **Testing & Automation ([`tests/`](tests/), [`Makefile`](Makefile), [`CONTRIBUTING.md`](CONTRIBUTING.md))**: Shared pytest fixtures in [`tests/conftest.py`](tests/conftest.py), per-module unit/integration files, strict `e2e` Playwright marker, Ruff complexity/format gates (`C90 <= 16`), and GitHub Actions branch-coverage CI.
 
 ---
 
@@ -123,14 +126,15 @@ Live cloud runs read keys from environment variables documented in [`.env.exampl
 
 ## Testing
 
-All 37 automated tests (mathematical invariants, adversarial parsing, blinded summarizer, mocked provider contracts, crash recovery, cross-process `PYTHONHASHSEED` determinism, CLI commands, and live Playwright responsive DOM/E2E verification) run offline with zero API charges:
+All 44 automated tests (43 fast unit/integration checks covering math invariants, overflow/adversarial parsing, blinded summarizer, mocked provider contracts, crash recovery, cross-process `PYTHONHASHSEED` determinism, and CLI commands, plus live Playwright responsive DOM/keyboard E2E checks) run offline with zero API charges. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`Makefile`](Makefile) for workflows:
 
 ```bash
-.venv/bin/ruff check src tests
-.venv/bin/pytest --cov=apart_epistemics --cov-report=term-missing -v
+make lint       # ruff check . && ruff format --check .
+make test-fast  # pytest -m "not e2e" -v (~2s)
+make cov        # pytest --cov=apart_epistemics --cov-report=term-missing -v
 ```
 
-Latest verified suite run: `All checks passed!`, `37 passed` (`93%` total package statement coverage; `98%` on `report.py`, `97%` on `engine.py`, `100%` on `models.py` and `summarizer.py`).
+Latest verified suite run: `All checks passed!` (`ruff check .`), `ruff format --check .` passes cleanly, and `44 passed` (`93%` total package statement + branch coverage across `src/apart_epistemics/`).
 
 ---
 

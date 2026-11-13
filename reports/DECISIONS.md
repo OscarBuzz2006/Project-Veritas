@@ -43,4 +43,27 @@
    - **Why:** First visual screenshot inspection revealed overlapping top-right quadrant labels and a slightly clipped table button at 1440px despite DOM assertions passing.
    - **Alternatives rejected:** Relying solely on HTML existence checks without rendering pixels.
 
+## 2026-11-13: Modularity, Performance & Developer Testing Refactor
+
+9. **Split Monolithic Modules into Cohesive Subpackages (`backends/`, `datasets/`, `engine/`, `report/`)**
+   - **Decision:** Decomposed 500-1100 line modules into focused single-responsibility subpackages while re-exporting all public API symbols from each subpackage's `__init__.py` and top-level `apart_epistemics/__init__.py` plus PEP 561 `py.typed`.
+   - **Why:** Reduces file length, isolates transport/simulator/reporting concerns for human readers and contributors, and keeps backward compatibility intact for callers.
+   - **Alternatives rejected:** Keeping single monolithic files over 1,000 lines or breaking top-level import paths.
+
+10. **Shared HTTP Transport Base, Contrast Statistics Helper, and Package-Safe Template Loading**
+    - **Decision:** Extracted `_HTTPChatBackend` in `backends/base.py`, exported shared `clamp` and `quantile_sorted` in `metrics.py`, consolidated paired Wilcoxon + bootstrap CI + Holm-Bonferroni into `engine/contrasts.py`, and switched dashboard template reading in `report/site.py` to `importlib.resources`.
+    - **Why:** Eliminates duplicated boilerplate across 5 HTTP providers and both experiment tracks, guarantees safe non-finite handling (`NaN`/`inf` fallback and `1e9999` overflow guard in `parsers.py`), and ensures installed wheels find `templates/dashboard.html`.
+    - **Alternatives rejected:** Maintaining parallel copies of HTTP error masking and contrast loops, or hardcoding `Path(__file__).parents` assumptions.
+
+11. **O(U^2) Frequency-Weighted Lexical Diversity & Pre-Grouped Task Metric Aggregation**
+    - **Decision:** Updated `compute_lexical_diversity` to deduplicate responses into counted `frozenset[str]` token bags, pre-extracted correlation tuples in `compute_goldman_effective_sources`, and pre-grouped Track 4 records by `(round_idx, task_id)` instead of O(N * T * R) nested scanning.
+    - **Why:** Produces bit-for-bit identical metrics while avoiding redundant inner loops on repeated greedy replies and large multi-round sweeps.
+    - **Alternatives rejected:** Approximate lexical sketching that alters reported `pairwise_jaccard_distance`.
+
+12. **Developer-First Testing Harness (`Makefile`, `CONTRIBUTING.md`, `conftest.py`, Branch Coverage, Strict CI)**
+    - **Decision:** Split tests into focused per-module files with shared `tests/conftest.py` fixtures, registered strict `e2e` pytest markers (`make test-fast` runs unit/integration tests in ~2s), enabled Ruff complexity/pytest/RUF rules (`C90 <= 16`) + `ruff format --check` in CI, enabled branch coverage, and added `tabindex`/`aria-label`/`aria-sort` keyboard accessibility to `dashboard.html`.
+    - **Why:** Makes running fast feedback loops effortless for contributors while keeping UI accessibility and full E2E browser checks enforced in CI.
+    - **Alternatives rejected:** Coupling all backend and engine tests into a single 700-line file without marker separation or CI format enforcement.
+
+
 

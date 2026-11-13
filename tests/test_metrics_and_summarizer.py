@@ -21,46 +21,11 @@ from apart_epistemics.metrics import (
     holm_bonferroni,
     paired_wilcoxon_p,
 )
-from apart_epistemics.models import RoundRecord, TaskKind
 from apart_epistemics.summarizer import (
     blind_and_shuffle_records,
     evaluate_dual_judge_topics,
     export_audit_sample,
 )
-
-
-def _make_record(
-    *,
-    condition_id: str,
-    round_idx: int,
-    agent_id: str,
-    model_assigned: str,
-    model_family: str,
-    topics: list[str],
-    stance_prob: float,
-    text: str,
-    overlap: float,
-) -> RoundRecord:
-    return RoundRecord(
-        run_id="run_test",
-        condition_id=condition_id,
-        seed=42,
-        task_id="od_sovereign_ai",
-        task_kind=TaskKind.OPEN_DEBATE,
-        round_idx=round_idx,
-        agent_id=agent_id,
-        agent_region="east_asia",
-        model_assigned=model_assigned,
-        model_family=model_family,
-        assistant_response_text="",
-        agent_response_text=text,
-        extracted_topics=topics,
-        stance_prob=stance_prob,
-        confidence=max(stance_prob, 1.0 - stance_prob),
-        stated_answer=1 if stance_prob >= 0.5 else 0,
-        goldman_source_overlap=overlap,
-        persuasion_bias_exposure=overlap * 2.0,
-    )
 
 
 def test_pages_diversity_prediction_theorem_holds_universally() -> None:
@@ -116,9 +81,9 @@ def test_bimodality_separates_polarized_echo_chambers_from_unimodal() -> None:
     assert con_stats["bimodality_coefficient"] < pol_stats["bimodality_coefficient"]
 
 
-def test_goldman_effective_sources_respects_independence_bounds() -> None:
+def test_goldman_effective_sources_respects_independence_bounds(record_factory: object) -> None:
     shared_recs = [
-        _make_record(
+        record_factory(
             condition_id="us_k1",
             round_idx=5,
             agent_id=f"a{i}",
@@ -132,7 +97,7 @@ def test_goldman_effective_sources_respects_independence_bounds() -> None:
         for i in range(20)
     ]
     indep_recs = [
-        _make_record(
+        record_factory(
             condition_id="no_ai",
             round_idx=5,
             agent_id=f"a{i}",
@@ -178,7 +143,8 @@ def test_statistical_tests_wilcoxon_bootstrap_holm_and_kappa() -> None:
     assert paired_wilcoxon_p(x, x) == pytest.approx(1.0)
 
     lo, hi = bootstrap_ci([yi - xi for xi, yi in zip(x, y, strict=True)], seed=42)
-    assert lo > 0.30 and hi < 0.40
+    assert lo > 0.30
+    assert hi < 0.40
 
     adj = holm_bonferroni([0.005, 0.02, 0.04, 0.50])
     assert adj[0] == pytest.approx(0.02)
@@ -187,9 +153,11 @@ def test_statistical_tests_wilcoxon_bootstrap_holm_and_kappa() -> None:
     assert adj[3] == pytest.approx(0.50)
 
 
-def test_blinded_dual_judge_summarizer_strips_metadata_and_checks_kappa(tmp_path: Path) -> None:
+def test_blinded_dual_judge_summarizer_strips_metadata_and_checks_kappa(
+    tmp_path: Path, record_factory: object
+) -> None:
     records = [
-        _make_record(
+        record_factory(
             condition_id="secret_us_k1",
             round_idx=5,
             agent_id="a1",
@@ -200,7 +168,7 @@ def test_blinded_dual_judge_summarizer_strips_metadata_and_checks_kappa(tmp_path
             text="We need independent academic audit to prevent corporate monopoly concentration.",
             overlap=0.9,
         ),
-        _make_record(
+        record_factory(
             condition_id="secret_cross_national",
             round_idx=5,
             agent_id="a2",

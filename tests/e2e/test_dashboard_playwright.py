@@ -15,6 +15,7 @@ from playwright.sync_api import ConsoleMessage, sync_playwright
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOCS_DIR = REPO_ROOT / "docs"
+pytestmark = pytest.mark.e2e
 
 
 class _QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -80,7 +81,8 @@ def test_dashboard_interactive_controls_and_responsive_viewports(
         # Check horizontal overflow at 1440px and ensure desktop table inspect button is unclipped
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         box = page.locator('[data-inspect-condition="cross_national_k4"]').bounding_box()
-        assert box is not None and box["x"] + box["width"] <= 1440
+        assert box is not None
+        assert box["x"] + box["width"] <= 1440
 
         # Save desktop screenshot before mutating tab/drawer state
         page.screenshot(path=str(shot_dir / "desktop-1440.png"), full_page=True)
@@ -108,6 +110,16 @@ def test_dashboard_interactive_controls_and_responsive_viewports(
         assert page.locator("#trajectory-svg-host svg").is_visible()
 
         # Trace drawer inspect and close interaction
+        bubble = page.locator('[data-condition-bubble="cross_national_k4"]')
+        assert bubble.get_attribute("tabindex") == "0"
+        assert bubble.get_attribute("role") == "button"
+        page.locator('#score-table th[data-sort="ground_truth_accuracy"]').click()
+        assert (
+            page.locator('#score-table th[data-sort="ground_truth_accuracy"]').get_attribute(
+                "aria-sort"
+            )
+            == "descending"
+        )
         page.locator('[data-inspect-condition="cross_national_k4"]').click()
         assert page.locator("#trace-drawer").is_visible()
         assert "Assistant:" in page.locator("#drawer-content").inner_text()

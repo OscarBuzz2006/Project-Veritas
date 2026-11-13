@@ -6,99 +6,15 @@ import json
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
-from apart_epistemics.backends import SyntheticEpistemicBackend
-from apart_epistemics.datasets import build_numeric_core_tasks
-from apart_epistemics.engine import analyze_numeric_core, run_numeric_core, run_suite
-from apart_epistemics.models import (
-    ConditionConfig,
-    ExperimentSuiteConfig,
-    HeterogeneityType,
-    NationalityType,
-)
 from apart_epistemics.report import build_static_site, generate_figures
 
 
-def _mini_suite_and_numeric(tmp_path: Path):
-    cfg = ExperimentSuiteConfig(
-        suite_name="Report Test Suite",
-        seed=42,
-        num_agents=12,
-        num_rounds=3,
-        peer_degree=2,
-        tasks_per_track=2,
-        conditions=[
-            ConditionConfig(
-                condition_id="no_ai",
-                label="No AI",
-                heterogeneity_type=HeterogeneityType.NO_AI,
-                nationality_type=NationalityType.NONE,
-                num_models=0,
-                group="baseline",
-            ),
-            ConditionConfig(
-                condition_id="us_k1_greedy",
-                label="US K1 T=0",
-                heterogeneity_type=HeterogeneityType.MONOLITHIC_SHARED,
-                nationality_type=NationalityType.US_ONLY,
-                num_models=1,
-                temperature=0.0,
-                top_p=0.0,
-                group="decoding_ablation",
-            ),
-            ConditionConfig(
-                condition_id="us_k1",
-                label="US K1 T=0.8",
-                heterogeneity_type=HeterogeneityType.MONOLITHIC_SHARED,
-                nationality_type=NationalityType.US_ONLY,
-                num_models=1,
-                group="k_sweep",
-            ),
-            ConditionConfig(
-                condition_id="cross_national_k4",
-                label="Cross-National K4",
-                heterogeneity_type=HeterogeneityType.CULTURAL_REGIONAL_MIX,
-                nationality_type=NationalityType.CROSS_NATIONAL,
-                num_models=4,
-                group="nationality",
-            ),
-            ConditionConfig(
-                condition_id="personalized_advisor",
-                label="Advisor",
-                heterogeneity_type=HeterogeneityType.PERSONALIZED_ADVISOR,
-                nationality_type=NationalityType.CROSS_NATIONAL,
-                num_models=12,
-                group="personalization",
-            ),
-            ConditionConfig(
-                condition_id="personalized_peer",
-                label="Peer",
-                heterogeneity_type=HeterogeneityType.PERSONALIZED_PEER,
-                nationality_type=NationalityType.US_ONLY,
-                num_models=12,
-                group="personalization",
-            ),
-        ],
-    )
-    backend = SyntheticEpistemicBackend(seed=42)
-    suite_res = run_suite(cfg, backend=backend, out_dir=tmp_path / "suite")
-    num_tasks = build_numeric_core_tasks()[:2]
-    num_recs = run_numeric_core(
-        tasks=num_tasks,
-        conditions=["C1", "C2", "C3"],
-        n_agents=6,
-        n_rounds=2,
-        replicates=1,
-        runs_path=tmp_path / "numeric_runs.jsonl",
-        backend=backend,
-        seed=42,
-    )
-    num_analysis = analyze_numeric_core(num_recs, num_tasks)
-    return suite_res, num_analysis, num_recs
-
-
-def test_generate_figures_produces_valid_svgs(tmp_path: Path) -> None:
-    suite_res, num_analysis, _ = _mini_suite_and_numeric(tmp_path)
+def test_generate_figures_produces_valid_svgs(
+    tmp_path: Path, mini_demo_bundle: tuple[dict[str, Any], dict[str, Any], list[Any]]
+) -> None:
+    suite_res, num_analysis, _ = mini_demo_bundle
     fig_dir = tmp_path / "figures"
     paths = generate_figures(suite_res, num_analysis, fig_dir)
 
@@ -118,8 +34,10 @@ def test_generate_figures_produces_valid_svgs(tmp_path: Path) -> None:
         assert root.attrib.get("viewBox")
 
 
-def test_build_static_site_self_contained_and_safe(tmp_path: Path) -> None:
-    suite_res, num_analysis, num_recs = _mini_suite_and_numeric(tmp_path)
+def test_build_static_site_self_contained_and_safe(
+    tmp_path: Path, mini_demo_bundle: tuple[dict[str, Any], dict[str, Any], list[Any]]
+) -> None:
+    suite_res, num_analysis, num_recs = mini_demo_bundle
     # Inject XSS-like sequence into one record to ensure safe JSON embedding.
     suite_res["records"][0].agent_response_text += " </script><script>window.__xss=1</script>"
 

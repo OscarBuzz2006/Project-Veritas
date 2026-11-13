@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import math
 import random
 import re
@@ -13,14 +14,22 @@ from apart_epistemics.models import RoundRecord
 _TOKEN_RE = re.compile(r"[a-z0-9']+")
 
 
-def _quantile(sorted_vals: list[float], q: float) -> float:
+def clamp(value: float, low: float, high: float) -> float:
+    """Clamp `value` safely into `[low, high]`, treating non-finite inputs as `low`."""
+    if not math.isfinite(value):
+        return low
+    return max(low, min(high, value))
+
+
+def quantile_sorted(sorted_vals: list[float], q: float) -> float:
+    """Compute linear-interpolated quantile `q` in [0, 1] from a pre-sorted sequence."""
     if not sorted_vals:
         return 0.0
     if len(sorted_vals) == 1:
         return sorted_vals[0]
     pos = q * (len(sorted_vals) - 1)
-    lo = int(math.floor(pos))
-    hi = int(math.ceil(pos))
+    lo = math.floor(pos)
+    hi = math.ceil(pos)
     frac = pos - lo
     return sorted_vals[lo] * (1.0 - frac) + sorted_vals[hi] * frac
 
@@ -43,7 +52,7 @@ def compute_page_decomposition(log_estimates: list[float], log_truth: float) -> 
     diversity = sum((g - mean_g) ** 2 for g in log_estimates) / n
     residual = abs(crowd_err - (avg_ind_err - diversity))
     sorted_vals = sorted(log_estimates)
-    iqr = _quantile(sorted_vals, 0.75) - _quantile(sorted_vals, 0.25)
+    iqr = quantile_sorted(sorted_vals, 0.75) - quantile_sorted(sorted_vals, 0.25)
     return {
         "crowd_error": crowd_err,
         "avg_individual_error": avg_ind_err,
@@ -65,7 +74,7 @@ def pearson_corr(xs: list[float], ys: list[float]) -> float:
     dy = math.sqrt(sum((y - my) ** 2 for y in ys))
     if dx < 1e-12 or dy < 1e-12:
         return 0.0
-    return max(-1.0, min(1.0, num / (dx * dy)))
+    return clamp(num / (dx * dy), -1.0, 1.0)
 
 
 def compute_accuracy(probs: list[float], truths: list[int]) -> float:
@@ -124,8 +133,7 @@ def compute_topic_entropy_and_hill(
     """Compute normalized Shannon entropy and Hill N1 effective topic count."""
     counts: Counter[str] = Counter()
     for items in topic_lists:
-        for topic in items:
-            counts[topic] += 1
+        counts.update(items)
     total = sum(counts.values())
     vocab_size = max(len(set(vocabulary)), len(counts), 1)
     if total == 0 or vocab_size <= 1:
@@ -139,7 +147,7 @@ def compute_topic_entropy_and_hill(
     max_h = math.log(vocab_size)
     norm_h = h_nat / max_h if max_h > 0 else 0.0
     return {
-        "normalized_entropy": max(0.0, min(1.0, norm_h)),
+        "normalized_entropy": clamp(norm_h, 0.0, 1.0),
         "effective_topics": math.exp(h_nat),
     }
 
@@ -159,19 +167,20 @@ def compute_minority_topic_survival(
 def compute_stance_stats(probs: list[float]) -> dict[str, float]:
     """Compute std, variance, and SAS bimodality coefficient."""
     n = len(probs)
-    if n < 4:
-        if n < 2:
-            return {"std": 0.0, "variance": 0.0, "bimodality_coefficient": 0.0}
-        mean_p = sum(probs) / n
-        var = sum((p - mean_p) ** 2 for p in probs) / n
-        return {"std": math.sqrt(var), "variance": var, "bimodality_coefficient": 0.0}
-
-    mean_p = sum(probs) / n
-    m2 = sum((p - mean_p) ** 2 for p in probs) / n
-    if m2 < 1e-12:
+    if n < 2:
         return {"std": 0.0, "variance": 0.0, "bimodality_coefficient": 0.0}
-    m3 = sum((p - mean_p) ** 3 for p in probs) / n
-    m4 = sum((p - mean_p) ** 4 for p in probs) / n
+    mean_p = sum(probs) / n
+    diffs = [p - mean_p for p in probs]
+    m2 = sum(d * d for d in diffs) / n
+    if n < 4 or m2 < 1e-12:
+        var = m2 if n >= 2 else 0.0
+        return {
+            "std": math.sqrt(var) if var >= 1e-12 else 0.0,
+            "variance": var if var >= 1e-12 else 0.0,
+            "bimodality_coefficient": 0.0,
+        }
+    m3 = sum(d**3 for d in diffs) / n
+    m4 = sum(d**4 for d in diffs) / n
     skew = m3 / (m2**1.5)
     excess_kurt = (m4 / (m2**2)) - 3.0
     denom = excess_kurt + 3.0 * ((n - 1) ** 2) / ((n - 2) * (n - 3))
@@ -179,26 +188,33 @@ def compute_stance_stats(probs: list[float]) -> dict[str, float]:
     return {
         "std": math.sqrt(m2),
         "variance": m2,
-        "bimodality_coefficient": max(0.0, min(1.0, bc)),
+        "bimodality_coefficient": clamp(bc, 0.0, 1.0),
     }
 
 
-def _pair_correlation(a: RoundRecord, b: RoundRecord) -> float:
-    if a.model_assigned == "none" and b.model_assigned == "none":
+def _pair_correlation_tuple(
+    a_model: str,
+    a_family: str,
+    a_overlap: float,
+    b_model: str,
+    b_family: str,
+    b_overlap: float,
+) -> float:
+    if a_model == "none" and b_model == "none":
         base = 0.02
-    elif a.model_assigned == b.model_assigned and a.model_assigned != "none":
+    elif a_model == b_model and a_model != "none":
         base = 0.84
-    elif a.model_family == b.model_family:
+    elif a_family == b_family:
         base = 0.70
-    elif a.model_family.startswith("us_") and b.model_family.startswith("us_"):
+    elif a_family.startswith("us_") and b_family.startswith("us_"):
         base = 0.48
-    elif a.model_family.startswith("cn_") and b.model_family.startswith("cn_"):
+    elif a_family.startswith("cn_") and b_family.startswith("cn_"):
         base = 0.44
-    elif a.model_assigned != "none" and b.model_assigned != "none":
+    elif a_model != "none" and b_model != "none":
         base = 0.18
     else:
         base = 0.05
-    peer_bump = 0.12 * (0.5 * (a.goldman_source_overlap + b.goldman_source_overlap))
+    peer_bump = 0.06 * (a_overlap + b_overlap)
     return min(0.96, base + peer_bump)
 
 
@@ -207,44 +223,55 @@ def compute_goldman_effective_sources(records: list[RoundRecord]) -> float:
     n = len(records)
     if n <= 1:
         return float(n)
-    corr_sum = float(n)  # diagonal terms = 1.0
+    # Extract primitive fields once to avoid repeated Pydantic attribute lookups inside O(N^2).
+    sig = [(r.model_assigned, r.model_family, r.goldman_source_overlap) for r in records]
+    corr_sum = float(n)
     for i in range(n):
+        am, af, ao = sig[i]
         for j in range(i + 1, n):
-            corr_sum += 2.0 * _pair_correlation(records[i], records[j])
+            bm, bf, bo = sig[j]
+            corr_sum += 2.0 * _pair_correlation_tuple(am, af, ao, bm, bf, bo)
     n_eff = (n * n) / max(corr_sum, 1.0)
-    return max(1.0, min(float(n), n_eff))
-
-
-def _tokenize(text: str) -> list[str]:
-    return _TOKEN_RE.findall(text.lower())
+    return clamp(n_eff, 1.0, float(n))
 
 
 def compute_lexical_diversity(texts: list[str]) -> dict[str, float]:
     """Compute distinct-2 bigram ratio and mean pairwise Jaccard token distance."""
     if not texts:
         return {"distinct_2": 0.0, "pairwise_jaccard_distance": 0.0}
-    all_bigrams: list[tuple[str, str]] = []
-    token_sets: list[set[str]] = []
-    for text in texts:
-        toks = _tokenize(text)
-        token_sets.append(set(toks))
-        if len(toks) >= 2:
-            all_bigrams.extend(zip(toks[:-1], toks[1:], strict=True))
-    distinct_2 = len(set(all_bigrams)) / len(all_bigrams) if all_bigrams else 0.0
 
-    if len(token_sets) < 2:
+    counts_by_text = Counter(texts)
+    unique_bigrams: set[tuple[str, str]] = set()
+    total_bigrams = 0
+    unique_sets: list[tuple[frozenset[str], int]] = []
+
+    for text, count in counts_by_text.items():
+        toks = _TOKEN_RE.findall(text.lower())
+        unique_sets.append((frozenset(toks), count))
+        if len(toks) >= 2:
+            total_bigrams += (len(toks) - 1) * count
+            unique_bigrams.update(itertools.pairwise(toks))
+
+    distinct_2 = len(unique_bigrams) / total_bigrams if total_bigrams else 0.0
+    n_texts = len(texts)
+    if n_texts < 2:
         return {"distinct_2": distinct_2, "pairwise_jaccard_distance": 0.0}
+
+    # Identical texts have Jaccard distance 0.0; only evaluate pairs of distinct unique texts.
     dist_sum = 0.0
-    pairs = 0
-    for i in range(len(token_sets)):
-        for j in range(i + 1, len(token_sets)):
-            u = len(token_sets[i] | token_sets[j])
-            inter = len(token_sets[i] & token_sets[j])
-            dist_sum += 1.0 - (inter / u if u > 0 else 0.0)
-            pairs += 1
+    u_len = len(unique_sets)
+    for i in range(u_len):
+        si, ci = unique_sets[i]
+        for j in range(i + 1, u_len):
+            sj, cj = unique_sets[j]
+            union_sz = len(si | sj)
+            pair_dist = 1.0 - (len(si & sj) / union_sz if union_sz > 0 else 0.0)
+            dist_sum += pair_dist * ci * cj
+
+    total_pairs = (n_texts * (n_texts - 1)) // 2
     return {
         "distinct_2": distinct_2,
-        "pairwise_jaccard_distance": dist_sum / pairs if pairs else 0.0,
+        "pairwise_jaccard_distance": dist_sum / total_pairs if total_pairs else 0.0,
     }
 
 
@@ -305,8 +332,7 @@ def paired_wilcoxon_p(xs: list[float], ys: list[float]) -> float:
     var_w = (n * (n + 1) * (2 * n + 1) - 0.5 * tie_adj) / 24.0
     if var_w <= 1e-12:
         return 1.0
-    z = (abs(w_stat - mean_w) - 0.5) / math.sqrt(var_w)
-    z = max(0.0, z)
+    z = max(0.0, (abs(w_stat - mean_w) - 0.5) / math.sqrt(var_w))
     return min(1.0, math.erfc(z / math.sqrt(2.0)))
 
 
@@ -320,12 +346,11 @@ def bootstrap_ci(
         return (diffs[0], diffs[0])
     rng = random.Random(seed)
     n = len(diffs)
-    means: list[float] = []
-    for _ in range(n_boot):
-        sample = [diffs[rng.randrange(n)] for _ in range(n)]
-        means.append(sum(sample) / n)
+    randrange = rng.randrange
+    inv_n = 1.0 / n
+    means = [sum(diffs[randrange(n)] for _ in range(n)) * inv_n for _ in range(n_boot)]
     means.sort()
-    return (_quantile(means, alpha / 2.0), _quantile(means, 1.0 - alpha / 2.0))
+    return (quantile_sorted(means, alpha / 2.0), quantile_sorted(means, 1.0 - alpha / 2.0))
 
 
 def holm_bonferroni(p_values: list[float]) -> list[float]:

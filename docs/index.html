@@ -863,13 +863,23 @@
             stroke: "#171614",
             "stroke-width": isSel ? 2.4 : 1,
             style: "cursor:pointer",
+            tabindex: 0,
+            role: "button",
+            "aria-label": `Inspect ${s.label}`,
             "data-condition-bubble": s.condition_id,
           });
-          circle.addEventListener("click", () => {
+          const activateBubble = () => {
             state.selectedCondition = s.condition_id;
             renderQuadrant();
             renderTable();
             openDrawer(s.condition_id);
+          };
+          circle.addEventListener("click", activateBubble);
+          circle.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              activateBubble();
+            }
           });
           svg.appendChild(circle);
           const off = labelOffsets[s.condition_id];
@@ -1082,6 +1092,10 @@
       }
 
       function renderTable() {
+        document.querySelectorAll("#score-table th[data-sort]").forEach((th) => {
+          const isSorted = th.dataset.sort === state.sortKey;
+          th.setAttribute("aria-sort", isSorted ? (state.sortAsc ? "ascending" : "descending") : "none");
+        });
         const tbody = document.getElementById("score-table-body");
         tbody.replaceChildren();
         const rows = [...filteredSummaries()].sort((a, b) => {

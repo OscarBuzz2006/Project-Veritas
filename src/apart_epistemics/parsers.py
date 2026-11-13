@@ -8,6 +8,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from apart_epistemics.metrics import clamp
+
 _MULTIPLIERS = {
     "k": 1e3,
     "thousand": 1e3,
@@ -34,6 +36,9 @@ _FINAL_PREFIX_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+_FENCE_RE = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.DOTALL | re.IGNORECASE)
+_BRACE_RE = re.compile(r"\{.*\}", re.DOTALL)
+
 
 @dataclass(frozen=True)
 class NumericParseResult:
@@ -53,10 +58,10 @@ def _parse_single_number_segment(segment: str) -> tuple[float | None, str]:
     raw_num = match.group("num").replace(",", "")
     try:
         base = float(raw_num)
-    except ValueError:
+        if match.group("exp") is not None:
+            base *= 10.0 ** int(match.group("exp"))
+    except (ValueError, OverflowError):
         return None, ""
-    if match.group("exp") is not None:
-        base *= 10.0 ** int(match.group("exp"))
     unit = (match.group("unit") or "").lower()
     if unit in _MULTIPLIERS:
         base *= _MULTIPLIERS[unit]
@@ -78,7 +83,7 @@ def parse_numeric_estimate(text: str, require_positive: bool = True) -> NumericP
         if matches:
             val, span = _parse_single_number_segment(matches[-1].group(0))
 
-    if val is None or math.isnan(val) or math.isinf(val):
+    if val is None or not math.isfinite(val):
         return NumericParseResult(value=None, log10_value=None, miss=True)
     if require_positive and val <= 0.0:
         return NumericParseResult(value=None, log10_value=None, miss=True, matched_span=span)
@@ -87,17 +92,13 @@ def parse_numeric_estimate(text: str, require_positive: bool = True) -> NumericP
     return NumericParseResult(value=val, log10_value=log_val, miss=False, matched_span=span)
 
 
-def _clamp(value: float, low: float, high: float) -> float:
-    return max(low, min(high, value))
-
-
 def parse_structured_belief(text: str) -> dict[str, Any]:
     """Parse JSON or fenced JSON belief outputs, falling back cleanly on free-form prose."""
     cleaned = text.strip()
-    fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, re.DOTALL | re.IGNORECASE)
+    fence_match = _FENCE_RE.search(cleaned)
     candidate = fence_match.group(1) if fence_match else cleaned
     if not candidate.startswith("{"):
-        brace_match = re.search(r"\{.*\}", candidate, re.DOTALL)
+        brace_match = _BRACE_RE.search(candidate)
         candidate = brace_match.group(0) if brace_match else ""
 
     if candidate:
@@ -110,8 +111,8 @@ def parse_structured_belief(text: str) -> dict[str, Any]:
                 if not isinstance(topics, list):
                     topics = []
                 return {
-                    "stance_prob": _clamp(stance, 0.0, 1.0),
-                    "confidence": _clamp(conf, 0.5, 1.0),
+                    "stance_prob": clamp(stance, 0.0, 1.0),
+                    "confidence": clamp(conf, 0.5, 1.0),
                     "rationale": str(payload.get("rationale", cleaned)).strip(),
                     "topics": [str(t).strip() for t in topics if str(t).strip()],
                 }

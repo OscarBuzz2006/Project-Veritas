@@ -31,15 +31,25 @@ apart-epistemics = "apart_epistemics.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-apart_epistemics = ["templates/*.html"]
+apart_epistemics = ["templates/*.html", "py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q --strict-markers"
+markers = [
+  "e2e: Browser end-to-end tests requiring Playwright Chromium.",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["apart_epistemics"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "C90", "PT", "RUF"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 16
