@@ -41,6 +41,88 @@ def test_c1_c2_c3_share_one_system_prompt_and_c3_only_appends_profile(
     assert "advisor" not in sys_c3.lower()
 
 
+def test_numeric_prompt_asks_for_best_estimate_in_task_unit(sample_agent: AgentProfile) -> None:
+    _, usr = build_numeric_prompts(
+        condition_id="C1",
+        agent=sample_agent,
+        question="Maximum depth of Lake Baikal?",
+        current_x=1500.0,
+        pop_stats=None,
+        history=[],
+        unit="meters",
+    )
+    assert "My current estimate is 1500 meters." in usr
+    assert "What is your best estimate of the true value?" in usr
+    assert "Final estimate: <plain number in meters>" in usr
+    assert "nothing after the number" in usr
+    assert "updated" not in usr
+
+    _, usr_no_unit = build_numeric_prompts(
+        condition_id="C1",
+        agent=sample_agent,
+        question="q",
+        current_x=2.0,
+        pop_stats=None,
+        history=[],
+    )
+    assert "Final estimate: <plain number>" in usr_no_unit
+
+
+def test_runner_passes_task_unit_into_prompt(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    seen: list[str] = []
+
+    class Spy(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            seen.append(kwargs["user_prompt"])
+            return super().generate_numeric_reply(**kwargs)
+
+    run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "runs.jsonl",
+        backend=Spy(seed=1),
+    )
+    assert seen
+    assert all(f"Final estimate: <plain number in {task.unit}>" in p for p in seen)
+
+
+def test_runner_treats_values_over_three_log_units_away_as_misses(tmp_path: Path) -> None:
+    task = build_numeric_core_tasks()[0]
+    prompts: list[str] = []
+
+    class UnitSlipBackend(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            prompts.append(kwargs["user_prompt"])
+            # A metres-read-as-millions style slip: roughly 1e9 times the true size.
+            return {
+                "raw_reply": f"Final estimate: {task.numeric_truth * 1e9:g}",
+                "model_slug": "m",
+                "provider": "p",
+                "reasoning_tokens": 0,
+            }
+
+    records = run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=2,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "runs.jsonl",
+        backend=UnitSlipBackend(seed=1),
+    )
+    assert len(records) == 2
+    assert all(r.miss for r in records)
+    assert all(r.parsed_value is None and r.assistant_log10 is None for r in records)
+    # Each implausible reply is retried once before being recorded as a miss.
+    assert len(prompts) == 4
+    # A miss leaves the agent's belief unchanged.
+    assert all(r.agent_log10_after == r.agent_log10_before for r in records)
+
+
 def test_numeric_prompt_builder_and_crash_resumable_runner(
     tmp_path: Path, sample_agent: AgentProfile
 ) -> None:

@@ -16,7 +16,25 @@ from apart_epistemics.datasets import generate_agent_population
 from apart_epistemics.engine.contrasts import compute_paired_holm_contrasts
 from apart_epistemics.metrics import compute_page_decomposition, pearson_corr, quantile_sorted
 from apart_epistemics.models import AgentProfile, NumericEstimateRecord, TaskItem
-from apart_epistemics.parsers import parse_numeric_estimate
+from apart_epistemics.parsers import NumericParseResult, parse_numeric_estimate
+
+# A parsed value further than this (in log10 units) from the agent's current estimate is
+# treated as a parse miss, e.g. a unit slip such as metres read as millions of metres.
+MAX_LOG10_JUMP = 3.0
+
+
+def _parse_reply(raw_reply: str, cur_x: float) -> NumericParseResult:
+    """Parse a reply, turning implausibly distant values into misses."""
+    parsed = parse_numeric_estimate(raw_reply, require_positive=True)
+    if (
+        not parsed.miss
+        and parsed.log10_value is not None
+        and abs(parsed.log10_value - math.log10(cur_x)) > MAX_LOG10_JUMP
+    ):
+        return NumericParseResult(
+            value=None, log10_value=None, miss=True, matched_span=parsed.matched_span
+        )
+    return parsed
 
 
 def build_numeric_prompts(
@@ -26,6 +44,7 @@ def build_numeric_prompts(
     current_x: float,
     pop_stats: tuple[float, float, float] | None,
     history: list[tuple[str, str]],
+    unit: str = "",
 ) -> tuple[str, str]:
     """Construct C1 (baseline), C2 (social summary), or C3 (personalized+history) prompts."""
     cond = condition_id.upper()
@@ -56,7 +75,13 @@ def build_numeric_prompts(
         ]
         parts.append("Recent conversation history:\n" + "\n".join(hist_lines))
 
-    parts.append(f"My current estimate is {est_str}. What should my updated numerical estimate be?")
+    unit_str = f" {unit}" if unit else ""
+    parts.append(
+        f"My current estimate is {est_str}{unit_str}. "
+        "What is your best estimate of the true value? "
+        f"End with 'Final estimate: <plain number{f' in {unit}' if unit else ''}>' "
+        "and nothing after the number."
+    )
     return (system_prompt, "\n\n".join(parts))
 
 
@@ -122,7 +147,7 @@ def _query_with_retry(
     )
     spent_usd += _estimate_call_cost_usd(resp)
     raw_reply = str(resp.get("raw_reply", ""))
-    parsed = parse_numeric_estimate(raw_reply, require_positive=True)
+    parsed = _parse_reply(raw_reply, cur_x)
 
     if parsed.miss:
         if spent_usd >= budget_usd:
@@ -142,7 +167,7 @@ def _query_with_retry(
         )
         spent_usd += _estimate_call_cost_usd(resp)
         raw_reply = str(resp.get("raw_reply", ""))
-        parsed = parse_numeric_estimate(raw_reply, require_positive=True)
+        parsed = _parse_reply(raw_reply, cur_x)
 
     return resp, parsed, spent_usd
 
@@ -222,6 +247,7 @@ def run_numeric_core(
                                 current_x=cur_x,
                                 pop_stats=pop_stats if cond_id in ("C2", "C3") else None,
                                 history=histories[a_idx],
+                                unit=task.unit,
                             )
                             resp, parsed, spent_usd = _query_with_retry(
                                 backend,
