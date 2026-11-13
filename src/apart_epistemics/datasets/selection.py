@@ -24,6 +24,18 @@ SELECTION_RULE = (
 )
 
 
+STRATIFIED_RULE = (
+    "Each candidate was asked {repeats} times with no user estimate, crowd statistic or history. "
+    "Error is the mean absolute log10 distance of the parsed answers from the documented truth; "
+    "spread is the population standard deviation of the parsed log10 answers. Candidates were "
+    "required to have error >= {min_error} log10 units (about {pct:.0f}% off) and at least two "
+    "parseable answers. Candidates with error >= {review_error} were held back until a person "
+    "confirmed the recorded truth (a very large error often means the recorded answer is wrong). "
+    "From the rest, the {half} with the highest spread and the {half} with the lowest spread "
+    "were kept; ties broke by error then id."
+)
+
+
 def validate_candidates(tasks: list[TaskItem]) -> None:
     """Refuse candidates that cannot be audited or cited."""
     if len({t.id for t in tasks}) != len(tasks):
@@ -51,20 +63,156 @@ def cold_prompts(task: TaskItem) -> tuple[str, str]:
     return system, user
 
 
+def _summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    if not rows:
+        return {"n": 0}
+    errs = [r["mean_abs_log10_error"] for r in rows]
+    spreads = [r["log10_spread"] for r in rows]
+    return {
+        "n": len(rows),
+        "mean_error": round(sum(errs) / len(errs), 6),
+        "mean_spread": round(sum(spreads) / len(spreads), 6),
+        "min_spread": round(min(spreads), 6),
+        "max_spread": round(max(spreads), 6),
+    }
+
+
+def _stratify(
+    rows: list[dict[str, Any]],
+    keep: int,
+    min_error: float,
+    review_error: float,
+    reviewed_ids: frozenset[str],
+) -> dict[str, Any]:
+    if keep % 2:
+        raise ValueError("keep must be even for a high/low spread split.")
+    unknown = reviewed_ids - {r["id"] for r in rows}
+    if unknown:
+        raise ValueError(f"reviewed ids not among the candidates: {sorted(unknown)}")
+
+    status: dict[str, str] = {}
+    for r in rows:
+        err, spread = r["mean_abs_log10_error"], r["log10_spread"]
+        if err is None:
+            status[r["id"]] = "no_answer"
+        elif spread is None:
+            status[r["id"]] = "too_few_answers"
+        elif err < min_error:
+            status[r["id"]] = "below_error_floor"
+        elif err >= review_error and r["id"] not in reviewed_ids:
+            status[r["id"]] = "held_for_review"
+        else:
+            status[r["id"]] = "eligible"
+
+    eligible = sorted(
+        (r for r in rows if status[r["id"]] == "eligible"),
+        key=lambda r: (-r["log10_spread"], -r["mean_abs_log10_error"], r["id"]),
+    )
+    held = sorted(i for i, st in status.items() if st == "held_for_review")
+    if len(eligible) < keep:
+        counts: dict[str, int] = {}
+        for st in status.values():
+            counts[st] = counts.get(st, 0) + 1
+        hint = (
+            f" {len(held)} held for hand review ({', '.join(held)}): check the recorded truth "
+            "and pass the confirmed ids as reviewed."
+            if held
+            else ""
+        )
+        raise ValueError(
+            f"Only {len(eligible)} eligible candidates for keep={keep}; outcomes {counts}.{hint}"
+        )
+
+    half = keep // 2
+    high = eligible[:half]
+    low = sorted(eligible[half:], key=lambda r: (r["log10_spread"], r["id"]))[:half]
+    return {
+        "status_by_id": status,
+        "held_for_review": held,
+        "high_spread_ids": [r["id"] for r in high],
+        "low_spread_ids": [r["id"] for r in low],
+        "boundary_tied": high[-1]["log10_spread"] <= low[-1]["log10_spread"],
+        "summary": {
+            "overall": _summarize(high + low),
+            "high_spread": _summarize(high),
+            "low_spread": _summarize(low),
+        },
+    }
+
+
 def run_cold_selection(
     candidates: list[TaskItem],
     backend: Any,
-    repeats: int = 3,
+    repeats: int = 8,
     keep: int = 10,
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
+    rule: str = "stratified",
+    min_error: float = 0.1,
+    review_error: float = 0.5,
+    reviewed_ids: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
-    """Query every candidate cold `repeats` times and pick the `keep` with the largest error."""
+    """Query every candidate cold `repeats` times, then select `keep` by the chosen rule.
+
+    `rule="stratified"` (default): require error >= `min_error`, hold back error >=
+    `review_error` until listed in `reviewed_ids`, then keep the `keep // 2` highest-spread
+    and `keep // 2` lowest-spread of what remains. `rule="error"`: largest error only.
+    """
     if repeats < 1 or keep < 1:
         raise ValueError("repeats and keep must be at least 1.")
+    if rule not in {"stratified", "error"}:
+        raise ValueError("rule must be 'stratified' or 'error'.")
     validate_candidates(candidates)
     if keep > len(candidates):
         raise ValueError(f"Cannot keep {keep} of only {len(candidates)} candidates.")
 
+    rows = _ask_cold(candidates, backend, repeats, max_tokens)
+    result: dict[str, Any] = {
+        "rule_name": rule,
+        "repeats": repeats,
+        "keep": keep,
+        "n_candidates": len(candidates),
+        "n_excluded_no_answer": sum(1 for r in rows if r["mean_abs_log10_error"] is None),
+        "candidates": rows,
+    }
+    if rule == "error":
+        ranked = sorted(
+            (r for r in rows if r["mean_abs_log10_error"] is not None),
+            key=lambda r: (-r["mean_abs_log10_error"], r["id"]),
+        )
+        result.update(
+            rule=SELECTION_RULE.format(repeats=repeats, keep=keep),
+            selected_ids=[r["id"] for r in ranked[:keep]],
+            strata={},
+        )
+        return result
+
+    strat = _stratify(rows, keep, min_error, review_error, reviewed_ids)
+    result.update(
+        rule=STRATIFIED_RULE.format(
+            repeats=repeats,
+            min_error=min_error,
+            pct=(10.0**min_error - 1.0) * 100.0,
+            review_error=review_error,
+            half=keep // 2,
+        ),
+        min_error=min_error,
+        review_error=review_error,
+        reviewed_ids=sorted(reviewed_ids),
+        selected_ids=strat["high_spread_ids"] + strat["low_spread_ids"],
+        strata={
+            **dict.fromkeys(strat["high_spread_ids"], "high_spread"),
+            **dict.fromkeys(strat["low_spread_ids"], "low_spread"),
+        },
+        **{k: v for k, v in strat.items() if k not in {"high_spread_ids", "low_spread_ids"}},
+        high_spread_ids=strat["high_spread_ids"],
+        low_spread_ids=strat["low_spread_ids"],
+    )
+    return result
+
+
+def _ask_cold(
+    candidates: list[TaskItem], backend: Any, repeats: int, max_tokens: int
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for task in candidates:
         system, user = cold_prompts(task)
@@ -109,18 +257,4 @@ def run_cold_selection(
                 "replies": replies,
             }
         )
-
-    ranked = sorted(
-        (r for r in rows if r["mean_abs_log10_error"] is not None),
-        key=lambda r: (-r["mean_abs_log10_error"], r["id"]),
-    )
-    selected_ids = [r["id"] for r in ranked[:keep]]
-    return {
-        "rule": SELECTION_RULE.format(repeats=repeats, keep=keep),
-        "repeats": repeats,
-        "keep": keep,
-        "n_candidates": len(candidates),
-        "n_excluded_no_answer": sum(1 for r in rows if r["mean_abs_log10_error"] is None),
-        "selected_ids": selected_ids,
-        "candidates": rows,
-    }
+    return rows

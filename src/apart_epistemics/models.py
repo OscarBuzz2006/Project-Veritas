@@ -54,6 +54,8 @@ class TaskItem(BaseModel):
     numeric_truth: float | None = Field(default=None, gt=0.0)
     unit: str = ""
     source_note: str = ""
+    # Set by question selection: "high_spread" or "low_spread". Empty when not stratified.
+    selection_stratum: str = ""
     popular_misconception_bias: float = Field(default=0.0, ge=-1.0, le=1.0)
     global_north_prior: float = Field(default=0.5, ge=0.0, le=1.0)
     canonical_topics: list[str] = Field(default_factory=list)
@@ -101,6 +103,9 @@ class ExperimentSuiteConfig(BaseModel):
     tasks_per_track: int = Field(default=6, ge=1, le=50)
     # Numeric-track questions. None falls back to tasks_per_track (the old behaviour).
     numeric_tasks: int | None = Field(default=None, ge=1, le=50)
+    # Path to a JSON list of numeric questions (e.g. selected_tasks.json from select-questions).
+    # When set it replaces the built-in bank; numeric_tasks then caps how many are used.
+    numeric_tasks_file: str | None = None
     # Starting estimates are log_truth + weight * popular_misconception_bias + N(0, sd).
     # Set the weight to 0 for a crowd that starts centred on the truth.
     numeric_start_bias_weight: float = Field(default=0.22, ge=0.0, le=1.0)

@@ -22,6 +22,7 @@ from apart_epistemics.datasets import (
     audit_question_selection_bias,
     build_numeric_core_tasks,
     run_cold_selection,
+    validate_candidates,
 )
 from apart_epistemics.engine import (
     TokenPricing,
@@ -195,6 +196,7 @@ def _serialize_numeric_analysis(analysis: dict[str, Any]) -> dict[str, Any]:
         "max_identity_residual": analysis["max_identity_residual"],
         "h4_assistant_agent_corr": analysis["h4_assistant_agent_corr"],
         "h4_slopes": analysis["h4_slopes"],
+        "by_stratum": analysis.get("by_stratum", {}),
         "by_condition_final": analysis["by_condition_final"],
         "condition_round_metrics": analysis["condition_round_metrics"],
         "contrasts": [
@@ -223,8 +225,12 @@ def _execute_numeric_track(
     workers: int = 1,
 ) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    bank = build_numeric_core_tasks()
-    num_tasks = bank[: cfg.numeric_tasks or cfg.tasks_per_track]
+    if cfg.numeric_tasks_file:
+        bank = _load_task_file(Path(cfg.numeric_tasks_file))
+        num_tasks = bank[: cfg.numeric_tasks] if cfg.numeric_tasks else bank
+    else:
+        bank = build_numeric_core_tasks()
+        num_tasks = bank[: cfg.numeric_tasks or cfg.tasks_per_track]
     print(
         f"Numeric track settings: {len(num_tasks)} of {len(bank)} questions, "
         f"{n_agents} agents, {cfg.num_rounds} rounds, {cfg.numeric_replicates} replicates, "
@@ -344,6 +350,14 @@ def _backend_from_args(args: argparse.Namespace, seed: int) -> Any:
     return create_backend(args.backend, **backend_kwargs)
 
 
+def _load_task_file(path: Path) -> list[TaskItem]:
+    """Load saved numeric questions (e.g. selected_tasks.json); every field is validated."""
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    tasks = [TaskItem.model_validate(row) for row in raw]
+    validate_candidates(tasks)
+    return tasks
+
+
 def _load_candidates(path: Path) -> list[TaskItem]:
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if isinstance(raw, dict):
@@ -364,12 +378,17 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
             raise BackendConfigError("Replay cannot answer new questions.")
         candidates = _load_candidates(Path(args.candidates))
         configure_budget(backend, out_dir, args.budget, args.request_allowance)
+        reviewed = frozenset(x.strip() for x in (args.reviewed or "").split(",") if x.strip())
         result = run_cold_selection(
             candidates,
             backend,
             repeats=args.repeats,
             keep=args.keep,
             max_tokens=args.max_tokens,
+            rule=args.rule,
+            min_error=args.min_error,
+            review_error=args.review_error,
+            reviewed_ids=reviewed,
         )
     except (BackendConfigError, BudgetExceededError, RuntimeError, ValueError, OSError) as exc:
         print(f"Selection failed: {exc}", file=sys.stderr)
@@ -377,11 +396,25 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
     result["backend"] = backend_identity(backend)
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "selection.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
-    chosen = [c for c in candidates if c.id in set(result["selected_ids"])]
+    strata = result["strata"]
+    chosen = [
+        c.model_copy(update={"selection_stratum": strata.get(c.id, "")})
+        for c in candidates
+        if c.id in set(result["selected_ids"])
+    ]
     (out_dir / "selected_tasks.json").write_text(
         json.dumps([c.model_dump(mode="json") for c in chosen], indent=2), encoding="utf-8"
     )
     print(f"Kept {len(chosen)} of {len(candidates)} -> {out_dir}/selected_tasks.json")
+    for name, stats in result.get("summary", {}).items():
+        print(f"  {name}: {stats}")
+    if result.get("held_for_review"):
+        print(
+            "  Held for hand review (very large error; check the recorded truth, then pass "
+            f"--reviewed): {', '.join(result['held_for_review'])}"
+        )
+    if result.get("boundary_tied"):
+        print("  Warning: spread is tied at the high/low boundary; the split is arbitrary there.")
     return 0
 
 
@@ -653,8 +686,37 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_sel.add_argument("--model", default=None)
     p_sel.add_argument("--pin-provider", default=None)
-    p_sel.add_argument("--repeats", type=int, default=3)
-    p_sel.add_argument("--keep", type=int, default=10)
+    p_sel.add_argument(
+        "--rule",
+        choices=["stratified", "error"],
+        default="stratified",
+        help="stratified: error floor, then half highest and half lowest spread. "
+        "error: largest error only.",
+    )
+    p_sel.add_argument(
+        "--repeats",
+        type=int,
+        default=8,
+        help="Cold asks per candidate. Spread needs several; 3 is usually too few.",
+    )
+    p_sel.add_argument("--keep", type=int, default=10, help="Total to keep (even).")
+    p_sel.add_argument(
+        "--min-error",
+        type=float,
+        default=0.1,
+        help="Minimum mean abs log10 error (0.1 is about 26%% off).",
+    )
+    p_sel.add_argument(
+        "--review-error",
+        type=float,
+        default=0.5,
+        help="Candidates at or above this error are held for hand review.",
+    )
+    p_sel.add_argument(
+        "--reviewed",
+        default="",
+        help="Comma-separated ids whose recorded truth you checked by hand.",
+    )
     p_sel.add_argument("--max-tokens", type=int, default=DEFAULT_NUMERIC_MAX_TOKENS)
     p_sel.add_argument("--budget", type=float, default=5.0)
     p_sel.add_argument("--request-allowance", type=float, default=1.0)

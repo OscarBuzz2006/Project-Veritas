@@ -484,6 +484,54 @@ def run_numeric_core(
     return ordered_records
 
 
+def _stratum_report(
+    records: list[NumericEstimateRecord],
+    tasks: list[TaskItem],
+    cell_metrics: dict[tuple[str, str, int, int], dict[str, float]],
+    max_round: int,
+    complete: bool,
+) -> dict[str, Any]:
+    """Slopes and final-round metrics for each question stratum (e.g. high/low spread)."""
+    by_stratum: dict[str, list[TaskItem]] = defaultdict(list)
+    for t in tasks:
+        if t.selection_stratum:
+            by_stratum[t.selection_stratum].append(t)
+    report: dict[str, Any] = {}
+    for name, stratum_tasks in sorted(by_stratum.items()):
+        qids = {t.id for t in stratum_tasks}
+        final: dict[str, dict[str, Any]] = {}
+        if complete:
+            for cond in sorted({c for c, _, _, _ in cell_metrics}):
+                cells = [
+                    m
+                    for (c, q, _rep, r), m in cell_metrics.items()
+                    if c == cond and q in qids and r == max_round
+                ]
+                if cells:
+                    n = len(cells)
+                    final[cond] = {
+                        "n_cells": n,
+                        **{
+                            key: round(sum(m[key] for m in cells) / n, 6)
+                            for key in (
+                                "crowd_error",
+                                "avg_individual_error",
+                                "diversity",
+                                "iqr",
+                                "miss_rate",
+                            )
+                        },
+                    }
+        report[name] = {
+            "questions": sorted(qids),
+            "by_condition_final": final,
+            "h4_slopes": compute_h4_slopes(
+                [r for r in records if r.question_id in qids], stratum_tasks
+            ),
+        }
+    return report
+
+
 def analyze_numeric_core(
     records: list[NumericEstimateRecord],
     tasks: list[TaskItem],
@@ -598,6 +646,7 @@ def analyze_numeric_core(
             "update rule and pooled across questions. Use h4_slopes instead."
         ),
         "h4_slopes": compute_h4_slopes(records, tasks),
+        "by_stratum": _stratum_report(records, tasks, cell_metrics, max_round, complete),
         "max_identity_residual": max_resid,
         "h4_assistant_agent_corr": round(h4_corr, 4),
         "by_condition_final": by_condition_final,

@@ -57,7 +57,7 @@ def test_selection_keeps_the_questions_the_model_gets_most_wrong() -> None:
         _task("close", 9.0),
     ]
     backend = Scripted({"known": 1.0, "off10x": 10.0, "off100x": 0.01, "close": 1.2})
-    out = run_cold_selection(tasks, backend, repeats=3, keep=2)
+    out = run_cold_selection(tasks, backend, repeats=3, keep=2, rule="error")
     assert out["selected_ids"] == ["off100x", "off10x"]  # 2.0 and 1.0 log10 units off
     by_id = {c["id"]: c for c in out["candidates"]}
     assert by_id["known"]["mean_abs_log10_error"] == pytest.approx(0.0)
@@ -70,7 +70,7 @@ def test_selection_keeps_the_questions_the_model_gets_most_wrong() -> None:
 
 def test_selection_asks_cold_with_no_estimate_crowd_or_history() -> None:
     backend = Scripted({"a": 1.0})
-    run_cold_selection([_task("a", 10.0, unit="meters")], backend, repeats=2, keep=1)
+    run_cold_selection([_task("a", 10.0, unit="meters")], backend, repeats=2, keep=1, rule="error")
     assert len(backend.prompts) == 2
     for prompt in backend.prompts:
         assert "current estimate" not in prompt
@@ -89,16 +89,16 @@ def test_selection_spread_reflects_disagreement_between_repeats() -> None:
             value = task.numeric_truth * (10.0 if Wobbly.n % 2 else 1.0)
             return {"raw_reply": f"Final estimate: {value:g}", "model_slug": "m", "provider": "p"}
 
-    out = run_cold_selection([_task("a", 100.0)], Wobbly({}), repeats=4, keep=1)
+    out = run_cold_selection([_task("a", 100.0)], Wobbly({}), repeats=4, keep=1, rule="error")
     assert out["candidates"][0]["log10_spread"] == pytest.approx(0.5)
 
 
 def test_selection_is_deterministic_and_breaks_ties_by_id() -> None:
     tasks = [_task("b", 100.0), _task("a", 100.0), _task("c", 100.0)]
     backend = Scripted({"a": 10.0, "b": 10.0, "c": 10.0})
-    first = run_cold_selection(tasks, backend, keep=2)
+    first = run_cold_selection(tasks, backend, keep=2, rule="error")
     assert first["selected_ids"] == ["a", "b"]
-    assert run_cold_selection(tasks, backend, keep=2) == first
+    assert run_cold_selection(tasks, backend, keep=2, rule="error") == first
 
 
 def test_unparseable_candidates_are_excluded_not_selected() -> None:
@@ -109,7 +109,11 @@ def test_unparseable_candidates_are_excluded_not_selected() -> None:
             return super().generate_numeric_reply(**kwargs)
 
     out = run_cold_selection(
-        [_task("mute", 5.0), _task("ok", 5.0)], Silent({"ok": 100.0}), repeats=2, keep=1
+        [_task("mute", 5.0), _task("ok", 5.0)],
+        Silent({"ok": 100.0}),
+        repeats=2,
+        keep=1,
+        rule="error",
     )
     assert out["selected_ids"] == ["ok"]
     assert out["n_excluded_no_answer"] == 1
@@ -169,7 +173,8 @@ def test_select_questions_cli_writes_the_rule_and_the_chosen_tasks(tmp_path: Pat
     assert len(chosen) == 2
     assert {c["id"] for c in chosen} == set(result["selected_ids"])
     assert result["backend"]["class"] == "SyntheticEpistemicBackend"
-    assert "largest error" in result["rule"]
+    assert "highest spread" in result["rule"]
+    assert {c["selection_stratum"] for c in chosen} == {"high_spread", "low_spread"}
 
 
 def test_select_questions_cli_rejects_uncitable_candidates(
@@ -335,5 +340,206 @@ def test_selection_records_the_cost_of_each_cold_reply() -> None:
         def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
             return {**super().generate_numeric_reply(**kwargs), "cost_usd": 0.0003}
 
-    out = run_cold_selection([_task("a", 10.0)], Priced({"a": 2.0}), repeats=2, keep=1)
+    out = run_cold_selection(
+        [_task("a", 10.0)], Priced({"a": 2.0}), repeats=2, keep=1, rule="error"
+    )
     assert [r["cost_usd"] for r in out["candidates"][0]["replies"]] == [0.0003, 0.0003]
+
+
+# ------------------------------------------------- stratified selection rule
+
+
+class Spready(SyntheticEpistemicBackend):
+    """Per question: answers cycle through truth * factor for each factor in the list."""
+
+    def __init__(self, plan: dict[str, list[float]]) -> None:
+        super().__init__(seed=1)
+        self.plan = plan
+        self.seen: dict[str, int] = {}
+
+    def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+        task = kwargs["task"]
+        n = self.seen.get(task.id, 0)
+        self.seen[task.id] = n + 1
+        factors = self.plan[task.id]
+        value = task.numeric_truth * factors[n % len(factors)]
+        return {"raw_reply": f"Final estimate: {value:g}", "model_slug": "m", "provider": "p"}
+
+
+def _plan(n_each: int = 3) -> tuple[list[TaskItem], dict[str, list[float]]]:
+    """Every id is 'hN' (wrong by ~30-60%, varied) or 'lN' (wrong by ~30%, constant)."""
+    tasks, plan = [], {}
+    for i in range(n_each):
+        tasks.append(_task(f"h{i}", 100.0))
+        plan[f"h{i}"] = [1.3, 2.0 + i * 0.5, 0.6]  # spread grows with i
+        tasks.append(_task(f"l{i}", 100.0))
+        plan[f"l{i}"] = [1.4 + i * 0.01]  # constant answers
+    return tasks, plan
+
+
+def test_stratified_keeps_equal_numbers_of_high_and_low_spread_questions() -> None:
+    tasks, plan = _plan()
+    out = run_cold_selection(tasks, Spready(plan), repeats=6, keep=4)
+    assert out["rule_name"] == "stratified"
+    assert sorted(out["high_spread_ids"]) == ["h1", "h2"]
+    assert sorted(out["low_spread_ids"]) == ["l0", "l1"] or sorted(out["low_spread_ids"]) == [
+        "l0",
+        "l2",
+    ]
+    assert len(out["selected_ids"]) == 4
+    assert out["strata"]["h2"] == "high_spread"
+    assert out["strata"][out["low_spread_ids"][0]] == "low_spread"
+    s = out["summary"]
+    assert s["high_spread"]["n"] == s["low_spread"]["n"] == 2
+    assert s["overall"]["n"] == 4
+    assert s["high_spread"]["mean_spread"] > s["low_spread"]["mean_spread"]
+
+
+def test_stratified_requires_the_error_floor_about_25_percent() -> None:
+    tasks = [_task("close", 100.0), _task("far_a", 100.0), _task("far_b", 100.0)]
+    plan = {"close": [1.10, 1.12], "far_a": [1.5, 1.4], "far_b": [1.6, 1.3]}  # 1.1 = 0.041 log
+    out = run_cold_selection(tasks, Spready(plan), repeats=4, keep=2)
+    assert out["status_by_id"]["close"] == "below_error_floor"
+    assert sorted(out["selected_ids"]) == ["far_a", "far_b"]
+    assert "about 26% off" in out["rule"]
+
+
+def test_very_large_errors_are_held_for_hand_review_until_confirmed() -> None:
+    tasks = [_task(f"ok{i}", 100.0) for i in range(3)] + [_task("suspect", 100.0)]
+    plan = {
+        "ok0": [1.4, 1.5],
+        "ok1": [1.5, 1.7],
+        "ok2": [1.3, 1.9],
+        "suspect": [10.0, 40.0],  # 1-1.6 log units off, and the widest spread
+    }
+
+    with pytest.raises(ValueError, match="held for hand review") as exc:
+        run_cold_selection(tasks, Spready(plan), repeats=4, keep=4)
+    assert "suspect" in str(exc.value)
+
+    # With keep=2 the suspect is simply held back, not selected.
+    held = run_cold_selection(tasks, Spready(plan), repeats=4, keep=2)
+    assert held["held_for_review"] == ["suspect"]
+    assert "suspect" not in held["selected_ids"]
+
+    # Once a person confirms the recorded truth, it is eligible.
+    confirmed = run_cold_selection(
+        tasks, Spready(plan), repeats=4, keep=2, reviewed_ids=frozenset({"suspect"})
+    )
+    assert "suspect" in confirmed["selected_ids"]
+    assert confirmed["held_for_review"] == []
+
+
+def test_reviewing_an_unknown_id_is_an_error_not_silently_ignored() -> None:
+    tasks, plan = _plan()
+    with pytest.raises(ValueError, match="not among the candidates"):
+        run_cold_selection(
+            tasks, Spready(plan), repeats=4, keep=2, reviewed_ids=frozenset({"typo"})
+        )
+
+
+def test_stratified_needs_an_even_keep_and_enough_eligible_candidates() -> None:
+    tasks, plan = _plan()
+    with pytest.raises(ValueError, match="even"):
+        run_cold_selection(tasks, Spready(plan), repeats=4, keep=3)
+    near = [_task(f"n{i}", 100.0) for i in range(4)]
+    with pytest.raises(ValueError, match="Only 0 eligible"):
+        run_cold_selection(
+            near, Spready({f"n{i}": [1.01, 1.02] for i in range(4)}), repeats=4, keep=2
+        )
+
+
+def test_single_answer_candidates_cannot_be_stratified() -> None:
+    tasks, plan = _plan()
+    out = run_cold_selection(tasks, Spready(plan), repeats=1, keep=2, rule="error")
+    assert out["rule_name"] == "error"  # the old rule still works with one answer
+    with pytest.raises(ValueError, match="too_few_answers"):
+        run_cold_selection(tasks, Spready(plan), repeats=1, keep=2)
+
+
+def test_a_tied_spread_boundary_is_flagged() -> None:
+    tasks = [_task(f"c{i}", 100.0) for i in range(4)]
+    plan = {f"c{i}": [1.5] for i in range(4)}  # all constant: spread 0 everywhere
+    out = run_cold_selection(tasks, Spready(plan), repeats=3, keep=4)
+    assert out["boundary_tied"] is True
+    tasks2, plan2 = _plan()
+    assert run_cold_selection(tasks2, Spready(plan2), repeats=6, keep=4)["boundary_tied"] is False
+
+
+def test_stratified_selection_is_deterministic() -> None:
+    tasks, plan = _plan()
+    first = run_cold_selection(tasks, Spready(plan), repeats=6, keep=4)
+    assert run_cold_selection(tasks, Spready(plan), repeats=6, keep=4) == first
+
+
+def test_cli_default_repeats_and_thresholds_and_review_flow(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from apart_epistemics.cli import build_parser
+
+    ns = build_parser().parse_args(["select-questions", "--candidates", "x.json"])
+    assert (ns.rule, ns.repeats, ns.keep, ns.min_error, ns.review_error) == (
+        "stratified",
+        8,
+        10,
+        0.1,
+        0.5,
+    )
+
+    rows = [
+        {
+            "id": f"q{i}",
+            "question": f"Q{i}?",
+            "numeric_truth": 10.0 ** (i + 1),
+            "unit": "km",
+            "source_note": SOURCE,
+        }
+        for i in range(6)
+    ]
+    cand = tmp_path / "cand.json"
+    cand.write_text(json.dumps(rows), encoding="utf-8")
+    rc = main(
+        ["select-questions", "--candidates", str(cand), "--keep", "5", "--out", str(tmp_path / "o")]
+    )
+    assert rc == 2  # odd keep is refused with a message, not a traceback
+    assert "even" in capsys.readouterr().err
+
+
+def test_selected_tasks_file_runs_and_the_analysis_reports_each_half(tmp_path: Path) -> None:
+    from apart_epistemics.cli import _default_conditions, _execute_numeric_track
+    from apart_epistemics.engine import analyze_numeric_core
+    from apart_epistemics.models import ExperimentSuiteConfig
+
+    base = build_numeric_core_tasks()[:4]
+    strata = ["high_spread", "high_spread", "low_spread", "low_spread"]
+    tasks = [
+        t.model_copy(update={"selection_stratum": s}) for t, s in zip(base, strata, strict=True)
+    ]
+    tasks_file = tmp_path / "selected_tasks.json"
+    tasks_file.write_text(json.dumps([t.model_dump(mode="json") for t in tasks]), encoding="utf-8")
+
+    cfg = ExperimentSuiteConfig(
+        num_agents=4,
+        num_rounds=2,
+        numeric_replicates=1,
+        numeric_tasks_file=str(tasks_file),
+        conditions=_default_conditions(),
+    )
+    analysis, recs = _execute_numeric_track(
+        cfg, SyntheticEpistemicBackend(seed=2), tmp_path / "run", n_agents=4, budget_usd=50.0
+    )
+    assert {r.question_id for r in recs} == {t.id for t in tasks}  # the file replaced the bank
+    by = analysis["by_stratum"]
+    assert set(by) == {"high_spread", "low_spread"}
+    assert by["high_spread"]["questions"] == sorted(t.id for t in tasks[:2])
+    assert set(by["high_spread"]["by_condition_final"]) == {"C1", "C2", "C3"}
+    assert by["low_spread"]["by_condition_final"]["C1"]["n_cells"] == 2
+    assert "slope_user" in by["high_spread"]["h4_slopes"]["by_condition"]["C1"]
+
+    # analyze rebuilds the same per-half report from the saved manifest alone.
+    reloaded = analyze_numeric_core(recs, tasks)
+    assert reloaded["by_stratum"] == by
+
+    # Without strata nothing extra is reported.
+    plain = [t.model_copy(update={"selection_stratum": ""}) for t in tasks]
+    assert analyze_numeric_core(recs, plain)["by_stratum"] == {}
