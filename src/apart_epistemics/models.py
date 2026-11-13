@@ -99,6 +99,12 @@ class ExperimentSuiteConfig(BaseModel):
     num_rounds: int = Field(default=5, ge=1, le=20)
     peer_degree: int = Field(default=3, ge=0, le=20)
     tasks_per_track: int = Field(default=6, ge=1, le=50)
+    # Numeric-track questions. None falls back to tasks_per_track (the old behaviour).
+    numeric_tasks: int | None = Field(default=None, ge=1, le=50)
+    # Starting estimates are log_truth + weight * popular_misconception_bias + N(0, sd).
+    # Set the weight to 0 for a crowd that starts centred on the truth.
+    numeric_start_bias_weight: float = Field(default=0.22, ge=0.0, le=1.0)
+    numeric_start_sd: float = Field(default=0.24, gt=0.0, le=2.0)
     numeric_replicates: int = Field(default=2, ge=1, le=10)
     alpha: float = Field(default=0.3, ge=0.0, le=1.0)
     conditions: list[ConditionConfig]

@@ -217,12 +217,19 @@ def _execute_numeric_track(
     workers: int = 1,
 ) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    num_tasks = build_numeric_core_tasks()[: cfg.tasks_per_track]
+    bank = build_numeric_core_tasks()
+    num_tasks = bank[: cfg.numeric_tasks or cfg.tasks_per_track]
+    print(
+        f"Numeric track settings: {len(num_tasks)} of {len(bank)} questions, "
+        f"{n_agents} agents, {cfg.num_rounds} rounds, {cfg.numeric_replicates} replicates, "
+        f"start bias weight {cfg.numeric_start_bias_weight}, start sd {cfg.numeric_start_sd}.",
+        flush=True,
+    )
     num_recs = run_numeric_core(
         tasks=num_tasks,
         conditions=["C1", "C2", "C3"],
         n_agents=n_agents,
-        n_rounds=max(2, min(cfg.num_rounds, 4)),
+        n_rounds=cfg.num_rounds,
         replicates=cfg.numeric_replicates,
         runs_path=out_dir / "numeric_runs.jsonl",
         backend=backend,
@@ -232,6 +239,8 @@ def _execute_numeric_track(
         max_tokens=max_tokens,
         pricing=pricing,
         workers=workers,
+        start_bias_weight=cfg.numeric_start_bias_weight,
+        start_sd=cfg.numeric_start_sd,
     )
     num_analysis = analyze_numeric_core(num_recs, num_tasks)
     (out_dir / "numeric_analysis.json").write_text(
@@ -277,6 +286,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
         num_agents=args.agents,
         num_rounds=args.rounds,
         tasks_per_track=args.tasks,
+        numeric_tasks=args.tasks,
         conditions=_default_conditions(),
     )
     out_path = Path(args.out)

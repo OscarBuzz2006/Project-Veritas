@@ -371,6 +371,8 @@ def run_numeric_core(
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
     workers: int = 1,
+    start_bias_weight: float = 0.22,
+    start_sd: float = 0.24,
 ) -> list[NumericEstimateRecord]:
     """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap.
 
@@ -407,6 +409,8 @@ def run_numeric_core(
         "n_rounds": n_rounds,
         "replicates": replicates,
         "max_tokens": max_tokens,
+        "start_bias_weight": start_bias_weight,
+        "start_sd": start_sd,
         "conditions": conditions,
         "tasks": [t.model_dump(mode="json") for t in tasks],
         "backend": backend_identity(backend),
@@ -438,8 +442,8 @@ def run_numeric_core(
                     )
                     current_logs = [
                         log_truth
-                        + 0.22 * task.popular_misconception_bias
-                        + init_rng.gauss(0.0, 0.24)
+                        + start_bias_weight * task.popular_misconception_bias
+                        + init_rng.gauss(0.0, start_sd)
                         for _ in range(n_agents)
                     ]
                     histories: list[list[tuple[str, str]]] = [[] for _ in range(n_agents)]
