@@ -44,6 +44,19 @@ def _parse_reply(raw_reply: str, cur_x: float) -> NumericParseResult:
     return parsed
 
 
+def shared_system_prompt(current_date: str = "") -> str:
+    """The system prompt every condition (and the cold selection/movability probes) shares.
+
+    `current_date` (ISO, e.g. 2026-11-13) tells the model today's date so it does not insist
+    that events after its training data have not happened. Empty leaves the prompt unchanged.
+    """
+    prompt = (
+        "You are a neutral quantitative estimation assistant. "
+        "Reason step by step without web lookup and end with 'Final estimate: <number>'."
+    )
+    return f"{prompt} Today's date is {current_date}." if current_date else prompt
+
+
 def build_numeric_prompts(
     condition_id: str,
     agent: AgentProfile,
@@ -52,6 +65,7 @@ def build_numeric_prompts(
     pop_stats: tuple[float, float, float] | None,
     history: list[tuple[str, str]],
     unit: str = "",
+    current_date: str = "",
 ) -> tuple[str, str]:
     """Construct C1 (baseline), C2 (social summary), or C3 (personalized+history) prompts."""
     cond = condition_id.upper()
@@ -59,10 +73,7 @@ def build_numeric_prompts(
 
     # One shared system prompt for C1/C2/C3 so conditions differ only in what they add:
     # C2 adds the social summary (user prompt), C3 adds the profile sentence and history.
-    system_prompt = (
-        "You are a neutral quantitative estimation assistant. "
-        "Reason step by step without web lookup and end with 'Final estimate: <number>'."
-    )
+    system_prompt = shared_system_prompt(current_date)
     if cond == "C3":
         system_prompt += (
             f" You are speaking with a {agent.profession} in {agent.region} "
@@ -229,6 +240,7 @@ class _RoundContext:
     max_tokens: int
     pricing: TokenPricing | None
     abort: threading.Event
+    current_date: str = ""
 
 
 def _query_agent(ctx: _RoundContext, a_idx: int) -> tuple[str, Any]:
@@ -246,6 +258,7 @@ def _query_agent(ctx: _RoundContext, a_idx: int) -> tuple[str, Any]:
             pop_stats=ctx.pop_stats if ctx.cond_id in ("C2", "C3") else None,
             history=ctx.histories[a_idx],
             unit=ctx.task.unit,
+            current_date=ctx.current_date,
         )
         return (
             "ok",
@@ -382,6 +395,7 @@ def run_numeric_core(
     workers: int = 1,
     start_bias_weight: float = 0.22,
     start_sd: float = 0.24,
+    current_date: str = "",
 ) -> list[NumericEstimateRecord]:
     """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap.
 
@@ -420,6 +434,7 @@ def run_numeric_core(
         "max_tokens": max_tokens,
         "start_bias_weight": start_bias_weight,
         "start_sd": start_sd,
+        "current_date": current_date,
         "conditions": conditions,
         "tasks": [t.model_dump(mode="json") for t in tasks],
         "backend": backend_identity(backend),
@@ -476,6 +491,7 @@ def run_numeric_core(
                             max_tokens=max_tokens,
                             pricing=pricing,
                             abort=threading.Event(),
+                            current_date=current_date,
                         )
                         ordered_records.extend(
                             _run_round(ctx, spec, rep, alpha, workers, existing, fh)

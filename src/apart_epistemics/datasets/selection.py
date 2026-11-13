@@ -16,6 +16,11 @@ from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
 from apart_epistemics.models import TaskItem
 from apart_epistemics.parsers import parse_numeric_estimate
 
+MISS_RULE = (
+    " Candidates with more than {allowed} of {repeats} unusable answers (no positive number, "
+    "including a stated zero) were dropped."
+)
+
 SELECTION_RULE = (
     "Each candidate was asked {repeats} times with no user estimate, crowd statistic or history. "
     "Error is the mean absolute log10 distance of the parsed answers from the documented truth. "
@@ -60,12 +65,17 @@ def validate_candidates(tasks: list[TaskItem]) -> None:
             raise ValueError(f"{t.id}: source_note must name a specific, citable source and date.")
 
 
-def cold_prompts(task: TaskItem) -> tuple[str, str]:
+def allowed_misses(repeats: int, max_miss_rate: float) -> int:
+    """Most unusable answers a candidate may have: `more than 1 of 8` -> 1 at 8 repeats."""
+    return int(max_miss_rate * repeats + 1e-9)
+
+
+def cold_prompts(task: TaskItem, current_date: str = "") -> tuple[str, str]:
     """Same system prompt as the experiment's C1; the user turn has no current estimate."""
-    system = (
-        "You are a neutral quantitative estimation assistant. "
-        "Reason step by step without web lookup and end with 'Final estimate: <number>'."
-    )
+    # Imported here: engine.numeric_core imports from datasets, so a top-level import would loop.
+    from apart_epistemics.engine.numeric_core import shared_system_prompt
+
+    system = shared_system_prompt(current_date)
     user = (
         f"Question: {task.question}\n\n"
         f"What is your best estimate of the true value? End with "
@@ -98,12 +108,15 @@ def _stratify(
     min_error: float,
     review_error: float,
     reviewed_ids: frozenset[str],
+    max_misses: int,
 ) -> dict[str, Any]:
     status: dict[str, str] = {}
     for r in rows:
         err, spread = r["mean_abs_log10_error"], r["log10_spread"]
         if err is None:
             status[r["id"]] = "no_answer"
+        elif r["n_misses"] > max_misses:
+            status[r["id"]] = "too_many_misses"
         elif spread is None:
             status[r["id"]] = "too_few_answers"
         elif err < min_error:
@@ -160,6 +173,8 @@ def run_cold_selection(
     min_error: float = 0.1,
     review_error: float = 0.5,
     reviewed_ids: frozenset[str] = frozenset(),
+    max_miss_rate: float = 0.125,
+    current_date: str = "",
 ) -> dict[str, Any]:
     """Query every candidate cold `repeats` times, then select `keep` by the chosen rule.
 
@@ -182,9 +197,12 @@ def run_cold_selection(
         if unknown:
             raise ValueError(f"reviewed ids not among the candidates: {sorted(unknown)}")
 
-    rows = _ask_cold(candidates, backend, repeats, max_tokens)
+    max_misses = allowed_misses(repeats, max_miss_rate)
+    rows = _ask_cold(candidates, backend, repeats, max_tokens, current_date)
     result: dict[str, Any] = {
         "rule_name": rule,
+        "current_date": current_date,
+        "max_misses": max_misses,
         "repeats": repeats,
         "keep": keep,
         "n_candidates": len(candidates),
@@ -193,11 +211,16 @@ def run_cold_selection(
     }
     if rule == "error":
         ranked = sorted(
-            (r for r in rows if r["mean_abs_log10_error"] is not None),
+            (
+                r
+                for r in rows
+                if r["mean_abs_log10_error"] is not None and r["n_misses"] <= max_misses
+            ),
             key=lambda r: (-r["mean_abs_log10_error"], r["id"]),
         )
         result.update(
-            rule=SELECTION_RULE.format(repeats=repeats, keep=keep),
+            rule=SELECTION_RULE.format(repeats=repeats, keep=keep)
+            + MISS_RULE.format(allowed=max_misses, repeats=repeats),
             selected_ids=[r["id"] for r in ranked[:keep]],
             strata={},
         )
@@ -209,9 +232,9 @@ def run_cold_selection(
         pct=(10.0**min_error - 1.0) * 100.0,
         review_error=review_error,
         half=keep // 2,
-    )
+    ) + MISS_RULE.format(allowed=max_misses, repeats=repeats)
     try:
-        strat = _stratify(rows, keep, min_error, review_error, reviewed_ids)
+        strat = _stratify(rows, keep, min_error, review_error, reviewed_ids, max_misses)
     except SelectionError as exc:
         exc.partial.update(
             {**result, "rule": rule_text, "min_error": min_error, "review_error": review_error}
@@ -235,11 +258,15 @@ def run_cold_selection(
 
 
 def _ask_cold(
-    candidates: list[TaskItem], backend: Any, repeats: int, max_tokens: int
+    candidates: list[TaskItem],
+    backend: Any,
+    repeats: int,
+    max_tokens: int,
+    current_date: str = "",
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for task in candidates:
-        system, user = cold_prompts(task)
+        system, user = cold_prompts(task, current_date)
         log_truth = math.log10(task.numeric_truth or 1.0)
         answers: list[float] = []
         replies: list[dict[str, Any]] = []

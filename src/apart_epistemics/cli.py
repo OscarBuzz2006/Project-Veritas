@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -224,6 +225,7 @@ def _execute_numeric_track(
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
     workers: int = 1,
+    current_date: str = "",
 ) -> tuple[dict[str, Any], list[NumericEstimateRecord]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     if cfg.numeric_tasks_file:
@@ -254,6 +256,7 @@ def _execute_numeric_track(
         workers=workers,
         start_bias_weight=cfg.numeric_start_bias_weight,
         start_sd=cfg.numeric_start_sd,
+        current_date=current_date,
     )
     num_analysis = analyze_numeric_core(num_recs, num_tasks)
     (out_dir / "numeric_analysis.json").write_text(
@@ -271,6 +274,7 @@ def _run_both_tracks(
     max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
     pricing: TokenPricing | None = None,
     workers: int = 1,
+    current_date: str = "",
 ) -> tuple[dict[str, Any], dict[str, Any], list[NumericEstimateRecord]]:
     if not hasattr(backend, "generate_numeric_reply"):
         raise BackendConfigError(
@@ -288,6 +292,7 @@ def _run_both_tracks(
         max_tokens=max_tokens,
         pricing=pricing,
         workers=workers,
+        current_date=current_date,
     )
     return suite_res, num_analysis, num_recs
 
@@ -336,6 +341,26 @@ def _cmd_demo(args: argparse.Namespace) -> int:
         f"residual={num_analysis['max_identity_residual']:.2e} -> {site_dir / 'index.html'}"
     )
     return 0
+
+
+def _resolve_current_date(arg: str | None, out_dir: Path | None = None) -> str:
+    """The date told to the model: the flag, else the date saved by a run being resumed, else today.
+
+    Reusing the saved date keeps a run that crosses midnight resumable: the date is part of the
+    run manifest, so a different one would otherwise force a new output folder.
+    """
+    if arg:
+        try:
+            return date.fromisoformat(arg).isoformat()
+        except ValueError:
+            raise BackendConfigError(f"--current-date must be YYYY-MM-DD, got {arg!r}.") from None
+    if out_dir is not None:
+        manifest = out_dir / "numeric_runs.manifest.json"
+        if manifest.exists():
+            saved = json.loads(manifest.read_text(encoding="utf-8")).get("current_date")
+            if saved:
+                return str(saved)
+    return date.today().isoformat()
 
 
 def _backend_from_args(args: argparse.Namespace, seed: int) -> Any:
@@ -398,6 +423,7 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
         candidates = _load_candidates(Path(args.candidates))
         configure_budget(backend, out_dir, args.budget, args.request_allowance)
         reviewed = frozenset(x.strip() for x in (args.reviewed or "").split(",") if x.strip())
+        current_date = _resolve_current_date(args.current_date)
         result = run_cold_selection(
             candidates,
             backend,
@@ -408,6 +434,8 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
             min_error=args.min_error,
             review_error=args.review_error,
             reviewed_ids=reviewed,
+            max_miss_rate=args.max_miss_rate,
+            current_date=current_date,
         )
     except SelectionError as exc:
         # The cold answers were paid for: keep them, and show why candidates dropped out.
@@ -478,6 +506,11 @@ def _cmd_run(args: argparse.Namespace) -> int:
         return 2
 
     out_dir = Path(args.out)
+    try:
+        current_date = _resolve_current_date(args.current_date, out_dir)
+    except BackendConfigError as exc:
+        print(f"Configuration error: {exc}", file=sys.stderr)
+        return 2
     if args.workers < 1:
         print("Configuration error: --workers must be at least 1.", file=sys.stderr)
         return 2
@@ -494,6 +527,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 max_tokens=args.max_tokens,
                 pricing=pricing,
                 workers=args.workers,
+                current_date=current_date,
             )
         else:
             _run_both_tracks(
@@ -504,6 +538,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 max_tokens=args.max_tokens,
                 pricing=pricing,
                 workers=args.workers,
+                current_date=current_date,
             )
     except (BudgetExceededError, RuntimeError, BackendConfigError) as exc:
         print(f"Execution failed: {exc}", file=sys.stderr)
@@ -692,6 +727,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Numeric track: agents queried concurrently within a round. Results are identical "
         "to --workers 1; only speed changes.",
     )
+    p_run.add_argument(
+        "--current-date",
+        default=None,
+        help="Today's date (YYYY-MM-DD) put in the shared system prompt. Default: today, or the "
+        "date saved by the run being resumed.",
+    )
     p_run.add_argument("--numeric-only", action="store_true")
 
     p_analyze = sub.add_parser("analyze", help="Analyze persisted JSONL logs and verify metrics.")
@@ -739,6 +780,18 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=0.5,
         help="Candidates at or above this error are held for hand review.",
+    )
+    p_sel.add_argument(
+        "--max-miss-rate",
+        type=float,
+        default=0.125,
+        help="Drop candidates with a larger share of unusable answers (no positive number, "
+        "including a stated zero). 0.125 means more than 1 of 8.",
+    )
+    p_sel.add_argument(
+        "--current-date",
+        default=None,
+        help="Today's date (YYYY-MM-DD) told to the model; default today. Same as the run.",
     )
     p_sel.add_argument(
         "--reviewed",
