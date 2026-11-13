@@ -436,6 +436,7 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
             reviewed_ids=reviewed,
             max_miss_rate=args.max_miss_rate,
             current_date=current_date,
+            max_per_family=args.max_per_family,
         )
     except SelectionError as exc:
         # The cold answers were paid for: keep them, and show why candidates dropped out.
@@ -464,6 +465,11 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
     print(f"Kept {len(chosen)} of {len(candidates)} -> {out_dir}/selected_tasks.json")
     for name, stats in result.get("summary", {}).items():
         print(f"  {name}: {stats}")
+    if result.get("family_cap_skipped"):
+        print(
+            "  Skipped because its family was full (cap "
+            f"{result.get('max_per_family')}): {', '.join(result['family_cap_skipped'])}"
+        )
     if result.get("held_for_review"):
         print(
             "  Held for hand review (very large error; check the recorded truth, then pass "
@@ -787,6 +793,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.125,
         help="Drop candidates with a larger share of unusable answers (no positive number, "
         "including a stated zero). 0.125 means more than 1 of 8.",
+    )
+    p_sel.add_argument(
+        "--max-per-family",
+        type=int,
+        default=None,
+        help="Keep at most this many questions per family (the `domain` field, e.g. one event). "
+        "Off by default; the shared cap covers both spread halves.",
     )
     p_sel.add_argument(
         "--current-date",

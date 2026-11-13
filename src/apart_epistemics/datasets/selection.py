@@ -65,6 +65,32 @@ def validate_candidates(tasks: list[TaskItem]) -> None:
             raise ValueError(f"{t.id}: source_note must name a specific, citable source and date.")
 
 
+CAP_RULE = (
+    " At most {cap} per family were kept: a higher-ranked candidate was skipped when its "
+    "family already had {cap}."
+)
+
+
+def _take(
+    ordered: list[dict[str, Any]],
+    n: int,
+    counts: dict[str, int],
+    cap: int | None,
+    skipped: list[str],
+) -> list[dict[str, Any]]:
+    """First `n` of `ordered`, skipping a candidate whose family already has `cap` kept."""
+    taken: list[dict[str, Any]] = []
+    for r in ordered:
+        if len(taken) == n:
+            break
+        if cap is not None and counts.get(r["domain"], 0) >= cap:
+            skipped.append(r["id"])
+            continue
+        counts[r["domain"]] = counts.get(r["domain"], 0) + 1
+        taken.append(r)
+    return taken
+
+
 def allowed_misses(repeats: int, max_miss_rate: float) -> int:
     """Most unusable answers a candidate may have: `more than 1 of 8` -> 1 at 8 repeats."""
     return int(max_miss_rate * repeats + 1e-9)
@@ -109,6 +135,7 @@ def _stratify(
     review_error: float,
     reviewed_ids: frozenset[str],
     max_misses: int,
+    max_per_family: int | None = None,
 ) -> dict[str, Any]:
     status: dict[str, str] = {}
     for r in rows:
@@ -147,11 +174,32 @@ def _stratify(
         )
 
     half = keep // 2
-    high = eligible[:half]
-    low = sorted(eligible[half:], key=lambda r: (r["log10_spread"], r["id"]))[:half]
+    counts: dict[str, int] = {}
+    skipped: list[str] = []
+    high = _take(eligible, half, counts, max_per_family, skipped)
+    chosen = {r["id"] for r in high}
+    rest = sorted(
+        (r for r in eligible if r["id"] not in chosen), key=lambda r: (r["log10_spread"], r["id"])
+    )
+    low = _take(rest, half, counts, max_per_family, skipped)
+    if len(high) < half or len(low) < half:
+        per_family: dict[str, int] = {}
+        for r in eligible:
+            per_family[r["domain"]] = per_family.get(r["domain"], 0) + 1
+        raise SelectionError(
+            f"Could not fill both halves of {half} within the family cap of {max_per_family}: "
+            f"eligible candidates per family are {dict(sorted(per_family.items()))}.",
+            {
+                "status_by_id": status,
+                "held_for_review": held,
+                "eligible_per_family": per_family,
+                "family_cap_skipped": sorted(set(skipped)),
+            },
+        )
     return {
         "status_by_id": status,
         "held_for_review": held,
+        "family_cap_skipped": sorted(set(skipped)),
         "high_spread_ids": [r["id"] for r in high],
         "low_spread_ids": [r["id"] for r in low],
         "boundary_tied": high[-1]["log10_spread"] <= low[-1]["log10_spread"],
@@ -175,6 +223,7 @@ def run_cold_selection(
     reviewed_ids: frozenset[str] = frozenset(),
     max_miss_rate: float = 0.125,
     current_date: str = "",
+    max_per_family: int | None = None,
 ) -> dict[str, Any]:
     """Query every candidate cold `repeats` times, then select `keep` by the chosen rule.
 
@@ -189,6 +238,15 @@ def run_cold_selection(
     validate_candidates(candidates)
     if keep > len(candidates):
         raise ValueError(f"Cannot keep {keep} of only {len(candidates)} candidates.")
+    if max_per_family is not None:
+        families = {t.domain for t in candidates}
+        if max_per_family < 1:
+            raise ValueError("max_per_family must be at least 1.")
+        if max_per_family * len(families) < keep:
+            raise ValueError(
+                f"A cap of {max_per_family} per family across {len(families)} families cannot "
+                f"yield {keep} questions."
+            )
     if rule == "stratified":
         # Check everything that can be checked before any paid call is made.
         if keep % 2:
@@ -203,6 +261,7 @@ def run_cold_selection(
         "rule_name": rule,
         "current_date": current_date,
         "max_misses": max_misses,
+        "max_per_family": max_per_family,
         "repeats": repeats,
         "keep": keep,
         "n_candidates": len(candidates),
@@ -218,10 +277,15 @@ def run_cold_selection(
             ),
             key=lambda r: (-r["mean_abs_log10_error"], r["id"]),
         )
+        skipped: list[str] = []
+        picked = _take(ranked, keep, {}, max_per_family, skipped)
+        cap_text = CAP_RULE.format(cap=max_per_family) if max_per_family is not None else ""
         result.update(
             rule=SELECTION_RULE.format(repeats=repeats, keep=keep)
-            + MISS_RULE.format(allowed=max_misses, repeats=repeats),
-            selected_ids=[r["id"] for r in ranked[:keep]],
+            + MISS_RULE.format(allowed=max_misses, repeats=repeats)
+            + cap_text,
+            selected_ids=[r["id"] for r in picked],
+            family_cap_skipped=sorted(set(skipped)),
             strata={},
         )
         return result
@@ -233,8 +297,12 @@ def run_cold_selection(
         review_error=review_error,
         half=keep // 2,
     ) + MISS_RULE.format(allowed=max_misses, repeats=repeats)
+    if max_per_family is not None:
+        rule_text += CAP_RULE.format(cap=max_per_family)
     try:
-        strat = _stratify(rows, keep, min_error, review_error, reviewed_ids, max_misses)
+        strat = _stratify(
+            rows, keep, min_error, review_error, reviewed_ids, max_misses, max_per_family
+        )
     except SelectionError as exc:
         exc.partial.update(
             {**result, "rule": rule_text, "min_error": min_error, "review_error": review_error}
