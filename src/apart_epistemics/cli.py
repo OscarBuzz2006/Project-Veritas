@@ -19,6 +19,7 @@ from apart_epistemics.backends import (
 )
 from apart_epistemics.backends.base import DEFAULT_NUMERIC_MAX_TOKENS
 from apart_epistemics.datasets import (
+    SelectionError,
     audit_question_selection_bias,
     build_numeric_core_tasks,
     run_cold_selection,
@@ -370,6 +371,24 @@ def _load_candidates(path: Path) -> list[TaskItem]:
     ]
 
 
+def _print_candidate_table(rows: list[dict[str, Any]], status: dict[str, str]) -> None:
+    """Compact per-candidate view (largest error first) so a failed run is still readable."""
+
+    def num(v: Any) -> str:
+        return "-" if v is None else f"{v:.3f}"
+
+    ordered = sorted(rows, key=lambda r: -(r["mean_abs_log10_error"] or -1.0))
+    print(f"{'id':34}{'family':12}{'ok/n':>7}{'error':>8}{'spread':>8}  status", file=sys.stderr)
+    for r in ordered:
+        answers = f"{r['n_answers']}/{r['n_answers'] + r['n_misses']}"
+        print(
+            f"{r['id']:34}{r.get('domain', ''):12}{answers:>7}"
+            f"{num(r['mean_abs_log10_error']):>8}{num(r['log10_spread']):>8}  "
+            f"{status.get(r['id'], '')}",
+            file=sys.stderr,
+        )
+
+
 def _cmd_select_questions(args: argparse.Namespace) -> int:
     out_dir = Path(args.out)
     try:
@@ -390,6 +409,15 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
             review_error=args.review_error,
             reviewed_ids=reviewed,
         )
+    except SelectionError as exc:
+        # The cold answers were paid for: keep them, and show why candidates dropped out.
+        failed = {"failed": str(exc), "backend": backend_identity(backend), **exc.partial}
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "selection.json").write_text(json.dumps(failed, indent=2), encoding="utf-8")
+        print(f"Selection failed: {exc}", file=sys.stderr)
+        print(f"Measurements saved to {out_dir}/selection.json", file=sys.stderr)
+        _print_candidate_table(failed.get("candidates", []), failed.get("status_by_id", {}))
+        return 2
     except (BackendConfigError, BudgetExceededError, RuntimeError, ValueError, OSError) as exc:
         print(f"Selection failed: {exc}", file=sys.stderr)
         return 2

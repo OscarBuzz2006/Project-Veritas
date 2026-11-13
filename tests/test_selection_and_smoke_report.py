@@ -543,3 +543,93 @@ def test_selected_tasks_file_runs_and_the_analysis_reports_each_half(tmp_path: P
     # Without strata nothing extra is reported.
     plain = [t.model_copy(update={"selection_stratum": ""}) for t in tasks]
     assert analyze_numeric_core(recs, plain)["by_stratum"] == {}
+
+
+# ------------------------------------- failed selections keep their paid answers
+
+
+class Counting(Spready):
+    def __init__(self, plan: dict[str, list[float]]) -> None:
+        super().__init__(plan)
+        self.calls = 0
+
+    def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+        self.calls += 1
+        return super().generate_numeric_reply(**kwargs)
+
+
+def test_bad_keep_or_reviewed_ids_are_rejected_before_any_paid_call() -> None:
+    tasks, plan = _plan()
+    backend = Counting(plan)
+    with pytest.raises(ValueError, match="even"):
+        run_cold_selection(tasks, backend, repeats=4, keep=3)
+    with pytest.raises(ValueError, match="not among the candidates"):
+        run_cold_selection(tasks, backend, repeats=4, keep=2, reviewed_ids=frozenset({"typo"}))
+    assert backend.calls == 0  # nothing was spent on a run that could never succeed
+
+
+def test_rows_and_summaries_carry_the_question_family() -> None:
+    tasks = [
+        _task("a", 100.0).model_copy(update={"domain": "census"}),
+        _task("b", 100.0).model_copy(update={"domain": "census"}),
+        _task("c", 100.0).model_copy(update={"domain": "events"}),
+        _task("d", 100.0).model_copy(update={"domain": "events"}),
+    ]
+    plan = {"a": [1.5, 1.2], "b": [1.5], "c": [1.4, 3.0], "d": [1.6, 1.5]}
+    out = run_cold_selection(tasks, Spready(plan), repeats=4, keep=4)
+    assert {c["id"]: c["domain"] for c in out["candidates"]} == {
+        "a": "census",
+        "b": "census",
+        "c": "events",
+        "d": "events",
+    }
+    assert out["summary"]["overall"]["by_family"] == {"census": 2, "events": 2}
+    halves = [out["summary"]["high_spread"]["by_family"], out["summary"]["low_spread"]["by_family"]]
+    assert sum(sum(h.values()) for h in halves) == 4
+
+
+def test_selection_error_carries_every_measurement_for_diagnosis() -> None:
+    from apart_epistemics.datasets import SelectionError
+
+    tasks = [_task(f"n{i}", 100.0) for i in range(4)]
+    plan = {f"n{i}": [1.01, 1.02] for i in range(4)}  # all below the error floor
+    with pytest.raises(SelectionError) as exc:
+        run_cold_selection(tasks, Spready(plan), repeats=4, keep=2)
+    partial = exc.value.partial
+    assert len(partial["candidates"]) == 4
+    assert all(len(c["replies"]) == 4 for c in partial["candidates"])
+    assert set(partial["status_by_id"].values()) == {"below_error_floor"}
+    assert partial["outcome_counts"] == {"below_error_floor": 4}
+    assert partial["min_error"] == 0.1
+    assert "about 26% off" in partial["rule"]
+
+
+def test_cli_saves_measurements_and_prints_a_table_when_selection_fails(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    rows = [
+        {
+            "id": f"q{i}",
+            "question": f"Q{i}?",
+            "domain": "census",
+            "numeric_truth": 10.0 ** (i + 1),
+            "unit": "km",
+            "source_note": SOURCE,
+        }
+        for i in range(4)
+    ]
+    cand = tmp_path / "cand.json"
+    cand.write_text(json.dumps(rows), encoding="utf-8")
+    out = tmp_path / "sel"
+    # The offline backend answers close to the truth, so every candidate is under the floor.
+    rc = main(["select-questions", "--candidates", str(cand), "--keep", "2", "--out", str(out)])
+    assert rc == 2
+    saved = json.loads((out / "selection.json").read_text(encoding="utf-8"))
+    assert "Only 0 eligible" in saved["failed"]
+    assert len(saved["candidates"]) == 4
+    assert saved["backend"]["class"] == "SyntheticEpistemicBackend"
+    assert not (out / "selected_tasks.json").exists()  # no selection, so no tasks file
+    err = capsys.readouterr().err
+    assert "Measurements saved to" in err
+    assert "below_error_floor" in err
+    assert "census" in err  # the table shows the family

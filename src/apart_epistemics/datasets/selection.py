@@ -36,6 +36,17 @@ STRATIFIED_RULE = (
 )
 
 
+class SelectionError(ValueError):
+    """Selection could not be completed; `partial` holds everything measured so far.
+
+    The cold answers were already paid for, so callers should save `partial` for diagnosis.
+    """
+
+    def __init__(self, message: str, partial: dict[str, Any]) -> None:
+        super().__init__(message)
+        self.partial = partial
+
+
 def validate_candidates(tasks: list[TaskItem]) -> None:
     """Refuse candidates that cannot be audited or cited."""
     if len({t.id for t in tasks}) != len(tasks):
@@ -68,8 +79,12 @@ def _summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         return {"n": 0}
     errs = [r["mean_abs_log10_error"] for r in rows]
     spreads = [r["log10_spread"] for r in rows]
+    families: dict[str, int] = {}
+    for r in rows:
+        families[r["domain"]] = families.get(r["domain"], 0) + 1
     return {
         "n": len(rows),
+        "by_family": dict(sorted(families.items())),
         "mean_error": round(sum(errs) / len(errs), 6),
         "mean_spread": round(sum(spreads) / len(spreads), 6),
         "min_spread": round(min(spreads), 6),
@@ -84,12 +99,6 @@ def _stratify(
     review_error: float,
     reviewed_ids: frozenset[str],
 ) -> dict[str, Any]:
-    if keep % 2:
-        raise ValueError("keep must be even for a high/low spread split.")
-    unknown = reviewed_ids - {r["id"] for r in rows}
-    if unknown:
-        raise ValueError(f"reviewed ids not among the candidates: {sorted(unknown)}")
-
     status: dict[str, str] = {}
     for r in rows:
         err, spread = r["mean_abs_log10_error"], r["log10_spread"]
@@ -119,8 +128,9 @@ def _stratify(
             if held
             else ""
         )
-        raise ValueError(
-            f"Only {len(eligible)} eligible candidates for keep={keep}; outcomes {counts}.{hint}"
+        raise SelectionError(
+            f"Only {len(eligible)} eligible candidates for keep={keep}; outcomes {counts}.{hint}",
+            {"status_by_id": status, "held_for_review": held, "outcome_counts": counts},
         )
 
     half = keep // 2
@@ -164,6 +174,13 @@ def run_cold_selection(
     validate_candidates(candidates)
     if keep > len(candidates):
         raise ValueError(f"Cannot keep {keep} of only {len(candidates)} candidates.")
+    if rule == "stratified":
+        # Check everything that can be checked before any paid call is made.
+        if keep % 2:
+            raise ValueError("keep must be even for a high/low spread split.")
+        unknown = reviewed_ids - {t.id for t in candidates}
+        if unknown:
+            raise ValueError(f"reviewed ids not among the candidates: {sorted(unknown)}")
 
     rows = _ask_cold(candidates, backend, repeats, max_tokens)
     result: dict[str, Any] = {
@@ -186,15 +203,22 @@ def run_cold_selection(
         )
         return result
 
-    strat = _stratify(rows, keep, min_error, review_error, reviewed_ids)
+    rule_text = STRATIFIED_RULE.format(
+        repeats=repeats,
+        min_error=min_error,
+        pct=(10.0**min_error - 1.0) * 100.0,
+        review_error=review_error,
+        half=keep // 2,
+    )
+    try:
+        strat = _stratify(rows, keep, min_error, review_error, reviewed_ids)
+    except SelectionError as exc:
+        exc.partial.update(
+            {**result, "rule": rule_text, "min_error": min_error, "review_error": review_error}
+        )
+        raise
     result.update(
-        rule=STRATIFIED_RULE.format(
-            repeats=repeats,
-            min_error=min_error,
-            pct=(10.0**min_error - 1.0) * 100.0,
-            review_error=review_error,
-            half=keep // 2,
-        ),
+        rule=rule_text,
         min_error=min_error,
         review_error=review_error,
         reviewed_ids=sorted(reviewed_ids),
@@ -247,6 +271,7 @@ def _ask_cold(
         rows.append(
             {
                 "id": task.id,
+                "domain": task.domain,
                 "numeric_truth": task.numeric_truth,
                 "unit": task.unit,
                 "source_note": task.source_note,
