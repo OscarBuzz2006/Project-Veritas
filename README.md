@@ -7,9 +7,25 @@
 
 > Multi-agent simulation and QA testing suite measuring how assistant provenance (`nationality_type`), model count ($K$), decoding temperature, and personalization regimes reshape agenda diversity, epistemic calibration, Goldman source independence, and Page's Diversity Prediction Theorem.
 
-**Live Interactive Lab Notebook:** [https://vikramwish.github.io/apart-epistemics/](https://vikramwish.github.io/apart-epistemics/)
+**Live React explorer:** [https://vikramwish.github.io/apart-epistemics/](https://vikramwish.github.io/apart-epistemics/)
 
 ---
+
+## About
+
+Epistemic Prism is a research workbench for investigating how groups of
+AI-assisted agents form beliefs, share topics, and make quantitative estimates.
+It pairs a Python simulation and evaluation pipeline with a React interface for
+researchers to compare conditions and inspect the records behind each score.
+
+The workspace covers two tracks: **Track 4** compares model diversity, decoding,
+provenance, and personalization; the **numeric core** measures crowd error and
+estimate diversity using Page's diversity identity. The bundled results are a
+seeded synthetic demonstration, not evidence of real-world model effects.
+
+The frontend uses React, TypeScript, Vite, Tailwind, and shadcn/ui components.
+It works from saved report data, so exploring the demo needs no API keys or live
+model connection.
 
 ## Why it exists
 
@@ -84,35 +100,63 @@ flowchart LR
 
 ## Visual Highlights
 
-### React explorer with shadcn/ui AI Elements
+### Four workspace views, one shared dataset
 
-The new `frontend/` uses actual copied shadcn/ui **Message, Bubble, Trace, Tabs,
-Button, and Badge** components. Recorded response pairs have expandable context,
-topics, and raw JSON; condition charts and numeric contrasts read the existing
-Python-generated benchmark data. No model calls or invented reasoning are added.
+The React explorer uses a monochrome interface with left-sidebar navigation.
+All views read the same Python-generated benchmark; viewing results makes no
+model calls and requires no API keys.
 
-With Node 22.12+, run `make ui-install`, `make ui-check`, then `make ui-dev`.
-Open the URL Vite prints. See [frontend/README.md](frontend/README.md) for browser
-tests and production preview. Pages builds now publish the React explorer with
-the original standalone report retained under `legacy/`; local edits do not
-publish a deployment. The screenshots below still show the standalone report.
+[![Compact React dashboard with sidebar navigation, all 11 conditions, diversity–calibration chart, selected metrics, and round trajectory](docs/screenshots/react-dashboard.png)](docs/screenshots/react-dashboard.png)
 
-### One dashboard. Three ways to inspect the experiment.
+| View | What you can do |
+|---|---|
+| **Dashboard** | See all 11 conditions, the comparison chart, six selected-condition metrics, and a topic trajectory together. Verified without page or condition-list scrolling at 1366 × 768. |
+| **Overview** | Filter by family or search, step through rounds, sort scores, change the trajectory metric, and export visible scores as CSV. |
+| **Numeric core** | Inspect C1/C2/C3 crowd-error decomposition, change the plotted metric, and review recorded statistical contrasts. |
+| **Response traces** | Read paired assistant/agent responses, inspect baseline settings, and expand recorded context, extracted topics, and raw JSON. |
 
-Compare conditions, follow belief updates across rounds, and inspect the traces
-behind each score—without leaving the lab notebook.
+The full report can be exported as JSON. Selection carries across the dashboard,
+overview, and response inspector. Smaller screens use a stacked layout with
+local chart/table scrolling to preserve readability.
 
-> **Demo data, not live findings.** These screenshots and figures show the seeded
-> synthetic benchmark. They illustrate the tooling, not measured effects in real models.
+> **Synthetic demonstration, not live findings.** Response specimens are sampled
+> final-round records, not a full conversation history. System prompts, tool
+> calls, and skill invocation records are not included in the current export;
+> the inspector labels them **Not recorded** rather than inventing activity.
+> The overview round filter does not apply to response specimens.
 
-[![Dashboard overview showing condition summaries, the diversity–calibration quadrant, and decoding comparison charts](docs/screenshots/dashboard-overview.png)](docs/screenshots/desktop-1440.png)
+With Node 22.12+, run `make ui-install`, then `make ui-dev`, and open the URL Vite
+prints. Select **Dashboard** in the sidebar for the compact view. See
+[frontend/README.md](frontend/README.md) for checks and production preview.
+`make serve` instead opens the original Python-generated report, retained under
+`legacy/` in the deployed site.
 
-- **Compare** — Filter experimental conditions and switch between Track 4 and the numeric core.
-- **Follow** — Scrub communication rounds and change the trajectory metric.
-- **Inspect** — Sort the condition ledger and open the underlying response traces.
+### Desktop screenshots
 
-Run `make serve` to try the interactive dashboard locally. The images below are
-static previews; select a figure to open its full-resolution SVG.
+Captured from the current React build with Playwright. The dashboard is shown
+at 1366 × 768; the detailed views use a 1440 px desktop viewport. Click a preview
+to open the original image.
+
+<details>
+<summary><strong>Overview: condition comparison, trajectories, and score table</strong></summary>
+
+[![Desktop overview with family filters, charts, and sortable condition scores](docs/screenshots/react-overview.png)](docs/screenshots/react-overview.png)
+
+</details>
+
+<details>
+<summary><strong>Numeric core: crowd error, diversity, and recorded contrasts</strong></summary>
+
+[![Desktop numeric core showing Page's diversity identity, condition summaries, trajectories, and statistical contrasts](docs/screenshots/react-numeric.png)](docs/screenshots/react-numeric.png)
+
+</details>
+
+<details open>
+<summary><strong>Response detail: paired outputs and recorded context</strong></summary>
+
+[![Desktop response specimen showing side-by-side simulation context and agent response, with prompt availability and recorded context expanded](docs/screenshots/react-response-detail.png)](docs/screenshots/react-response-detail.png)
+
+</details>
 
 ### Four views of the synthetic benchmark
 
@@ -143,19 +187,7 @@ static previews; select a figure to open its full-resolution SVG.
   </tr>
 </table>
 
-<details>
-<summary><strong>Full-page desktop and mobile screenshots</strong></summary>
 
-Captured at desktop (1440 px wide) and mobile (390 px wide) viewports. These are
-full-page captures, so their image heights extend beyond the viewport.
-
-<p><a href="docs/screenshots/desktop-1440.png">Open full desktop screenshot</a> · <a href="docs/screenshots/mobile-390.png">Open full mobile screenshot</a></p>
-
-<p align="center">
-  <a href="docs/screenshots/mobile-390.png"><img src="docs/screenshots/mobile-390.png" alt="Full mobile layout with vertically stacked condition summaries, charts, round controls, and score ledger" width="260"></a>
-</p>
-
-</details>
 
 ---
 
@@ -169,7 +201,32 @@ full-page captures, so their image heights extend beyond the viewport.
 
 ---
 
-## Quick start
+## Run the frontend
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Open the local URL printed by Vite. The committed report data is bundled with
+the app; no Python server is required. For a production preview, run
+`npm run build` followed by `npm run preview`.
+
+## Publishing with GitHub Pages
+
+A repository admin must enable **Settings → Pages → Build and deployment →
+Source: GitHub Actions** once for each repository, including forks. The
+[Pages workflow](.github/workflows/pages.yml) checks this configuration before
+building and publishing `frontend/dist`. If setup is missing, deployment is
+skipped with instructions in the workflow summary; application CI still runs.
+After enabling Pages, run **Deploy GitHub Pages → Run workflow**.
+
+The [hosted reference demo](https://vikramwish.github.io/apart-epistemics/) is
+published from `vikramwish/apart-epistemics`. Copying the code to another
+repository does not automatically enable hosting there.
+
+## Python quick start
 
 **Hackathon teammates:** see [HACKATHON.md](HACKATHON.md) for the full onboarding
 and testing checklist, Windows commands, troubleshooting, and live-run caveats.
@@ -198,12 +255,19 @@ loaded. Read the safety limitations in [HACKATHON.md](HACKATHON.md) first.
 
 ## Testing
 
-All 44 automated tests (43 fast unit/integration checks covering math invariants, overflow/adversarial parsing, blinded summarizer, mocked provider contracts, crash recovery, cross-process `PYTHONHASHSEED` determinism, and CLI commands, plus live Playwright responsive DOM/keyboard E2E checks) run offline with zero API charges. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`Makefile`](Makefile) for workflows:
+The Python suite has 44 automated tests (43 fast unit/integration checks covering math invariants, overflow/adversarial parsing, blinded summarizer, mocked provider contracts, crash recovery, cross-process `PYTHONHASHSEED` determinism, and CLI commands, plus live Playwright responsive DOM/keyboard E2E checks) run offline with zero API charges. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`Makefile`](Makefile) for workflows:
 
 ```bash
 make lint       # ruff check . && ruff format --check .
 make test-fast  # pytest -m "not e2e" -v (~2s)
 make cov        # pytest --cov=apart_epistemics --cov-report=term-missing -v
+```
+
+The React frontend adds 17 unit tests and 10 desktop/mobile browser checks:
+
+```bash
+make ui-check   # TypeScript, formatting, unit tests, production build
+make ui-e2e     # Browser checks; install frontend Playwright Chromium first
 ```
 
 Use the CI badge and your local test output for current verification status.

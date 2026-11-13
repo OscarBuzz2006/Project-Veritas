@@ -19,7 +19,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  pages-configuration:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.pages.outputs.ready }}
+    steps:
+      - name: Check repository Pages configuration
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(curl --silent --show-error --output pages.json --write-out '%{http_code}' \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          if [ "$status" = 200 ] && [ "$(jq -r '.build_type' pages.json)" = workflow ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          elif [ "$status" = 404 ] || [ "$status" = 200 ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo '::warning::Pages is not configured for GitHub Actions. A repository admin must enable it in Settings > Pages.'
+            {
+              echo '### Pages setup required'
+              echo 'Deployment was skipped; the separate CI workflow still validates the application.'
+              echo "A repository admin must open https://github.com/$GITHUB_REPOSITORY/settings/pages and select **GitHub Actions** as the build source."
+              echo 'Then run this workflow again using Run workflow. No code changes are needed.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::Could not check Pages configuration (HTTP $status)."
+            exit 1
+          fi
+
   deploy:
+    needs: pages-configuration
+    if: needs.pages-configuration.outputs.ready == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

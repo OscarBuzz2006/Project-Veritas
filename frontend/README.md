@@ -94,8 +94,13 @@ The original `make serve` command still serves `docs/` directly with no Node ste
 
 The Pages workflow builds and tests this frontend before publishing `dist/`.
 Relative asset URLs support a repository subpath; no SPA route rewrite is needed.
-Changing files locally does not publish them. Existing README screenshots depict
-the standalone report, not a verified screenshot of this React frontend.
+Changing files locally does not publish them. The root README includes current
+desktop screenshots of the React dashboard, overview, numeric core, and response detail.
+
+Each repository must have Pages enabled by an admin under **Settings → Pages →
+Source: GitHub Actions**. The workflow skips deployment with a setup notice if
+this is missing; CI still runs. After configuration, use **Deploy GitHub Pages →
+Run workflow** to publish.
 
 ## Ownership
 
