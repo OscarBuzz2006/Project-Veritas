@@ -1,0 +1,193 @@
+{
+  "max_identity_residual": 1.0928757898653885e-16,
+  "h4_assistant_agent_corr": 0.993,
+  "by_condition_final": {
+    "C1": {
+      "condition_id": "C1",
+      "round_idx": 4,
+      "crowd_error": 0.003412,
+      "avg_individual_error": 0.022177,
+      "diversity": 0.018765,
+      "iqr": 0.173982,
+      "miss_rate": 0.0
+    },
+    "C2": {
+      "condition_id": "C2",
+      "round_idx": 4,
+      "crowd_error": 0.002335,
+      "avg_individual_error": 0.007402,
+      "diversity": 0.005067,
+      "iqr": 0.091439,
+      "miss_rate": 0.0
+    },
+    "C3": {
+      "condition_id": "C3",
+      "round_idx": 4,
+      "crowd_error": 0.000949,
+      "avg_individual_error": 0.019802,
+      "diversity": 0.018854,
+      "iqr": 0.18499,
+      "miss_rate": 0.0
+    }
+  },
+  "condition_round_metrics": [
+    {
+      "condition_id": "C1",
+      "round_idx": 1,
+      "crowd_error": 0.001598,
+      "avg_individual_error": 0.045906,
+      "diversity": 0.044308,
+      "iqr": 0.26364,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C1",
+      "round_idx": 2,
+      "crowd_error": 0.001903,
+      "avg_individual_error": 0.034661,
+      "diversity": 0.032758,
+      "iqr": 0.225809,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C1",
+      "round_idx": 3,
+      "crowd_error": 0.00264,
+      "avg_individual_error": 0.027445,
+      "diversity": 0.024806,
+      "iqr": 0.202231,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C1",
+      "round_idx": 4,
+      "crowd_error": 0.003412,
+      "avg_individual_error": 0.022177,
+      "diversity": 0.018765,
+      "iqr": 0.173982,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 1,
+      "crowd_error": 0.001509,
+      "avg_individual_error": 0.034592,
+      "diversity": 0.033084,
+      "iqr": 0.2326,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 2,
+      "crowd_error": 0.001655,
+      "avg_individual_error": 0.019125,
+      "diversity": 0.01747,
+      "iqr": 0.167712,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 3,
+      "crowd_error": 0.001973,
+      "avg_individual_error": 0.011394,
+      "diversity": 0.009421,
+      "iqr": 0.122316,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 4,
+      "crowd_error": 0.002335,
+      "avg_individual_error": 0.007402,
+      "diversity": 0.005067,
+      "iqr": 0.091439,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 1,
+      "crowd_error": 0.001275,
+      "avg_individual_error": 0.045949,
+      "diversity": 0.044674,
+      "iqr": 0.279158,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 2,
+      "crowd_error": 0.001214,
+      "avg_individual_error": 0.034723,
+      "diversity": 0.033509,
+      "iqr": 0.24417,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 3,
+      "crowd_error": 0.001111,
+      "avg_individual_error": 0.02547,
+      "diversity": 0.024359,
+      "iqr": 0.207968,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 4,
+      "crowd_error": 0.000949,
+      "avg_individual_error": 0.019802,
+      "diversity": 0.018854,
+      "iqr": 0.18499,
+      "miss_rate": 0.0
+    }
+  ],
+  "contrasts": [
+    {
+      "contrast_id": "c2_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": -0.013698,
+      "ci_low": -0.015783,
+      "ci_high": -0.011679,
+      "wilcoxon_p": 0.000488,
+      "holm_adjusted_p": 0.001953,
+      "n_cells": 12
+    },
+    {
+      "contrast_id": "c2_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": -0.001077,
+      "ci_low": -0.001696,
+      "ci_high": -0.000438,
+      "wilcoxon_p": 0.020996,
+      "holm_adjusted_p": 0.041992,
+      "n_cells": 12
+    },
+    {
+      "contrast_id": "c3_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": 8.9e-05,
+      "ci_low": -0.001566,
+      "ci_high": 0.00216,
+      "wilcoxon_p": 0.850098,
+      "holm_adjusted_p": 0.850098,
+      "n_cells": 12
+    },
+    {
+      "contrast_id": "c3_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": -0.002464,
+      "ci_low": -0.003539,
+      "ci_high": -0.001466,
+      "wilcoxon_p": 0.000977,
+      "holm_adjusted_p": 0.00293,
+      "n_cells": 12
+    }
+  ]
+}

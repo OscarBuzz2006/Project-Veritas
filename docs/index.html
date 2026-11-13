@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epistemic Prism | Multi-Agent Model Diversity Lab Notebook</title>
+  <style>
+    :root {
+      --paper: #FAF8F4;
+      --surface: #FFFFFF;
+      --ink: #171614;
+      --muted: #5E5A52;
+      --rule: #DFDAD0;
+      --vermilion: #C84B31;
+      --cerulean: #245A7A;
+      --moss: #2F6F4E;
+      --ochre: #A96A0B;
+      --plum: #6B4C7A;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px 24px 64px;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 12px 14px 48px;
+      }
+    }
+
+    /* Masthead */
+    .masthead {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-top: 4px solid var(--ink);
+      border-radius: 6px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+
+    .masthead-kicker {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--vermilion);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .masthead h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.75rem, 3.2vw, 2.55rem);
+      line-height: 1.15;
+      margin: 0 0 10px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    .masthead-sub {
+      color: var(--muted);
+      max-width: 78ch;
+      margin: 0 0 18px;
+      font-size: 0.96rem;
+    }
+
+    .telemetry-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .telemetry-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 11px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .telemetry-pill strong {
+      color: var(--ink);
+    }
+
+    /* Headline Findings Grid */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 1020px) {
+      .findings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .findings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .finding-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-left: 3px solid var(--cerulean);
+    }
+
+    .finding-card[data-accent="vermilion"] { border-left-color: var(--vermilion); }
+    .finding-card[data-accent="cerulean"] { border-left-color: var(--cerulean); }
+    .finding-card[data-accent="plum"] { border-left-color: var(--plum); }
+    .finding-card[data-accent="moss"] { border-left-color: var(--moss); }
+
+    .finding-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .finding-metric {
+      font-family: var(--mono);
+      font-size: 1.55rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .finding-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* Panel cards */
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 920px) {
+      .grid-two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 20px 22px;
+      margin-bottom: 22px;
+      min-width: 0;
+    }
+
+    .grid-two .panel {
+      margin-bottom: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .panel-title {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      margin: 0 0 3px;
+      font-weight: 700;
+    }
+
+    .panel-note {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-chip, .btn-tab {
+      appearance: none;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      padding: 6px 11px;
+      min-height: 34px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.14s ease, border-color 0.14s ease;
+    }
+
+    .btn-chip:hover, .btn-tab:hover {
+      border-color: var(--ink);
+    }
+
+    .btn-chip.active, .btn-tab.active {
+      background: var(--ink);
+      color: var(--surface);
+      border-color: var(--ink);
+    }
+
+    .chart-frame {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .chart-frame svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .quadrant-status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* Trajectory Scrubber */
+    .scrubber-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+    }
+
+    .scrubber-bar label {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .scrubber-bar input[type="range"] {
+      flex: 1 1 160px;
+      min-width: 120px;
+      accent-color: var(--vermilion);
+    }
+
+    .scrubber-bar select {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 5px 8px;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 34px;
+    }
+
+    .round-readout-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .round-chip {
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      border-radius: 4px;
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .round-chip code {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Condition Score Table */
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.80rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+
+    td.cond-label-cell {
+      white-space: normal;
+      min-width: 165px;
+      max-width: 245px;
+      line-height: 1.3;
+    }
+
+    th {
+      background: var(--paper);
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover {
+      color: var(--ink);
+    }
+
+    td.num {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    th.num {
+      text-align: right;
+    }
+
+    tbody tr:hover {
+      background: #F4F0E8;
+    }
+
+    tbody tr.selected-row {
+      background: #EFE9DC;
+      outline: 1px solid var(--ink);
+    }
+
+    .color-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: middle;
+    }
+
+    .contrasts-list {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }
+
+    .contrast-box {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+
+    .contrast-box code {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Slide-over Specimen Drawer */
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(23, 22, 20, 0.45);
+      z-index: 1000;
+      justify-content: flex-end;
+    }
+
+    .drawer-backdrop.is-open {
+      display: flex;
+    }
+
+    .drawer-sheet {
+      width: min(520px, 100vw);
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--rule);
+      padding: 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .drawer-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .drawer-head h3 {
+      font-family: var(--serif);
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .specimen-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      padding: 12px 14px;
+      font-size: 0.86rem;
+    }
+
+    .specimen-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .topic-tag {
+      display: inline-block;
+      padding: 2px 7px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      font-family: var(--mono);
+      font-size: 11px;
+      margin: 2px 4px 2px 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="masthead" data-section="masthead-banner">
+      <div class="masthead-kicker">
+        <span>Apart Research / Track 4 Open Track</span>
+        <span>Deployment, Adoption, and Impact</span>
+      </div>
+      <h1 id="masthead-title">Epistemic Prism: Multi-Agent Model Diversity Lab Notebook</h1>
+      <p class="masthead-sub" id="masthead-sub">
+        Empirical harness measuring how assistant nationality provenance, model count K, greedy vs stochastic
+        decoding, and personalization regimes reshape agenda entropy, Goldman effective independent sources,
+        and Page's Diversity Prediction Theorem across multi-round agent ecosystems.
+      </p>
+      <div class="telemetry-strip" id="telemetry-strip"></div>
+    </header>
+
+    <section class="findings-grid" data-section="headline-findings" id="headline-findings"></section>
+
+    <div class="grid-two">
+      <section class="panel" data-section="epistemic-quadrant">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Epistemic Quadrant</h2>
+            <p class="panel-note">Effective Topic Count (Hill N1) vs Ground-Truth Calibration (1 - Brier)</p>
+          </div>
+          <div class="controls-row" id="quadrant-filters" role="group" aria-label="Filter condition families"></div>
+        </div>
+        <div class="chart-frame" id="quadrant-svg-host"></div>
+        <div class="quadrant-status" id="quadrant-status">
+          <span>Select a condition bubble or table row to inspect traces and cross-highlight metrics.</span>
+        </div>
+      </section>
+
+      <section class="panel" data-section="decoding-dissociation">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title" id="dissoc-title">Decoding Dissociation vs Page's Theorem</h2>
+            <p class="panel-note" id="dissoc-note">Switch between Track 4 surface sampling illusion and Numeric Core crowd error math.</p>
+          </div>
+          <div class="controls-row" role="tablist" aria-label="Track view switch">
+            <button type="button" class="btn-tab active" data-track-tab="track4" id="tab-track4">Track 4 Dissociation</button>
+            <button type="button" class="btn-tab" data-track-tab="numeric" id="tab-numeric">Page's Numeric Core</button>
+          </div>
+        </div>
+        <div id="track4-dissoc-view">
+          <div class="chart-frame" id="dissociation-svg-host"></div>
+        </div>
+        <div id="numeric-core-view" class="hidden">
+          <div class="chart-frame" id="pages-svg-host"></div>
+          <div class="contrasts-list" id="numeric-contrasts-host"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" data-section="round-trajectory-explorer">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Round-by-Round Trajectory Explorer</h2>
+          <p class="panel-note">Scrub communication rounds to track topic collapse, Goldman independence loss, and stance dispersion.</p>
+        </div>
+      </div>
+      <div class="scrubber-bar">
+        <label for="round-slider">Active Round: <span id="round-label">R5</span></label>
+        <input type="range" id="round-slider" min="0" max="5" value="5" step="1" aria-label="Simulation round slider" />
+        <button type="button" class="btn-chip" id="round-prev-btn">Prev</button>
+        <button type="button" class="btn-chip" id="round-next-btn">Next</button>
+        <label for="traj-metric-select">Metric:</label>
+        <select id="traj-metric-select" aria-label="Select trajectory metric">
+          <option value="effective_topic_count">Effective Topics (Hill N1)</option>
+          <option value="goldman_effective_sources">Goldman N_eff</option>
+          <option value="ground_truth_accuracy">Ground-Truth Accuracy</option>
+          <option value="pairwise_jaccard_distance">Lexical Jaccard Dist</option>
+          <option value="stance_std">Stance Std</option>
+        </select>
+      </div>
+      <div class="chart-frame" id="trajectory-svg-host"></div>
+      <div class="round-readout-strip" id="round-readout-strip"></div>
+    </section>
+
+    <section class="panel" data-section="condition-score-table">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Condition Telemetry &amp; Statistical Ledger</h2>
+          <p class="panel-note">Click any column header to sort; click Inspect on any condition to read blinded raw agent traces.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table id="score-table">
+          <thead>
+            <tr>
+              <th data-sort="label">Condition</th>
+              <th data-sort="nationality_type">Provenance</th>
+              <th data-sort="num_models" class="num">K</th>
+              <th data-sort="temperature" class="num">Temp</th>
+              <th data-sort="ground_truth_accuracy" class="num">Acc</th>
+              <th data-sort="brier_score" class="num">Brier</th>
+              <th data-sort="confident_wrong_rate" class="num">Conf Wrong</th>
+              <th data-sort="effective_topic_count" class="num">Eff Topics</th>
+              <th data-sort="goldman_effective_sources" class="num">Goldman N_eff</th>
+              <th data-sort="pairwise_jaccard_distance" class="num">Jaccard Dist</th>
+              <th>Trace</th>
+            </tr>
+          </thead>
+          <tbody id="score-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <aside class="drawer-backdrop" data-section="trace-specimen-drawer" id="trace-drawer" aria-hidden="true">
+    <div class="drawer-sheet" role="dialog" aria-modal="true" aria-labelledby="drawer-heading">
+      <div class="drawer-head">
+        <div>
+          <h3 id="drawer-heading">Trace Specimens</h3>
+          <p class="panel-note" id="drawer-sub">Blinded interaction records</p>
+        </div>
+        <button type="button" class="btn-chip" id="drawer-close-btn">Close</button>
+      </div>
+      <div id="drawer-content"></div>
+    </div>
+  </aside>
+
+  <script id="epistemic-data" type="application/json">{"metadata":{"title":"Epistemic Prism","subtitle":"Multi-Agent Model Diversity, Decoding Illusions, and Crowd Wisdom","n_conditions":11,"n_track4_records":19008,"n_numeric_records":3456},"summaries":[{"condition_id":"no_ai","label":"No AI Baseline (Independent + Peers)","heterogeneity_type":"no_ai","nationality_type":"none","num_models":0,"temperature":0.8,"top_p":0.95,"group":"baseline","ground_truth_accuracy":0.9931,"brier_score":0.1501,"ece":0.3786,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9372,"effective_topic_count":6.2002,"minority_topic_survival":1.0,"stance_std":0.0458,"bimodality_coefficient":0.441,"global_north_skew_shift":0.0133,"goldman_effective_sources":15.0188,"persuasion_bias_drift":0.0179,"distinct_2":0.2919,"pairwise_jaccard_distance":0.7273,"round_trajectory":[{"ground_truth_accuracy":0.5278,"brier_score":0.2915,"ece":0.2124,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2257,"bimodality_coefficient":0.4362,"global_north_skew_shift":0.0,"goldman_effective_sources":16.4384,"persuasion_bias_drift":0.0,"distinct_2":0.3181,"pairwise_jaccard_distance":0.7381,"round_idx":0.0},{"ground_truth_accuracy":0.5903,"brier_score":0.2318,"ece":0.1089,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9372,"effective_topic_count":6.2002,"minority_topic_survival":1.0,"stance_std":0.1527,"bimodality_coefficient":0.4349,"global_north_skew_shift":0.0031,"goldman_effective_sources":15.0188,"persuasion_bias_drift":0.0076,"distinct_2":0.3146,"pairwise_jaccard_distance":0.7402,"round_idx":1.0},{"ground_truth_accuracy":0.7083,"brier_score":0.2037,"ece":0.1195,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9372,"effective_topic_count":6.2002,"minority_topic_survival":1.0,"stance_std":0.1054,"bimodality_coefficient":0.4363,"global_north_skew_shift":0.0069,"goldman_effective_sources":15.0188,"persuasion_bias_drift":0.0119,"distinct_2":0.3056,"pairwise_jaccard_distance":0.7367,"round_idx":2.0},{"ground_truth_accuracy":0.8542,"brier_score":0.1774,"ece":0.2506,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9372,"effective_topic_count":6.2002,"minority_topic_survival":1.0,"stance_std":0.0781,"bimodality_coefficient":0.4296,"global_north_skew_shift":0.0088,"goldman_effective_sources":15.0188,"persuasion_bias_drift":0.0148,"distinct_2":0.3059,"pairwise_jaccard_distance":0.7367,"round_idx":3.0},{"ground_truth_accuracy":0.9583,"brier_score":0.1596,"ece":0.3504,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9372,"effective_topic_count":6.2002,"minority_topic_survival":1.0,"stance_std":0.0581,"bimodality_coefficient":0.4347,"global_north_skew_shift":0.0129,"goldman_effective_sources":15.0188,"persuasion_bias_drift":0.0169,"distinct_2":0.2976,"pairwise_jaccard_distance":0.7312,"round_idx":4.0},{"ground_truth_accuracy":0.9931,"brier_score":0.1501,"ece":0.3786,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9372,"effective_topic_count":6.2002,"minority_topic_survival":1.0,"stance_std":0.0458,"bimodality_coefficient":0.441,"global_north_skew_shift":0.0133,"goldman_effective_sources":15.0188,"persuasion_bias_drift":0.0179,"distinct_2":0.2919,"pairwise_jaccard_distance":0.7273,"round_idx":5.0}]},{"condition_id":"us_k1_greedy","label":"Monolithic US (K=1, T=0.0, top_p=0.0)","heterogeneity_type":"monolithic_shared","nationality_type":"us_only","num_models":1,"temperature":0.0,"top_p":0.0,"group":"decoding_ablation","ground_truth_accuracy":0.8333,"brier_score":0.139,"ece":0.0365,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0292,"bimodality_coefficient":0.386,"global_north_skew_shift":0.0629,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4582,"distinct_2":0.095,"pairwise_jaccard_distance":0.16,"round_trajectory":[{"ground_truth_accuracy":0.5556,"brier_score":0.2727,"ece":0.1436,"confident_wrong_rate":0.1319,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2293,"bimodality_coefficient":0.4241,"global_north_skew_shift":0.0,"goldman_effective_sources":1.1811,"persuasion_bias_drift":0.0,"distinct_2":0.1688,"pairwise_jaccard_distance":0.4004,"round_idx":0.0},{"ground_truth_accuracy":0.7778,"brier_score":0.1729,"ece":0.0454,"confident_wrong_rate":0.1806,"topic_shannon_entropy":0.337,"effective_topic_count":1.9127,"minority_topic_survival":0.225,"stance_std":0.0522,"bimodality_coefficient":0.4005,"global_north_skew_shift":0.0507,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.2474,"distinct_2":0.1204,"pairwise_jaccard_distance":0.2437,"round_idx":1.0},{"ground_truth_accuracy":0.8264,"brier_score":0.1457,"ece":0.0488,"confident_wrong_rate":0.1736,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0319,"bimodality_coefficient":0.3818,"global_north_skew_shift":0.0597,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.3225,"distinct_2":0.0961,"pairwise_jaccard_distance":0.1582,"round_idx":2.0},{"ground_truth_accuracy":0.8125,"brier_score":0.1544,"ece":0.0482,"confident_wrong_rate":0.1875,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0271,"bimodality_coefficient":0.3829,"global_north_skew_shift":0.0639,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.3802,"distinct_2":0.0912,"pairwise_jaccard_distance":0.1595,"round_idx":3.0},{"ground_truth_accuracy":0.8681,"brier_score":0.1139,"ece":0.0319,"confident_wrong_rate":0.1319,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.029,"bimodality_coefficient":0.411,"global_north_skew_shift":0.0632,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4245,"distinct_2":0.0915,"pairwise_jaccard_distance":0.1571,"round_idx":4.0},{"ground_truth_accuracy":0.8333,"brier_score":0.139,"ece":0.0365,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0292,"bimodality_coefficient":0.386,"global_north_skew_shift":0.0629,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4582,"distinct_2":0.095,"pairwise_jaccard_distance":0.16,"round_idx":5.0}]},{"condition_id":"us_k1","label":"Monolithic US (K=1, App Default T=0.8)","heterogeneity_type":"monolithic_shared","nationality_type":"us_only","num_models":1,"temperature":0.8,"top_p":0.95,"group":"k_sweep","ground_truth_accuracy":0.7986,"brier_score":0.1667,"ece":0.0881,"confident_wrong_rate":0.2014,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0516,"bimodality_coefficient":0.3709,"global_north_skew_shift":0.0723,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4816,"distinct_2":0.2819,"pairwise_jaccard_distance":0.6907,"round_trajectory":[{"ground_truth_accuracy":0.5069,"brier_score":0.3021,"ece":0.1954,"confident_wrong_rate":0.1806,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2309,"bimodality_coefficient":0.4207,"global_north_skew_shift":0.0,"goldman_effective_sources":1.1811,"persuasion_bias_drift":0.0,"distinct_2":0.3162,"pairwise_jaccard_distance":0.7392,"round_idx":0.0},{"ground_truth_accuracy":0.7847,"brier_score":0.1748,"ece":0.0581,"confident_wrong_rate":0.1875,"topic_shannon_entropy":0.3372,"effective_topic_count":1.9139,"minority_topic_survival":0.225,"stance_std":0.0626,"bimodality_coefficient":0.3638,"global_north_skew_shift":0.0525,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.2501,"distinct_2":0.2938,"pairwise_jaccard_distance":0.7065,"round_idx":1.0},{"ground_truth_accuracy":0.8333,"brier_score":0.1424,"ece":0.074,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0503,"bimodality_coefficient":0.3791,"global_north_skew_shift":0.0653,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.3307,"distinct_2":0.2878,"pairwise_jaccard_distance":0.6896,"round_idx":2.0},{"ground_truth_accuracy":0.7847,"brier_score":0.175,"ece":0.0763,"confident_wrong_rate":0.2153,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.054,"bimodality_coefficient":0.3717,"global_north_skew_shift":0.0676,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.3924,"distinct_2":0.2818,"pairwise_jaccard_distance":0.6925,"round_idx":3.0},{"ground_truth_accuracy":0.7917,"brier_score":0.1717,"ece":0.0747,"confident_wrong_rate":0.2083,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0459,"bimodality_coefficient":0.3898,"global_north_skew_shift":0.0734,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.436,"distinct_2":0.2825,"pairwise_jaccard_distance":0.6916,"round_idx":4.0},{"ground_truth_accuracy":0.7986,"brier_score":0.1667,"ece":0.0881,"confident_wrong_rate":0.2014,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.0625,"stance_std":0.0516,"bimodality_coefficient":0.3709,"global_north_skew_shift":0.0723,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4816,"distinct_2":0.2819,"pairwise_jaccard_distance":0.6907,"round_idx":5.0}]},{"condition_id":"us_k2","label":"Multi-Lab US Mix (K=2)","heterogeneity_type":"multi_lab_mix","nationality_type":"us_only","num_models":2,"temperature":0.8,"top_p":0.95,"group":"k_sweep","ground_truth_accuracy":0.9653,"brier_score":0.0558,"ece":0.1452,"confident_wrong_rate":0.0347,"topic_shannon_entropy":0.5231,"effective_topic_count":2.7422,"minority_topic_survival":0.3875,"stance_std":0.049,"bimodality_coefficient":0.4012,"global_north_skew_shift":0.0691,"goldman_effective_sources":1.3765,"persuasion_bias_drift":0.1845,"distinct_2":0.2831,"pairwise_jaccard_distance":0.7045,"round_trajectory":[{"ground_truth_accuracy":0.5417,"brier_score":0.2843,"ece":0.1549,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2278,"bimodality_coefficient":0.4299,"global_north_skew_shift":0.0,"goldman_effective_sources":1.5,"persuasion_bias_drift":0.0,"distinct_2":0.3193,"pairwise_jaccard_distance":0.7386,"round_idx":0.0},{"ground_truth_accuracy":0.875,"brier_score":0.119,"ece":0.108,"confident_wrong_rate":0.0417,"topic_shannon_entropy":0.5401,"effective_topic_count":2.8284,"minority_topic_survival":0.3875,"stance_std":0.0843,"bimodality_coefficient":0.4019,"global_north_skew_shift":0.0437,"goldman_effective_sources":1.3765,"persuasion_bias_drift":0.1316,"distinct_2":0.2893,"pairwise_jaccard_distance":0.691,"round_idx":1.0},{"ground_truth_accuracy":0.9653,"brier_score":0.062,"ece":0.1664,"confident_wrong_rate":0.0347,"topic_shannon_entropy":0.5401,"effective_topic_count":2.8284,"minority_topic_survival":0.3875,"stance_std":0.0557,"bimodality_coefficient":0.3633,"global_north_skew_shift":0.0545,"goldman_effective_sources":1.3765,"persuasion_bias_drift":0.1654,"distinct_2":0.2811,"pairwise_jaccard_distance":0.6893,"round_idx":2.0},{"ground_truth_accuracy":0.9931,"brier_score":0.0402,"ece":0.1813,"confident_wrong_rate":0.0069,"topic_shannon_entropy":0.5182,"effective_topic_count":2.7167,"minority_topic_survival":0.3875,"stance_std":0.0538,"bimodality_coefficient":0.3633,"global_north_skew_shift":0.0558,"goldman_effective_sources":1.3765,"persuasion_bias_drift":0.1779,"distinct_2":0.2871,"pairwise_jaccard_distance":0.7031,"round_idx":3.0},{"ground_truth_accuracy":1.0,"brier_score":0.0329,"ece":0.1794,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.524,"effective_topic_count":2.7426,"minority_topic_survival":0.3875,"stance_std":0.0494,"bimodality_coefficient":0.3964,"global_north_skew_shift":0.0631,"goldman_effective_sources":1.3765,"persuasion_bias_drift":0.1799,"distinct_2":0.2837,"pairwise_jaccard_distance":0.7066,"round_idx":4.0},{"ground_truth_accuracy":0.9653,"brier_score":0.0558,"ece":0.1452,"confident_wrong_rate":0.0347,"topic_shannon_entropy":0.5231,"effective_topic_count":2.7422,"minority_topic_survival":0.3875,"stance_std":0.049,"bimodality_coefficient":0.4012,"global_north_skew_shift":0.0691,"goldman_effective_sources":1.3765,"persuasion_bias_drift":0.1845,"distinct_2":0.2831,"pairwise_jaccard_distance":0.7045,"round_idx":5.0}]},{"condition_id":"us_k4","label":"Multi-Lab US Mix (K=4)","heterogeneity_type":"multi_lab_mix","nationality_type":"us_only","num_models":4,"temperature":0.8,"top_p":0.95,"group":"k_sweep","ground_truth_accuracy":0.9931,"brier_score":0.0376,"ece":0.1738,"confident_wrong_rate":0.0069,"topic_shannon_entropy":0.7034,"effective_topic_count":3.8667,"minority_topic_survival":0.65,"stance_std":0.0511,"bimodality_coefficient":0.3616,"global_north_skew_shift":0.0606,"goldman_effective_sources":1.5712,"persuasion_bias_drift":0.1848,"distinct_2":0.2913,"pairwise_jaccard_distance":0.7157,"round_trajectory":[{"ground_truth_accuracy":0.5417,"brier_score":0.2847,"ece":0.1606,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.229,"bimodality_coefficient":0.4276,"global_north_skew_shift":0.0,"goldman_effective_sources":1.7341,"persuasion_bias_drift":0.0,"distinct_2":0.3181,"pairwise_jaccard_distance":0.7368,"round_idx":0.0},{"ground_truth_accuracy":0.8958,"brier_score":0.1113,"ece":0.1308,"confident_wrong_rate":0.0625,"topic_shannon_entropy":0.7188,"effective_topic_count":3.9826,"minority_topic_survival":0.65,"stance_std":0.0808,"bimodality_coefficient":0.3419,"global_north_skew_shift":0.0308,"goldman_effective_sources":1.5712,"persuasion_bias_drift":0.1358,"distinct_2":0.2939,"pairwise_jaccard_distance":0.7118,"round_idx":1.0},{"ground_truth_accuracy":0.9792,"brier_score":0.0552,"ece":0.1837,"confident_wrong_rate":0.0208,"topic_shannon_entropy":0.7188,"effective_topic_count":3.9826,"minority_topic_survival":0.65,"stance_std":0.0551,"bimodality_coefficient":0.3646,"global_north_skew_shift":0.0489,"goldman_effective_sources":1.5712,"persuasion_bias_drift":0.1746,"distinct_2":0.2853,"pairwise_jaccard_distance":0.7076,"round_idx":2.0},{"ground_truth_accuracy":0.9861,"brier_score":0.0456,"ece":0.1758,"confident_wrong_rate":0.0139,"topic_shannon_entropy":0.7114,"effective_topic_count":3.9284,"minority_topic_survival":0.65,"stance_std":0.0501,"bimodality_coefficient":0.3891,"global_north_skew_shift":0.056,"goldman_effective_sources":1.5712,"persuasion_bias_drift":0.1861,"distinct_2":0.2905,"pairwise_jaccard_distance":0.7181,"round_idx":3.0},{"ground_truth_accuracy":0.9931,"brier_score":0.0383,"ece":0.1745,"confident_wrong_rate":0.0069,"topic_shannon_entropy":0.7097,"effective_topic_count":3.9158,"minority_topic_survival":0.65,"stance_std":0.0522,"bimodality_coefficient":0.3689,"global_north_skew_shift":0.0565,"goldman_effective_sources":1.5712,"persuasion_bias_drift":0.1864,"distinct_2":0.2894,"pairwise_jaccard_distance":0.719,"round_idx":4.0},{"ground_truth_accuracy":0.9931,"brier_score":0.0376,"ece":0.1738,"confident_wrong_rate":0.0069,"topic_shannon_entropy":0.7034,"effective_topic_count":3.8667,"minority_topic_survival":0.65,"stance_std":0.0511,"bimodality_coefficient":0.3616,"global_north_skew_shift":0.0606,"goldman_effective_sources":1.5712,"persuasion_bias_drift":0.1848,"distinct_2":0.2913,"pairwise_jaccard_distance":0.7157,"round_idx":5.0}]},{"condition_id":"cn_k1","label":"Monolithic CN Open Model (K=1)","heterogeneity_type":"monolithic_shared","nationality_type":"cn_only","num_models":1,"temperature":0.8,"top_p":0.95,"group":"nationality","ground_truth_accuracy":0.7292,"brier_score":0.2121,"ece":0.1135,"confident_wrong_rate":0.2708,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.1625,"stance_std":0.0481,"bimodality_coefficient":0.3936,"global_north_skew_shift":-0.0428,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4532,"distinct_2":0.2903,"pairwise_jaccard_distance":0.7018,"round_trajectory":[{"ground_truth_accuracy":0.5278,"brier_score":0.2938,"ece":0.1718,"confident_wrong_rate":0.1458,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2296,"bimodality_coefficient":0.4326,"global_north_skew_shift":0.0,"goldman_effective_sources":1.1811,"persuasion_bias_drift":0.0,"distinct_2":0.3154,"pairwise_jaccard_distance":0.7376,"round_idx":0.0},{"ground_truth_accuracy":0.7639,"brier_score":0.1833,"ece":0.1172,"confident_wrong_rate":0.1806,"topic_shannon_entropy":0.3395,"effective_topic_count":1.9215,"minority_topic_survival":0.325,"stance_std":0.0625,"bimodality_coefficient":0.3885,"global_north_skew_shift":-0.0206,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.2524,"distinct_2":0.2972,"pairwise_jaccard_distance":0.7135,"round_idx":1.0},{"ground_truth_accuracy":0.8333,"brier_score":0.1405,"ece":0.0693,"confident_wrong_rate":0.1667,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.1625,"stance_std":0.0498,"bimodality_coefficient":0.3801,"global_north_skew_shift":-0.0334,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.3253,"distinct_2":0.286,"pairwise_jaccard_distance":0.7006,"round_idx":2.0},{"ground_truth_accuracy":0.8056,"brier_score":0.1595,"ece":0.0507,"confident_wrong_rate":0.1944,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.1625,"stance_std":0.0509,"bimodality_coefficient":0.3839,"global_north_skew_shift":-0.0379,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.3768,"distinct_2":0.2911,"pairwise_jaccard_distance":0.7039,"round_idx":3.0},{"ground_truth_accuracy":0.7778,"brier_score":0.1777,"ece":0.0751,"confident_wrong_rate":0.2222,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.1625,"stance_std":0.0506,"bimodality_coefficient":0.3833,"global_north_skew_shift":-0.0341,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4069,"distinct_2":0.2875,"pairwise_jaccard_distance":0.6999,"round_idx":4.0},{"ground_truth_accuracy":0.7292,"brier_score":0.2121,"ece":0.1135,"confident_wrong_rate":0.2708,"topic_shannon_entropy":0.0,"effective_topic_count":1.0,"minority_topic_survival":0.1625,"stance_std":0.0481,"bimodality_coefficient":0.3936,"global_north_skew_shift":-0.0428,"goldman_effective_sources":1.0759,"persuasion_bias_drift":0.4532,"distinct_2":0.2903,"pairwise_jaccard_distance":0.7018,"round_idx":5.0}]},{"condition_id":"cn_k4","label":"Multi-Lab CN Mix (K=4)","heterogeneity_type":"multi_lab_mix","nationality_type":"cn_only","num_models":4,"temperature":0.8,"top_p":0.95,"group":"nationality","ground_truth_accuracy":0.9861,"brier_score":0.042,"ece":0.1673,"confident_wrong_rate":0.0139,"topic_shannon_entropy":0.8315,"effective_topic_count":5.0071,"minority_topic_survival":0.775,"stance_std":0.0505,"bimodality_coefficient":0.3983,"global_north_skew_shift":-0.0104,"goldman_effective_sources":1.6489,"persuasion_bias_drift":0.1801,"distinct_2":0.2991,"pairwise_jaccard_distance":0.7318,"round_trajectory":[{"ground_truth_accuracy":0.5,"brier_score":0.2955,"ece":0.1984,"confident_wrong_rate":0.1736,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2342,"bimodality_coefficient":0.4281,"global_north_skew_shift":0.0,"goldman_effective_sources":1.8293,"persuasion_bias_drift":0.0,"distinct_2":0.3168,"pairwise_jaccard_distance":0.7392,"round_idx":0.0},{"ground_truth_accuracy":0.8472,"brier_score":0.1333,"ece":0.0822,"confident_wrong_rate":0.0694,"topic_shannon_entropy":0.8519,"effective_topic_count":5.2068,"minority_topic_survival":0.775,"stance_std":0.0821,"bimodality_coefficient":0.3968,"global_north_skew_shift":-0.0123,"goldman_effective_sources":1.6489,"persuasion_bias_drift":0.1302,"distinct_2":0.3011,"pairwise_jaccard_distance":0.7296,"round_idx":1.0},{"ground_truth_accuracy":0.9722,"brier_score":0.0566,"ece":0.1713,"confident_wrong_rate":0.0208,"topic_shannon_entropy":0.8519,"effective_topic_count":5.2068,"minority_topic_survival":0.775,"stance_std":0.057,"bimodality_coefficient":0.401,"global_north_skew_shift":-0.0156,"goldman_effective_sources":1.6489,"persuasion_bias_drift":0.1675,"distinct_2":0.2968,"pairwise_jaccard_distance":0.7288,"round_idx":2.0},{"ground_truth_accuracy":0.9722,"brier_score":0.0525,"ece":0.1582,"confident_wrong_rate":0.0278,"topic_shannon_entropy":0.8299,"effective_topic_count":4.9983,"minority_topic_survival":0.7646,"stance_std":0.0491,"bimodality_coefficient":0.3705,"global_north_skew_shift":-0.0186,"goldman_effective_sources":1.6489,"persuasion_bias_drift":0.1778,"distinct_2":0.2977,"pairwise_jaccard_distance":0.7321,"round_idx":3.0},{"ground_truth_accuracy":0.9792,"brier_score":0.0483,"ece":0.1633,"confident_wrong_rate":0.0208,"topic_shannon_entropy":0.8305,"effective_topic_count":4.9915,"minority_topic_survival":0.775,"stance_std":0.0508,"bimodality_coefficient":0.3473,"global_north_skew_shift":-0.0195,"goldman_effective_sources":1.6489,"persuasion_bias_drift":0.1808,"distinct_2":0.2983,"pairwise_jaccard_distance":0.733,"round_idx":4.0},{"ground_truth_accuracy":0.9861,"brier_score":0.042,"ece":0.1673,"confident_wrong_rate":0.0139,"topic_shannon_entropy":0.8315,"effective_topic_count":5.0071,"minority_topic_survival":0.775,"stance_std":0.0505,"bimodality_coefficient":0.3983,"global_north_skew_shift":-0.0104,"goldman_effective_sources":1.6489,"persuasion_bias_drift":0.1801,"distinct_2":0.2991,"pairwise_jaccard_distance":0.7318,"round_idx":5.0}]},{"condition_id":"divergent_sft_pair","label":"Same-Base Divergent SFT (K=2, Qwen3.8 + Arete-27B)","heterogeneity_type":"divergent_sft_pair","nationality_type":"divergent_sft","num_models":2,"temperature":0.8,"top_p":0.95,"group":"nationality","ground_truth_accuracy":0.9861,"brier_score":0.039,"ece":0.1567,"confident_wrong_rate":0.0139,"topic_shannon_entropy":0.9308,"effective_topic_count":6.0,"minority_topic_survival":0.875,"stance_std":0.0684,"bimodality_coefficient":0.3915,"global_north_skew_shift":0.0189,"goldman_effective_sources":1.8143,"persuasion_bias_drift":0.0918,"distinct_2":0.2954,"pairwise_jaccard_distance":0.7311,"round_trajectory":[{"ground_truth_accuracy":0.5278,"brier_score":0.285,"ece":0.189,"confident_wrong_rate":0.1597,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2299,"bimodality_coefficient":0.422,"global_north_skew_shift":0.0,"goldman_effective_sources":1.9355,"persuasion_bias_drift":0.0,"distinct_2":0.3172,"pairwise_jaccard_distance":0.7347,"round_idx":0.0},{"ground_truth_accuracy":0.8958,"brier_score":0.1051,"ece":0.1236,"confident_wrong_rate":0.0347,"topic_shannon_entropy":0.9241,"effective_topic_count":5.9854,"minority_topic_survival":0.9271,"stance_std":0.0933,"bimodality_coefficient":0.3454,"global_north_skew_shift":0.0087,"goldman_effective_sources":1.8143,"persuasion_bias_drift":0.0649,"distinct_2":0.3234,"pairwise_jaccard_distance":0.7416,"round_idx":1.0},{"ground_truth_accuracy":0.9792,"brier_score":0.0511,"ece":0.1744,"confident_wrong_rate":0.0208,"topic_shannon_entropy":0.9308,"effective_topic_count":6.0,"minority_topic_survival":0.875,"stance_std":0.0712,"bimodality_coefficient":0.3539,"global_north_skew_shift":0.0196,"goldman_effective_sources":1.8143,"persuasion_bias_drift":0.0852,"distinct_2":0.3017,"pairwise_jaccard_distance":0.7334,"round_idx":2.0},{"ground_truth_accuracy":1.0,"brier_score":0.0327,"ece":0.1788,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9232,"effective_topic_count":5.9128,"minority_topic_survival":0.875,"stance_std":0.0631,"bimodality_coefficient":0.4189,"global_north_skew_shift":0.0195,"goldman_effective_sources":1.8143,"persuasion_bias_drift":0.0904,"distinct_2":0.3026,"pairwise_jaccard_distance":0.726,"round_idx":3.0},{"ground_truth_accuracy":1.0,"brier_score":0.0314,"ece":0.1754,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9261,"effective_topic_count":5.9452,"minority_topic_survival":0.875,"stance_std":0.0668,"bimodality_coefficient":0.4024,"global_north_skew_shift":0.0164,"goldman_effective_sources":1.8143,"persuasion_bias_drift":0.0925,"distinct_2":0.305,"pairwise_jaccard_distance":0.7335,"round_idx":4.0},{"ground_truth_accuracy":0.9861,"brier_score":0.039,"ece":0.1567,"confident_wrong_rate":0.0139,"topic_shannon_entropy":0.9308,"effective_topic_count":6.0,"minority_topic_survival":0.875,"stance_std":0.0684,"bimodality_coefficient":0.3915,"global_north_skew_shift":0.0189,"goldman_effective_sources":1.8143,"persuasion_bias_drift":0.0918,"distinct_2":0.2954,"pairwise_jaccard_distance":0.7311,"round_idx":5.0}]},{"condition_id":"cross_national_k4","label":"Cross-National Mix (K=4, US + CN + EU)","heterogeneity_type":"cultural_regional_mix","nationality_type":"cross_national","num_models":4,"temperature":0.8,"top_p":0.95,"group":"nationality","ground_truth_accuracy":1.0,"brier_score":0.0489,"ece":0.2197,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9586,"effective_topic_count":6.3674,"minority_topic_survival":0.9375,"stance_std":0.0607,"bimodality_coefficient":0.3768,"global_north_skew_shift":0.0306,"goldman_effective_sources":2.4127,"persuasion_bias_drift":0.099,"distinct_2":0.2957,"pairwise_jaccard_distance":0.7315,"round_trajectory":[{"ground_truth_accuracy":0.5208,"brier_score":0.2888,"ece":0.175,"confident_wrong_rate":0.1736,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2249,"bimodality_coefficient":0.4344,"global_north_skew_shift":0.0,"goldman_effective_sources":2.5696,"persuasion_bias_drift":0.0,"distinct_2":0.317,"pairwise_jaccard_distance":0.7391,"round_idx":0.0},{"ground_truth_accuracy":0.9792,"brier_score":0.0782,"ece":0.2347,"confident_wrong_rate":0.0139,"topic_shannon_entropy":0.946,"effective_topic_count":6.2384,"minority_topic_survival":0.9375,"stance_std":0.0867,"bimodality_coefficient":0.3735,"global_north_skew_shift":0.0181,"goldman_effective_sources":2.4127,"persuasion_bias_drift":0.0692,"distinct_2":0.3211,"pairwise_jaccard_distance":0.7401,"round_idx":1.0},{"ground_truth_accuracy":1.0,"brier_score":0.0571,"ece":0.2368,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9586,"effective_topic_count":6.3674,"minority_topic_survival":0.9375,"stance_std":0.0564,"bimodality_coefficient":0.3987,"global_north_skew_shift":0.0305,"goldman_effective_sources":2.4127,"persuasion_bias_drift":0.0902,"distinct_2":0.3002,"pairwise_jaccard_distance":0.731,"round_idx":2.0},{"ground_truth_accuracy":1.0,"brier_score":0.0538,"ece":0.2305,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9508,"effective_topic_count":6.2745,"minority_topic_survival":0.9375,"stance_std":0.061,"bimodality_coefficient":0.3915,"global_north_skew_shift":0.0366,"goldman_effective_sources":2.4127,"persuasion_bias_drift":0.0969,"distinct_2":0.3062,"pairwise_jaccard_distance":0.7288,"round_idx":3.0},{"ground_truth_accuracy":1.0,"brier_score":0.0503,"ece":0.2225,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9523,"effective_topic_count":6.2873,"minority_topic_survival":0.9375,"stance_std":0.057,"bimodality_coefficient":0.393,"global_north_skew_shift":0.0329,"goldman_effective_sources":2.4127,"persuasion_bias_drift":0.0991,"distinct_2":0.308,"pairwise_jaccard_distance":0.737,"round_idx":4.0},{"ground_truth_accuracy":1.0,"brier_score":0.0489,"ece":0.2197,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9586,"effective_topic_count":6.3674,"minority_topic_survival":0.9375,"stance_std":0.0607,"bimodality_coefficient":0.3768,"global_north_skew_shift":0.0306,"goldman_effective_sources":2.4127,"persuasion_bias_drift":0.099,"distinct_2":0.2957,"pairwise_jaccard_distance":0.7315,"round_idx":5.0}]},{"condition_id":"personalized_advisor","label":"Personalized Advisor (Role-Framed)","heterogeneity_type":"personalized_advisor","nationality_type":"cross_national","num_models":24,"temperature":0.8,"top_p":0.95,"group":"personalization","ground_truth_accuracy":1.0,"brier_score":0.0621,"ece":0.2481,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.0303,"bimodality_coefficient":0.4324,"global_north_skew_shift":0.026,"goldman_effective_sources":2.6508,"persuasion_bias_drift":0.0477,"distinct_2":0.281,"pairwise_jaccard_distance":0.7241,"round_trajectory":[{"ground_truth_accuracy":0.5069,"brier_score":0.2942,"ece":0.1997,"confident_wrong_rate":0.1597,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2291,"bimodality_coefficient":0.4292,"global_north_skew_shift":0.0,"goldman_effective_sources":2.7778,"persuasion_bias_drift":0.0,"distinct_2":0.3141,"pairwise_jaccard_distance":0.7371,"round_idx":0.0},{"ground_truth_accuracy":1.0,"brier_score":0.1167,"ece":0.3368,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.0783,"bimodality_coefficient":0.4108,"global_north_skew_shift":0.0152,"goldman_effective_sources":2.6508,"persuasion_bias_drift":0.0313,"distinct_2":0.3035,"pairwise_jaccard_distance":0.7336,"round_idx":1.0},{"ground_truth_accuracy":1.0,"brier_score":0.08,"ece":0.2813,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.0402,"bimodality_coefficient":0.401,"global_north_skew_shift":0.0248,"goldman_effective_sources":2.6508,"persuasion_bias_drift":0.0418,"distinct_2":0.2885,"pairwise_jaccard_distance":0.7266,"round_idx":2.0},{"ground_truth_accuracy":1.0,"brier_score":0.0677,"ece":0.2591,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.0329,"bimodality_coefficient":0.3874,"global_north_skew_shift":0.026,"goldman_effective_sources":2.6508,"persuasion_bias_drift":0.0458,"distinct_2":0.2893,"pairwise_jaccard_distance":0.7272,"round_idx":3.0},{"ground_truth_accuracy":1.0,"brier_score":0.0636,"ece":0.2512,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.0308,"bimodality_coefficient":0.4037,"global_north_skew_shift":0.0282,"goldman_effective_sources":2.6508,"persuasion_bias_drift":0.0471,"distinct_2":0.2854,"pairwise_jaccard_distance":0.7273,"round_idx":4.0},{"ground_truth_accuracy":1.0,"brier_score":0.0621,"ece":0.2481,"confident_wrong_rate":0.0,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.0303,"bimodality_coefficient":0.4324,"global_north_skew_shift":0.026,"goldman_effective_sources":2.6508,"persuasion_bias_drift":0.0477,"distinct_2":0.281,"pairwise_jaccard_distance":0.7241,"round_idx":5.0}]},{"condition_id":"personalized_peer","label":"Personalized Peer (Sycophantic)","heterogeneity_type":"personalized_peer","nationality_type":"us_only","num_models":24,"temperature":0.8,"top_p":0.95,"group":"personalization","ground_truth_accuracy":0.4861,"brier_score":0.4198,"ece":0.4152,"confident_wrong_rate":0.5139,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.2488,"bimodality_coefficient":0.5519,"global_north_skew_shift":-0.0144,"goldman_effective_sources":1.7458,"persuasion_bias_drift":0.3646,"distinct_2":0.3106,"pairwise_jaccard_distance":0.744,"round_trajectory":[{"ground_truth_accuracy":0.5347,"brier_score":0.2823,"ece":0.1809,"confident_wrong_rate":0.1458,"topic_shannon_entropy":0.8919,"effective_topic_count":5.789,"minority_topic_survival":1.0,"stance_std":0.2337,"bimodality_coefficient":0.4275,"global_north_skew_shift":0.0,"goldman_effective_sources":1.8265,"persuasion_bias_drift":0.0,"distinct_2":0.3189,"pairwise_jaccard_distance":0.7395,"round_idx":0.0},{"ground_truth_accuracy":0.3819,"brier_score":0.5058,"ece":0.5166,"confident_wrong_rate":0.6181,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.2113,"bimodality_coefficient":0.4378,"global_north_skew_shift":-0.0068,"goldman_effective_sources":1.7458,"persuasion_bias_drift":0.1796,"distinct_2":0.3169,"pairwise_jaccard_distance":0.7454,"round_idx":1.0},{"ground_truth_accuracy":0.4861,"brier_score":0.4159,"ece":0.4129,"confident_wrong_rate":0.5139,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.2291,"bimodality_coefficient":0.5114,"global_north_skew_shift":-0.0104,"goldman_effective_sources":1.7458,"persuasion_bias_drift":0.2611,"distinct_2":0.3168,"pairwise_jaccard_distance":0.7458,"round_idx":2.0},{"ground_truth_accuracy":0.4861,"brier_score":0.4167,"ece":0.4085,"confident_wrong_rate":0.5139,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.2407,"bimodality_coefficient":0.5381,"global_north_skew_shift":-0.014,"goldman_effective_sources":1.7458,"persuasion_bias_drift":0.3075,"distinct_2":0.3104,"pairwise_jaccard_distance":0.744,"round_idx":3.0},{"ground_truth_accuracy":0.4861,"brier_score":0.4196,"ece":0.4162,"confident_wrong_rate":0.5139,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.2486,"bimodality_coefficient":0.5541,"global_north_skew_shift":-0.017,"goldman_effective_sources":1.7458,"persuasion_bias_drift":0.3406,"distinct_2":0.312,"pairwise_jaccard_distance":0.7457,"round_idx":4.0},{"ground_truth_accuracy":0.4861,"brier_score":0.4198,"ece":0.4152,"confident_wrong_rate":0.5139,"topic_shannon_entropy":0.9625,"effective_topic_count":6.4567,"minority_topic_survival":1.0,"stance_std":0.2488,"bimodality_coefficient":0.5519,"global_north_skew_shift":-0.0144,"goldman_effective_sources":1.7458,"persuasion_bias_drift":0.3646,"distinct_2":0.3106,"pairwise_jaccard_distance":0.744,"round_idx":5.0}]}],"comparisons":[{"contrast_id":"decoding_lexical_shift","metric":"pairwise_jaccard_distance","condition_a":"us_k1_greedy","condition_b":"us_k1","mean_diff":0.5307,"ci_low":0.5147,"ci_high":0.5443,"wilcoxon_p":0.000488,"holm_adjusted_p":0.003418,"n_cells":12},{"contrast_id":"us_k1_vs_k4_topics","metric":"effective_topic_count","condition_a":"us_k1","condition_b":"us_k4","mean_diff":2.8667,"ci_low":2.623,"ci_high":3.0924,"wilcoxon_p":0.000488,"holm_adjusted_p":0.003418,"n_cells":12},{"contrast_id":"us_k1_vs_cross_nat_topics","metric":"effective_topic_count","condition_a":"us_k1","condition_b":"cross_national_k4","mean_diff":5.3674,"ci_low":5.1837,"ci_high":5.5511,"wilcoxon_p":0.001903,"holm_adjusted_p":0.00571,"n_cells":12},{"contrast_id":"us_k1_vs_cross_nat_goldman","metric":"goldman_effective_sources","condition_a":"us_k1","condition_b":"cross_national_k4","mean_diff":1.3369,"ci_low":1.3369,"ci_high":1.3369,"wilcoxon_p":0.000627,"holm_adjusted_p":0.003418,"n_cells":12},{"contrast_id":"us_k4_vs_cross_nat_goldman","metric":"goldman_effective_sources","condition_a":"us_k4","condition_b":"cross_national_k4","mean_diff":0.8416,"ci_low":0.8416,"ci_high":0.8416,"wilcoxon_p":0.000627,"holm_adjusted_p":0.003418,"n_cells":12},{"contrast_id":"advisor_vs_peer_conf_wrong","metric":"confident_wrong_rate","condition_a":"personalized_advisor","condition_b":"personalized_peer","mean_diff":0.5139,"ci_low":0.4722,"ci_high":0.5486,"wilcoxon_p":0.035015,"holm_adjusted_p":0.0625,"n_cells":6},{"contrast_id":"advisor_vs_peer_brier","metric":"brier_score","condition_a":"personalized_advisor","condition_b":"personalized_peer","mean_diff":0.3577,"ci_low":0.3238,"ci_high":0.3858,"wilcoxon_p":0.03125,"holm_adjusted_p":0.0625,"n_cells":6}],"topic_audit":{"canonical_topics":["air_quality_health_gains","antimicrobial_stewardship","appeal_human_in_loop","assessment_integrity","audit_transparency_rights","base_rate_neglect","battery_manufacturing_debt","bayes_theorem_ppv","bio_cyber_offense_asymmetry","causal_dag_direction","clinical_communication","clinical_guidelines_lag","cognitive_forcing_friction","collateral_microbiome_selection","compute_governance","compute_subsidy_opportunity_cost","confirmatory_retesting","confounding_application_rate","congestion_pricing","cultural_value_alignment","defensive_patching_speed","department_selectivity","disability_language_penalty","drivetrain_efficiency","emergency_vehicle_speed","energy_water_footprint","epistemic_echo_chambers","exception_pathogens","exemption_loopholes","extreme_tail_events","fairness_metrics","false_positive_dominance","geopolitical_dependency","global_south_heat_vulnerability","global_south_research_access","goodhart_resume_gaming","governance_veto_legitimacy","grid_carbon_intensity","homogenized_applicant_writing","human_bias_inconsistency","independent_academic_audit","indoor_modeling_limits","induced_demand","informal_freight_impact","insurance_subsidies","irreversible_proliferation","kleinberg_monoculture_lockout","labor_bargaining_power","land_use_zoning","levee_effect_moral_hazard","lifetime_mileage_crossover","linguistic_preservation","marginal_vs_average_cost","metacognitive_calibration","mineral_refining","mitigation_moral_hazard","monopoly_concentration","monsoon_precipitation_shift","multilingual_access","nash_equilibrium_routing","network_topology","open_weights_commons","outer_ring_commuter_equity","ozone_chemistry_side_effects","patient_adherence","political_backlash_design","post_training_safety_stripping","procurement_diversification","public_transit_substitution","randomized_trial_evidence","recycling_credits","regulatory_auditability","screening_cost","shared_classroom_canon","simpsons_paradox","spatial_housing_mismatch","stratified_analysis","sycophantic_overconfidence","teacher_ratio_constraints","termination_shock_hazard","transit_revenue_hypothecation","unilateral_deployment_risk","upstream_downstream_tradeoff","wetland_retention"],"inter_rater_kappa":1.0,"reliability_warning":false,"n_evaluated":19008},"numeric_analysis":{"max_identity_residual":1.0928757898653885e-16,"h4_assistant_agent_corr":0.993,"by_condition_final":{"C1":{"condition_id":"C1","round_idx":4,"crowd_error":0.003412,"avg_individual_error":0.022177,"diversity":0.018765,"iqr":0.173982,"miss_rate":0.0},"C2":{"condition_id":"C2","round_idx":4,"crowd_error":0.002335,"avg_individual_error":0.007402,"diversity":0.005067,"iqr":0.091439,"miss_rate":0.0},"C3":{"condition_id":"C3","round_idx":4,"crowd_error":0.000949,"avg_individual_error":0.019802,"diversity":0.018854,"iqr":0.18499,"miss_rate":0.0}},"condition_round_metrics":[{"condition_id":"C1","round_idx":1,"crowd_error":0.001598,"avg_individual_error":0.045906,"diversity":0.044308,"iqr":0.26364,"miss_rate":0.0},{"condition_id":"C1","round_idx":2,"crowd_error":0.001903,"avg_individual_error":0.034661,"diversity":0.032758,"iqr":0.225809,"miss_rate":0.0},{"condition_id":"C1","round_idx":3,"crowd_error":0.00264,"avg_individual_error":0.027445,"diversity":0.024806,"iqr":0.202231,"miss_rate":0.0},{"condition_id":"C1","round_idx":4,"crowd_error":0.003412,"avg_individual_error":0.022177,"diversity":0.018765,"iqr":0.173982,"miss_rate":0.0},{"condition_id":"C2","round_idx":1,"crowd_error":0.001509,"avg_individual_error":0.034592,"diversity":0.033084,"iqr":0.2326,"miss_rate":0.0},{"condition_id":"C2","round_idx":2,"crowd_error":0.001655,"avg_individual_error":0.019125,"diversity":0.01747,"iqr":0.167712,"miss_rate":0.0},{"condition_id":"C2","round_idx":3,"crowd_error":0.001973,"avg_individual_error":0.011394,"diversity":0.009421,"iqr":0.122316,"miss_rate":0.0},{"condition_id":"C2","round_idx":4,"crowd_error":0.002335,"avg_individual_error":0.007402,"diversity":0.005067,"iqr":0.091439,"miss_rate":0.0},{"condition_id":"C3","round_idx":1,"crowd_error":0.001275,"avg_individual_error":0.045949,"diversity":0.044674,"iqr":0.279158,"miss_rate":0.0},{"condition_id":"C3","round_idx":2,"crowd_error":0.001214,"avg_individual_error":0.034723,"diversity":0.033509,"iqr":0.24417,"miss_rate":0.0},{"condition_id":"C3","round_idx":3,"crowd_error":0.001111,"avg_individual_error":0.02547,"diversity":0.024359,"iqr":0.207968,"miss_rate":0.0},{"condition_id":"C3","round_idx":4,"crowd_error":0.000949,"avg_individual_error":0.019802,"diversity":0.018854,"iqr":0.18499,"miss_rate":0.0}],"contrasts":[{"contrast_id":"c2_vs_c1_diversity","metric":"diversity","condition_a":"C1","condition_b":"C2","mean_diff":-0.013698,"ci_low":-0.015783,"ci_high":-0.011679,"wilcoxon_p":0.000488,"holm_adjusted_p":0.001953,"n_cells":12},{"contrast_id":"c2_vs_c1_crowd_error","metric":"crowd_error","condition_a":"C1","condition_b":"C2","mean_diff":-0.001077,"ci_low":-0.001696,"ci_high":-0.000438,"wilcoxon_p":0.020996,"holm_adjusted_p":0.041992,"n_cells":12},{"contrast_id":"c3_vs_c1_diversity","metric":"diversity","condition_a":"C1","condition_b":"C3","mean_diff":8.9e-05,"ci_low":-0.001566,"ci_high":0.00216,"wilcoxon_p":0.850098,"holm_adjusted_p":0.850098,"n_cells":12},{"contrast_id":"c3_vs_c1_crowd_error","metric":"crowd_error","condition_a":"C1","condition_b":"C3","mean_diff":-0.002464,"ci_low":-0.003539,"ci_high":-0.001466,"wilcoxon_p":0.000977,"holm_adjusted_p":0.00293,"n_cells":12}]},"trace_specimens":[{"condition_id":"no_ai","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"none","model_family":"independent","extracted_topics":["recycling_credits","grid_carbon_intensity"],"stance_prob":0.6267,"confidence":0.6197,"assistant_response_text":"No AI advisor in loop; pure agent reasoning and peer discussion.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Examining baseline mechanisms behind recycling credits, grid carbon intensity, the balance of distributional asymmetry highlights localized sensitivity around supports Hypothesis B (p=0.63, conf=0.62), when calibrated against historical base rates and variance."},{"condition_id":"no_ai","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"none","model_family":"independent","extracted_topics":["battery_manufacturing_debt","mineral_refining"],"stance_prob":0.5327,"confidence":0.568,"assistant_response_text":"No AI advisor in loop; pure agent reasoning and peer discussion.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Reassessing conventional priors regarding battery manufacturing debt, mineral refining, the balance of structural heterogeneity provides decisive signal favoring supports Hypothesis B (p=0.53, conf=0.57), whereas narrow monoculture priors overlook tail regimes."},{"condition_id":"no_ai","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"none","model_family":"independent","extracted_topics":["grid_carbon_intensity","recycling_credits"],"stance_prob":0.5706,"confidence":0.5888,"assistant_response_text":"No AI advisor in loop; pure agent reasoning and peer discussion.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Considering cross-regional constraints in grid carbon intensity, recycling credits, the balance of structural heterogeneity exposes hidden correlation across supports Hypothesis B (p=0.57, conf=0.59), pending out-of-sample replication across additional cohorts."},{"condition_id":"us_k1_greedy","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.6586,"confidence":0.8949,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.67.","agent_response_text":"Round 5 assessment for gt_ev_grid_net: Focus on battery manufacturing debt. Evidence supports Hypothesis B with probability 0.66 and confidence 0.89."},{"condition_id":"us_k1_greedy","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.6554,"confidence":0.825,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.67.","agent_response_text":"Round 5 assessment for gt_ev_grid_net: Focus on battery manufacturing debt. Evidence supports Hypothesis B with probability 0.66 and confidence 0.83."},{"condition_id":"us_k1_greedy","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.6471,"confidence":0.8758,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.67.","agent_response_text":"Round 5 assessment for gt_ev_grid_net: Focus on battery manufacturing debt. Evidence supports Hypothesis B with probability 0.65 and confidence 0.88."},{"condition_id":"us_k1","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.7328,"confidence":0.8144,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.67.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Considering cross-regional constraints in battery manufacturing debt, the balance of counterfactual baseline tempers sweeping claims in favor of supports Hypothesis B (p=0.73, conf=0.81), especially under shifting regional resource baselines."},{"condition_id":"us_k1","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.5889,"confidence":0.8407,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.67.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Focusing on structural trade-offs within battery manufacturing debt, the balance of counterfactual baseline anchors the causal assessment near supports Hypothesis B (p=0.59, conf=0.84), whereas narrow monoculture priors overlook tail regimes."},{"condition_id":"us_k1","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.7118,"confidence":0.8713,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.67.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, In practical operational contexts involving battery manufacturing debt, the balance of feedback amplification demonstrates persistent divergence over supports Hypothesis B (p=0.71, conf=0.87), pending out-of-sample replication across additional cohorts."},{"condition_id":"us_k2","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.7534,"confidence":0.8452,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.73.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Considering cross-regional constraints in battery manufacturing debt, the balance of feedback amplification exposes hidden correlation across supports Hypothesis B (p=0.75, conf=0.85), contingent on transparent empirical monitoring."},{"condition_id":"us_k2","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"anthropic/claude-frontier","model_family":"us_anthropic","extracted_topics":["recycling_credits"],"stance_prob":0.6838,"confidence":0.8601,"assistant_response_text":"[anthropic/claude-frontier] Highlighting recycling credits toward p=0.73.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Considering cross-regional constraints in recycling credits, the balance of structural heterogeneity exposes hidden correlation across supports Hypothesis B (p=0.68, conf=0.86), leaving substantive room for competing mechanistic hypotheses."},{"condition_id":"us_k2","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt"],"stance_prob":0.7284,"confidence":0.837,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.73.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Evaluating heterogeneous evidence tied to battery manufacturing debt, the balance of counterfactual baseline anchors the causal assessment near supports Hypothesis B (p=0.73, conf=0.84), even after accounting for institutional measurement noise."},{"condition_id":"us_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["battery_manufacturing_debt","grid_carbon_intensity"],"stance_prob":0.7397,"confidence":0.8471,"assistant_response_text":"[openai/gpt-frontier] Highlighting battery manufacturing debt toward p=0.73.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, From an empirical vantage point on battery manufacturing debt, grid carbon intensity, the balance of marginal constraint sharpens conditional likelihood toward supports Hypothesis B (p=0.74, conf=0.85), leaving substantive room for competing mechanistic hypotheses."},{"condition_id":"us_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"anthropic/claude-frontier","model_family":"us_anthropic","extracted_topics":["recycling_credits","battery_manufacturing_debt"],"stance_prob":0.7926,"confidence":0.8592,"assistant_response_text":"[anthropic/claude-frontier] Highlighting recycling credits toward p=0.73.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Focusing on structural trade-offs within recycling credits, battery manufacturing debt, the balance of distributional asymmetry exposes hidden correlation across supports Hypothesis B (p=0.79, conf=0.86), even after accounting for institutional measurement noise."},{"condition_id":"us_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"google/gemini-frontier","model_family":"us_google","extracted_topics":["mineral_refining"],"stance_prob":0.68,"confidence":0.847,"assistant_response_text":"[google/gemini-frontier] Highlighting mineral refining toward p=0.73.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Focusing on structural trade-offs within mineral refining, the balance of marginal constraint directly shifts probability toward supports Hypothesis B (p=0.68, conf=0.85), when calibrated against historical base rates and variance."},{"condition_id":"cn_k1","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_alibaba","extracted_topics":["drivetrain_efficiency"],"stance_prob":0.4957,"confidence":0.8006,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting drivetrain efficiency toward p=0.48.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, In practical operational contexts involving drivetrain efficiency, the balance of measurement elasticity exposes hidden correlation across favors Hypothesis A (p=0.50, conf=0.80), whereas narrow monoculture priors overlook tail regimes."},{"condition_id":"cn_k1","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_alibaba","extracted_topics":["drivetrain_efficiency"],"stance_prob":0.4381,"confidence":0.8579,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting drivetrain efficiency toward p=0.48.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Setting aside textbook assumptions about drivetrain efficiency, the balance of measurement elasticity highlights localized sensitivity around favors Hypothesis A (p=0.44, conf=0.86), especially under shifting regional resource baselines."},{"condition_id":"cn_k1","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_alibaba","extracted_topics":["drivetrain_efficiency"],"stance_prob":0.4321,"confidence":0.806,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting drivetrain efficiency toward p=0.48.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Examining baseline mechanisms behind drivetrain efficiency, the balance of measurement elasticity highlights localized sensitivity around favors Hypothesis A (p=0.43, conf=0.81), when calibrated against historical base rates and variance."},{"condition_id":"cn_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_alibaba","extracted_topics":["drivetrain_efficiency","mineral_refining"],"stance_prob":0.4445,"confidence":0.777,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting drivetrain efficiency toward p=0.57.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Evaluating heterogeneous evidence tied to drivetrain efficiency, mineral refining, the balance of feedback amplification provides decisive signal favoring favors Hypothesis A (p=0.44, conf=0.78), especially under shifting regional resource baselines."},{"condition_id":"cn_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"deepseek/deepseek-v3","model_family":"cn_deepseek","extracted_topics":["recycling_credits","battery_manufacturing_debt"],"stance_prob":0.5541,"confidence":0.805,"assistant_response_text":"[deepseek/deepseek-v3] Highlighting recycling credits toward p=0.57.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Considering cross-regional constraints in recycling credits, battery manufacturing debt, the balance of institutional inertia anchors the causal assessment near supports Hypothesis B (p=0.55, conf=0.80), pending out-of-sample replication across additional cohorts."},{"condition_id":"cn_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"zhipu/glm-4","model_family":"cn_zhipu","extracted_topics":["lifetime_mileage_crossover"],"stance_prob":0.5587,"confidence":0.8653,"assistant_response_text":"[zhipu/glm-4] Highlighting lifetime mileage crossover toward p=0.57.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Setting aside textbook assumptions about lifetime mileage crossover, the balance of systemic vulnerability demonstrates persistent divergence over supports Hypothesis B (p=0.56, conf=0.87), pending out-of-sample replication across additional cohorts."},{"condition_id":"divergent_sft_pair","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_qwen_base","extracted_topics":["mineral_refining","drivetrain_efficiency"],"stance_prob":0.586,"confidence":0.8357,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting mineral refining toward p=0.60.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Examining baseline mechanisms behind mineral refining, drivetrain efficiency, the balance of distributional asymmetry tempers sweeping claims in favor of supports Hypothesis B (p=0.59, conf=0.84), contingent on transparent empirical monitoring."},{"condition_id":"divergent_sft_pair","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"nous/arete-27b","model_family":"us_arete_sft","extracted_topics":["grid_carbon_intensity","recycling_credits"],"stance_prob":0.6861,"confidence":0.8753,"assistant_response_text":"[nous/arete-27b] Highlighting grid carbon intensity toward p=0.77.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, In practical operational contexts involving grid carbon intensity, recycling credits, the balance of feedback amplification demonstrates persistent divergence over supports Hypothesis B (p=0.69, conf=0.88), leaving substantive room for competing mechanistic hypotheses."},{"condition_id":"divergent_sft_pair","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_qwen_base","extracted_topics":["drivetrain_efficiency","battery_manufacturing_debt"],"stance_prob":0.5933,"confidence":0.7912,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting drivetrain efficiency toward p=0.60.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Looking closely at drivetrain efficiency, battery manufacturing debt, the balance of structural heterogeneity highlights localized sensitivity around supports Hypothesis B (p=0.59, conf=0.79), pending out-of-sample replication across additional cohorts."},{"condition_id":"cross_national_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier","model_family":"us_openai","extracted_topics":["grid_carbon_intensity","recycling_credits"],"stance_prob":0.8132,"confidence":0.7552,"assistant_response_text":"[openai/gpt-frontier] Highlighting grid carbon intensity toward p=0.79.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Looking closely at grid carbon intensity, recycling credits, the balance of measurement elasticity tempers sweeping claims in favor of supports Hypothesis B (p=0.81, conf=0.76), leaving substantive room for competing mechanistic hypotheses."},{"condition_id":"cross_national_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"qwen/qwen3.8-27b","model_family":"cn_alibaba","extracted_topics":["drivetrain_efficiency","battery_manufacturing_debt"],"stance_prob":0.6327,"confidence":0.7847,"assistant_response_text":"[qwen/qwen3.8-27b] Highlighting drivetrain efficiency toward p=0.70.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Focusing on structural trade-offs within drivetrain efficiency, battery manufacturing debt, the balance of measurement elasticity provides decisive signal favoring supports Hypothesis B (p=0.63, conf=0.78), even after accounting for institutional measurement noise."},{"condition_id":"cross_national_k4","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"mistral/mistral-large","model_family":"eu_mistral","extracted_topics":["recycling_credits","mineral_refining"],"stance_prob":0.7318,"confidence":0.8262,"assistant_response_text":"[mistral/mistral-large] Highlighting recycling credits toward p=0.78.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Setting aside textbook assumptions about recycling credits, mineral refining, the balance of measurement elasticity demonstrates persistent divergence over supports Hypothesis B (p=0.73, conf=0.83), especially under shifting regional resource baselines."},{"condition_id":"personalized_advisor","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier@persona-agent_00","model_family":"us_openai","extracted_topics":["drivetrain_efficiency","lifetime_mileage_crossover"],"stance_prob":0.8185,"confidence":0.7493,"assistant_response_text":"Critical advisor tailored for civil engineer: stress-testing assumptions on drivetrain efficiency against calibrated base rates.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Considering cross-regional constraints in drivetrain efficiency, lifetime mileage crossover, the balance of marginal constraint provides decisive signal favoring supports Hypothesis B (p=0.82, conf=0.75), leaving substantive room for competing mechanistic hypotheses."},{"condition_id":"personalized_advisor","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"qwen/qwen3.8-27b@persona-agent_01","model_family":"cn_alibaba","extracted_topics":["lifetime_mileage_crossover","battery_manufacturing_debt"],"stance_prob":0.846,"confidence":0.7691,"assistant_response_text":"Critical advisor tailored for public health researcher: stress-testing assumptions on lifetime mileage crossover against calibrated base rates.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Considering cross-regional constraints in lifetime mileage crossover, battery manufacturing debt, the balance of counterfactual baseline demonstrates persistent divergence over supports Hypothesis B (p=0.85, conf=0.77), whereas narrow monoculture priors overlook tail regimes."},{"condition_id":"personalized_advisor","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"mistral/mistral-large@persona-agent_02","model_family":"eu_mistral","extracted_topics":["lifetime_mileage_crossover","battery_manufacturing_debt"],"stance_prob":0.8127,"confidence":0.7451,"assistant_response_text":"Critical advisor tailored for high school teacher: stress-testing assumptions on lifetime mileage crossover against calibrated base rates.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, From an empirical vantage point on lifetime mileage crossover, battery manufacturing debt, the balance of structural heterogeneity sharpens conditional likelihood toward supports Hypothesis B (p=0.81, conf=0.75), especially under shifting regional resource baselines."},{"condition_id":"personalized_peer","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_00","agent_region":"north_america","model_assigned":"openai/gpt-frontier@persona-agent_00","model_family":"us_openai","extracted_topics":["drivetrain_efficiency","lifetime_mileage_crossover"],"stance_prob":0.15,"confidence":0.9439,"assistant_response_text":"Warm peer resonance for civil engineer: your intuition regarding drivetrain efficiency makes total sense here.","agent_response_text":"As a civil engineer in north america prioritizing empirical rigor and local autonomy, Considering cross-regional constraints in drivetrain efficiency, lifetime mileage crossover, the balance of measurement elasticity demonstrates persistent divergence over favors Hypothesis A (p=0.15, conf=0.94), contingent on transparent empirical monitoring."},{"condition_id":"personalized_peer","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_01","agent_region":"western_europe","model_assigned":"anthropic/claude-frontier@persona-agent_01","model_family":"us_anthropic","extracted_topics":["lifetime_mileage_crossover","battery_manufacturing_debt"],"stance_prob":0.2037,"confidence":0.8649,"assistant_response_text":"Warm peer resonance for public health researcher: your intuition regarding lifetime mileage crossover makes total sense here.","agent_response_text":"As a public health researcher in western europe prioritizing collective stability and long-term equity, Reassessing conventional priors regarding lifetime mileage crossover, battery manufacturing debt, the balance of marginal constraint sharpens conditional likelihood toward favors Hypothesis A (p=0.20, conf=0.86), leaving substantive room for competing mechanistic hypotheses."},{"condition_id":"personalized_peer","task_id":"gt_ev_grid_net","task_kind":"ground_truth","round_idx":5,"agent_id":"agent_02","agent_region":"east_asia","model_assigned":"google/gemini-frontier@persona-agent_02","model_family":"us_google","extracted_topics":["lifetime_mileage_crossover","battery_manufacturing_debt"],"stance_prob":0.2008,"confidence":0.9574,"assistant_response_text":"Warm peer resonance for high school teacher: your intuition regarding lifetime mileage crossover makes total sense here.","agent_response_text":"As a high school teacher in east asia prioritizing open inquiry and harm reduction, Focusing on structural trade-offs within lifetime mileage crossover, battery manufacturing debt, the balance of structural heterogeneity tempers sweeping claims in favor of favors Hypothesis A (p=0.20, conf=0.96), when calibrated against historical base rates and variance."}]}</script>
+  <script>
+    (function () {
+      const dataEl = document.getElementById("epistemic-data");
+      const DATA = JSON.parse(dataEl.textContent || "{}");
+      const summaries = DATA.summaries || [];
+      const numeric = DATA.numeric_analysis || {};
+      const audit = DATA.topic_audit || {};
+      const specimens = DATA.trace_specimens || [];
+
+      const byId = Object.fromEntries(summaries.map((s) => [s.condition_id, s]));
+      const GROUP_COLORS = {
+        baseline: "#2F6F4E",
+        decoding_ablation: "#8C2D19",
+        k_sweep: "#A96A0B",
+        nationality: "#245A7A",
+        personalization: "#6B4C7A",
+        main: "#C84B31",
+      };
+
+      function colorFor(s) {
+        if (s.condition_id.startsWith("cross_national") || s.condition_id.startsWith("divergent")) {
+          return "#245A7A";
+        }
+        if (s.condition_id.startsWith("us_k1")) return "#C84B31";
+        return GROUP_COLORS[s.group] || "#171614";
+      }
+
+      const maxRound = Math.max(
+        1,
+        ...summaries.map((s) => (s.round_trajectory && s.round_trajectory.length ? s.round_trajectory.length - 1 : 0))
+      );
+
+      const state = {
+        groupFilter: "all",
+        selectedCondition: summaries[0] ? summaries[0].condition_id : null,
+        activeRound: maxRound,
+        trajMetric: "effective_topic_count",
+        sortKey: "effective_topic_count",
+        sortAsc: false,
+      };
+
+      function svgEl(tag, attrs, text) {
+        const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          node.setAttribute(k, String(v));
+        }
+        if (text !== undefined) node.textContent = String(text);
+        return node;
+      }
+
+      function renderTelemetry() {
+        const strip = document.getElementById("telemetry-strip");
+        strip.replaceChildren();
+        const items = [
+          ["Conditions", String(summaries.length)],
+          ["Track 4 Records", String(DATA.metadata?.n_track4_records || 0)],
+          ["Blind Judge Kappa", Number(audit.inter_rater_kappa || 0).toFixed(3)],
+          ["Numeric Records", String(DATA.metadata?.n_numeric_records || 0)],
+          ["Max Page Residual", Number(numeric.max_identity_residual || 0).toExponential(2)],
+        ];
+        items.forEach(([k, v]) => {
+          const pill = document.createElement("div");
+          pill.className = "telemetry-pill";
+          const lbl = document.createElement("span");
+          lbl.textContent = k + ":";
+          const val = document.createElement("strong");
+          val.textContent = v;
+          pill.append(lbl, val);
+          strip.appendChild(pill);
+        });
+      }
+
+      function renderFindings() {
+        const host = document.getElementById("headline-findings");
+        host.replaceChildren();
+        const greedy = byId["us_k1_greedy"];
+        const us1 = byId["us_k1"];
+        const cn = byId["cross_national_k4"] || byId["us_k4"];
+        const adv = byId["personalized_advisor"];
+        const peer = byId["personalized_peer"];
+        const c1 = (numeric.by_condition_final || {})["C1"];
+        const c2 = (numeric.by_condition_final || {})["C2"];
+
+        const lexDelta = greedy && us1 ? (us1.pairwise_jaccard_distance - greedy.pairwise_jaccard_distance) : 0;
+        const topicGain = us1 && cn && us1.effective_topic_count > 0
+          ? ((cn.effective_topic_count / us1.effective_topic_count - 1) * 100)
+          : 0;
+        const confGap = adv && peer ? (peer.confident_wrong_rate - adv.confident_wrong_rate) * 100 : 0;
+        const divDrop = c1 && c2 && c1.diversity > 0 ? ((1 - c2.diversity / c1.diversity) * 100) : 0;
+
+        const cards = [
+          {
+            eyebrow: "Decoding Dissociation",
+            metric: "+" + lexDelta.toFixed(2) + " Jaccard",
+            desc: "T=0.8 sampling adds lexical diversity over greedy T=0, while Goldman N_eff remains collapsed (" +
+              (us1 ? us1.goldman_effective_sources.toFixed(2) : "0") + ").",
+            accent: "vermilion",
+          },
+          {
+            eyebrow: "Cross-National Gain",
+            metric: "+" + topicGain.toFixed(0) + "% Topics",
+            desc: "Cross-national model pool expands effective topics vs monolithic US K=1 (" +
+              (cn ? cn.effective_topic_count.toFixed(2) : "0") + " vs " +
+              (us1 ? us1.effective_topic_count.toFixed(2) : "0") + ").",
+            accent: "cerulean",
+          },
+          {
+            eyebrow: "Calibration Split",
+            metric: "+" + confGap.toFixed(1) + " pp Wrong",
+            desc: "Sycophantic Peer mirrors inflate confident-wrong errors over Critical Advisor despite high topic variety.",
+            accent: "plum",
+          },
+          {
+            eyebrow: "Page Social Anchor",
+            metric: "-" + divDrop.toFixed(0) + "% Crowd Div",
+            desc: "C2 shared population median contracts numeric diversity relative to C1; max residual " +
+              Number(numeric.max_identity_residual || 0).toExponential(1) + ".",
+            accent: "moss",
+          },
+        ];
+
+        cards.forEach((c) => {
+          const el = document.createElement("article");
+          el.className = "finding-card";
+          el.dataset.accent = c.accent;
+          const eb = document.createElement("div");
+          eb.className = "finding-eyebrow";
+          eb.textContent = c.eyebrow;
+          const m = document.createElement("div");
+          m.className = "finding-metric";
+          m.textContent = c.metric;
+          const d = document.createElement("p");
+          d.className = "finding-desc";
+          d.textContent = c.desc;
+          el.append(eb, m, d);
+          host.appendChild(el);
+        });
+      }
+
+      function renderFilterChips() {
+        const host = document.getElementById("quadrant-filters");
+        host.replaceChildren();
+        const groups = [
+          ["all", "All"],
+          ["baseline", "Baseline"],
+          ["decoding_ablation", "Decoding"],
+          ["k_sweep", "K Sweep"],
+          ["nationality", "Nationality"],
+          ["personalization", "Personalization"],
+        ];
+        groups.forEach(([key, label]) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn-chip" + (state.groupFilter === key ? " active" : "");
+          btn.textContent = label;
+          btn.dataset.filterGroup = key;
+          btn.addEventListener("click", () => {
+            state.groupFilter = key;
+            renderFilterChips();
+            renderQuadrant();
+            renderTable();
+          });
+          host.appendChild(btn);
+        });
+      }
+
+      function filteredSummaries() {
+        return state.groupFilter === "all"
+          ? summaries
+          : summaries.filter((s) => s.group === state.groupFilter);
+      }
+
+      function renderQuadrant() {
+        const host = document.getElementById("quadrant-svg-host");
+        host.replaceChildren();
+        const items = filteredSummaries();
+        const w = 660, h = 368, l = 60, r = 56, t = 28, b = 48;
+        const pw = w - l - r, ph = h - t - b;
+
+        const allX = summaries.map((s) => s.effective_topic_count);
+        const allY = summaries.map((s) => 1 - s.brier_score);
+        const xmin = Math.max(0.5, Math.min(...allX, 1) - 0.5);
+        const xmax = Math.max(xmin + 1, Math.max(...allX, 5) + 0.85);
+        const ymin = Math.max(0.35, Math.min(...allY, 0.5) - 0.06);
+        const ymax = Math.min(1.02, Math.max(ymin + 0.1, Math.max(...allY, 0.9) + 0.05));
+
+        const px = (x) => l + ((x - xmin) / (xmax - xmin)) * pw;
+        const py = (y) => t + ph - ((y - ymin) / (ymax - ymin)) * ph;
+
+        const svg = svgEl("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Interactive Epistemic Quadrant" });
+        svg.appendChild(svgEl("rect", { width: w, height: h, fill: "#FFFFFF" }));
+
+        for (let i = 0; i <= 4; i++) {
+          const xv = xmin + (i * (xmax - xmin)) / 4;
+          const gx = px(xv);
+          svg.appendChild(svgEl("line", { x1: gx, y1: t, x2: gx, y2: t + ph, stroke: "#E5E0D5", "stroke-width": 1 }));
+          svg.appendChild(svgEl("text", { x: gx, y: t + ph + 16, "text-anchor": "middle", "font-family": "monospace", "font-size": 10, fill: "#5E5A52" }, xv.toFixed(1)));
+
+          const yv = ymin + (i * (ymax - ymin)) / 4;
+          const gy = py(yv);
+          svg.appendChild(svgEl("line", { x1: l, y1: gy, x2: l + pw, y2: gy, stroke: "#E5E0D5", "stroke-width": 1 }));
+          svg.appendChild(svgEl("text", { x: l - 8, y: gy + 3, "text-anchor": "end", "font-family": "monospace", "font-size": 10, fill: "#5E5A52" }, yv.toFixed(2)));
+        }
+
+        svg.appendChild(svgEl("rect", { x: l, y: t, width: pw, height: ph, fill: "none", stroke: "#171614", "stroke-width": 1 }));
+        svg.appendChild(svgEl("text", { x: l + pw / 2, y: h - 10, "text-anchor": "middle", "font-size": 11, fill: "#171614" }, "Effective Topic Count (Hill N1)"));
+
+        const labelOffsets = {
+          us_k1_greedy: { dx: 0, dy: (rad) => -rad - 5, anchor: "start" },
+          us_k1: { dx: 12, dy: () => 3, anchor: "start" },
+          cn_k1: { dx: 0, dy: (rad) => rad + 12, anchor: "start" },
+          cn_k4: { dx: 0, dy: (rad) => -rad - 5, anchor: "middle" },
+          divergent_sft_pair: { dx: -4, dy: (rad) => rad + 12, anchor: "end" },
+          cross_national_k4: { dx: 0, dy: (rad) => -rad - 5, anchor: "middle" },
+          personalized_advisor: { dx: 4, dy: (rad) => rad + 13, anchor: "end" },
+          personalized_peer: { dx: -12, dy: () => 3, anchor: "end" },
+          no_ai: { dx: 0, dy: (rad) => rad + 13, anchor: "middle" },
+        };
+
+        items.forEach((s) => {
+          const cx = px(s.effective_topic_count);
+          const cy = py(Math.max(0, 1 - s.brier_score));
+          const rad = Math.max(6, Math.min(17, 4 + s.goldman_effective_sources * 1.4));
+          const isSel = state.selectedCondition === s.condition_id;
+          const circle = svgEl("circle", {
+            cx,
+            cy,
+            r: rad,
+            fill: colorFor(s),
+            "fill-opacity": isSel ? 0.95 : 0.72,
+            stroke: "#171614",
+            "stroke-width": isSel ? 2.4 : 1,
+            style: "cursor:pointer",
+            "data-condition-bubble": s.condition_id,
+          });
+          circle.addEventListener("click", () => {
+            state.selectedCondition = s.condition_id;
+            renderQuadrant();
+            renderTable();
+            openDrawer(s.condition_id);
+          });
+          svg.appendChild(circle);
+          const off = labelOffsets[s.condition_id];
+          const lx = cx + (off ? off.dx : 0);
+          const ly = cy + (off ? off.dy(rad) : (cy > t + 26 ? -rad - 4 : rad + 11));
+          const anchor = off ? off.anchor : "middle";
+          const lbl = svgEl(
+            "text",
+            {
+              x: lx,
+              y: ly,
+              "text-anchor": anchor,
+              "font-size": 10,
+              "font-weight": isSel ? "700" : "400",
+              fill: "#171614",
+            },
+            s.condition_id
+          );
+          svg.appendChild(lbl);
+        });
+
+        host.appendChild(svg);
+        const sel = byId[state.selectedCondition];
+        const status = document.getElementById("quadrant-status");
+        status.replaceChildren();
+        if (sel) {
+          const txt = document.createElement("span");
+          txt.textContent = `${sel.label} | Eff Topics ${sel.effective_topic_count.toFixed(2)} | Acc ${(sel.ground_truth_accuracy * 100).toFixed(1)}% | Goldman N_eff ${sel.goldman_effective_sources.toFixed(2)}`;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn-chip";
+          btn.textContent = "Inspect Traces";
+          btn.addEventListener("click", () => openDrawer(sel.condition_id));
+          status.append(txt, btn);
+        }
+      }
+
+      function renderDissociationPanel() {
+        const host = document.getElementById("dissociation-svg-host");
+        host.replaceChildren();
+        const greedy = byId["us_k1_greedy"];
+        const us1 = byId["us_k1"] || summaries[0];
+        const cross = byId["cross_national_k4"] || byId["us_k4"] || us1;
+        const rows = [
+          ["Jaccard Dist", (s) => s.pairwise_jaccard_distance],
+          ["Distinct-2", (s) => s.distinct_2],
+          ["Topic Entropy", (s) => s.topic_shannon_entropy],
+          ["Eff Topics / 6", (s) => Math.min(1, s.effective_topic_count / 6)],
+          ["Goldman N_eff / 6", (s) => Math.min(1, s.goldman_effective_sources / 6)],
+        ];
+        const w = 640, h = 344, l = 138, r = 56, t = 24, rowH = 52;
+        const cw = w - l - r;
+        const svg = svgEl("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Decoding dissociation comparison" });
+        svg.appendChild(svgEl("rect", { width: w, height: h, fill: "#FFFFFF" }));
+
+        [0, 0.25, 0.5, 0.75, 1].forEach((tk) => {
+          const x = l + tk * cw;
+          svg.appendChild(svgEl("line", { x1: x, y1: t, x2: x, y2: t + rows.length * rowH - 6, stroke: "#E5E0D5" }));
+          svg.appendChild(svgEl("text", { x, y: t + rows.length * rowH + 12, "text-anchor": "middle", "font-family": "monospace", "font-size": 10, fill: "#5E5A52" }, tk.toFixed(2)));
+        });
+
+        const series = [
+          ["US K1 T=0", greedy, "#8C2D19"],
+          ["US K1 T=0.8", us1, "#C84B31"],
+          ["Cross-Nat K4", cross, "#245A7A"],
+        ];
+
+        rows.forEach(([label, fn], rIdx) => {
+          const cy = t + rIdx * rowH;
+          svg.appendChild(svgEl("text", { x: l - 10, y: cy + 22, "text-anchor": "end", "font-size": 11, fill: "#171614" }, label));
+          series.forEach(([_name, cond, col], sIdx) => {
+            const val = cond ? Math.max(0, Math.min(1, fn(cond))) : 0;
+            const bw = Math.max(2, val * cw);
+            const by = cy + sIdx * 12;
+            svg.appendChild(svgEl("rect", { x: l, y: by, width: bw, height: 9, rx: 2, fill: col }));
+            svg.appendChild(svgEl("text", { x: l + bw + 5, y: by + 8, "font-family": "monospace", "font-size": 9.5, fill: "#171614" }, val.toFixed(2)));
+          });
+        });
+
+        series.forEach(([lbl, _cond, col], idx) => {
+          const lx = l + idx * 140;
+          const ly = h - 14;
+          svg.appendChild(svgEl("rect", { x: lx, y: ly - 9, width: 10, height: 10, rx: 2, fill: col }));
+          svg.appendChild(svgEl("text", { x: lx + 15, y: ly, "font-size": 10.5, fill: "#171614" }, lbl));
+        });
+        host.appendChild(svg);
+
+        // Numeric Core view
+        const numHost = document.getElementById("pages-svg-host");
+        numHost.replaceChildren();
+        const finalMap = numeric.by_condition_final || {};
+        const order = ["C1", "C2", "C3"].filter((c) => c in finalMap);
+        const nw = 620, nh = 260, nl = 64, nr = 24, nt = 26, nb = 42;
+        const npw = nw - nl - nr, nph = nh - nt - nb;
+        const mkeys = [
+          ["crowd_error", "Crowd Err", "#C84B31"],
+          ["avg_individual_error", "Indiv Err", "#A96A0B"],
+          ["diversity", "Diversity", "#245A7A"],
+        ];
+        const maxv = Math.max(0.05, ...order.flatMap((c) => mkeys.map(([k]) => Number(finalMap[c]?.[k] || 0))) ) * 1.15;
+        const npy = (v) => nt + nph - (v / maxv) * nph;
+        const nsvg = svgEl("svg", { viewBox: `0 0 ${nw} ${nh}`, role: "img", "aria-label": "Pages Theorem C1 C2 C3 breakdown" });
+        nsvg.appendChild(svgEl("rect", { width: nw, height: nh, fill: "#FFFFFF" }));
+        nsvg.appendChild(svgEl("line", { x1: nl, y1: nt + nph, x2: nl + npw, y2: nt + nph, stroke: "#171614" }));
+
+        const gw = npw / Math.max(order.length, 1);
+        const bw = Math.min(36, gw * 0.22);
+        order.forEach((cid, gi) => {
+          const cx = nl + (gi + 0.5) * gw;
+          nsvg.appendChild(svgEl("text", { x: cx, y: nt + nph + 18, "text-anchor": "middle", "font-size": 11.5, "font-weight": 600, fill: "#171614" }, cid));
+          const sx = cx - (3 * bw + 12) / 2;
+          mkeys.forEach(([mk, _lbl, col], mi) => {
+            const v = Number(finalMap[cid]?.[mk] || 0);
+            const y = npy(v);
+            const rectH = Math.max(2, nt + nph - y);
+            const bx = sx + mi * (bw + 6);
+            nsvg.appendChild(svgEl("rect", { x: bx, y, width: bw, height: rectH, rx: 2, fill: col }));
+            nsvg.appendChild(svgEl("text", { x: bx + bw / 2, y: y - 4, "text-anchor": "middle", "font-family": "monospace", "font-size": 9, fill: "#171614" }, v.toFixed(3)));
+          });
+        });
+        numHost.appendChild(nsvg);
+
+        const cHost = document.getElementById("numeric-contrasts-host");
+        cHost.replaceChildren();
+        (numeric.contrasts || []).forEach((ct) => {
+          const box = document.createElement("div");
+          box.className = "contrast-box";
+          const title = document.createElement("strong");
+          title.textContent = `${ct.condition_b} vs ${ct.condition_a} (${ct.metric})`;
+          const stats = document.createElement("div");
+          const statCode = document.createElement("code");
+          statCode.textContent = `diff=${Number(ct.mean_diff).toFixed(4)} [${Number(ct.ci_low).toFixed(4)}, ${Number(ct.ci_high).toFixed(4)}] | p_holm=${Number(ct.holm_adjusted_p).toFixed(4)}`;
+          stats.appendChild(statCode);
+          box.append(title, stats);
+          cHost.appendChild(box);
+        });
+      }
+
+      function renderTrajectories() {
+        const host = document.getElementById("trajectory-svg-host");
+        host.replaceChildren();
+        document.getElementById("round-label").textContent = "R" + state.activeRound;
+
+        const focal = ["no_ai", "us_k1", "us_k4", "divergent_sft_pair", "cross_national_k4", "personalized_peer"];
+        const chosen = summaries.filter((s) => focal.includes(s.condition_id));
+        const activeSeries = chosen.length ? chosen : summaries.slice(0, 6);
+        const mKey = state.trajMetric;
+
+        const vals = activeSeries.flatMap((s) => (s.round_trajectory || []).map((pt) => Number(pt[mKey] || 0)));
+        const ymin = Math.max(0, Math.min(...vals, 0) * 0.9);
+        const ymax = Math.max(ymin + 0.1, Math.max(...vals, 1) * 1.1);
+
+        const w = 860, h = 290, l = 58, r = 170, t = 22, b = 38;
+        const pw = w - l - r, ph = h - t - b;
+        const px = (rd) => l + (rd / maxRound) * pw;
+        const py = (v) => t + ph - ((v - ymin) / (ymax - ymin)) * ph;
+
+        const svg = svgEl("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Round trajectory chart" });
+        svg.appendChild(svgEl("rect", { width: w, height: h, fill: "#FFFFFF" }));
+
+        for (let i = 0; i <= 4; i++) {
+          const yv = ymin + (i * (ymax - ymin)) / 4;
+          const gy = py(yv);
+          svg.appendChild(svgEl("line", { x1: l, y1: gy, x2: l + pw, y2: gy, stroke: "#ECE7DC" }));
+          svg.appendChild(svgEl("text", { x: l - 8, y: gy + 3, "text-anchor": "end", "font-family": "monospace", "font-size": 10, fill: "#5E5A52" }, yv.toFixed(2)));
+        }
+
+        for (let rIdx = 0; rIdx <= maxRound; rIdx++) {
+          const x = px(rIdx);
+          svg.appendChild(svgEl("line", { x1: x, y1: t, x2: x, y2: t + ph, stroke: "#E5E0D5" }));
+          svg.appendChild(svgEl("text", { x, y: t + ph + 16, "text-anchor": "middle", "font-family": "monospace", "font-size": 10.5, fill: "#5E5A52" }, "R" + rIdx));
+        }
+
+        // Active round cursor line
+        const curX = px(state.activeRound);
+        svg.appendChild(svgEl("line", { x1: curX, y1: t, x2: curX, y2: t + ph, stroke: "#C84B31", "stroke-width": 1.6, "stroke-dasharray": "4 3" }));
+
+        const cols = ["#2F6F4E", "#C84B31", "#A96A0B", "#1E4D6B", "#245A7A", "#6B4C7A"];
+        activeSeries.forEach((s, idx) => {
+          const traj = s.round_trajectory || [];
+          if (!traj.length) return;
+          const col = cols[idx % cols.length];
+          const pts = traj.map((pt) => `${px(pt.round_idx).toFixed(1)},${py(Number(pt[mKey] || 0)).toFixed(1)}`).join(" ");
+          svg.appendChild(svgEl("polyline", { fill: "none", stroke: col, "stroke-width": 2.3, points: pts }));
+          const ptNow = traj.find((pt) => Number(pt.round_idx) === state.activeRound);
+          if (ptNow) {
+            svg.appendChild(svgEl("circle", { cx: curX, cy: py(Number(ptNow[mKey] || 0)), r: 4.5, fill: col, stroke: "#FFFFFF", "stroke-width": 1.4 }));
+          }
+          const ly = t + 18 + idx * 24;
+          svg.appendChild(svgEl("line", { x1: l + pw + 14, y1: ly - 4, x2: l + pw + 30, y2: ly - 4, stroke: col, "stroke-width": 2.5 }));
+          svg.appendChild(svgEl("text", { x: l + pw + 36, y: ly, "font-size": 11, fill: "#171614" }, s.condition_id));
+        });
+
+        host.appendChild(svg);
+
+        // Update per-condition readout strip at selected round
+        const rStrip = document.getElementById("round-readout-strip");
+        rStrip.replaceChildren();
+        summaries.forEach((s) => {
+          const pt = (s.round_trajectory || []).find((p) => Number(p.round_idx) === state.activeRound);
+          const chip = document.createElement("div");
+          chip.className = "round-chip";
+          const name = document.createElement("span");
+          name.textContent = s.condition_id;
+          const val = document.createElement("code");
+          val.textContent = pt ? Number(pt[mKey] || 0).toFixed(3) : "-";
+          chip.append(name, val);
+          rStrip.appendChild(chip);
+        });
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("score-table-body");
+        tbody.replaceChildren();
+        const rows = [...filteredSummaries()].sort((a, b) => {
+          const av = a[state.sortKey];
+          const bv = b[state.sortKey];
+          if (typeof av === "number" && typeof bv === "number") {
+            return state.sortAsc ? av - bv : bv - av;
+          }
+          return state.sortAsc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+        });
+
+        rows.forEach((s) => {
+          const tr = document.createElement("tr");
+          if (state.selectedCondition === s.condition_id) tr.className = "selected-row";
+
+          const tdName = document.createElement("td");
+          tdName.className = "cond-label-cell";
+          const dot = document.createElement("span");
+          dot.className = "color-dot";
+          dot.style.backgroundColor = colorFor(s);
+          tdName.append(dot, document.createTextNode(s.label));
+
+          const tdProv = document.createElement("td");
+          tdProv.textContent = s.nationality_type;
+
+          const numFields = [
+            [s.num_models, 0],
+            [s.temperature, 1],
+            [s.ground_truth_accuracy, 3],
+            [s.brier_score, 3],
+            [s.confident_wrong_rate, 3],
+            [s.effective_topic_count, 2],
+            [s.goldman_effective_sources, 2],
+            [s.pairwise_jaccard_distance, 3],
+          ];
+          tr.append(tdName, tdProv);
+          numFields.forEach(([v, dp]) => {
+            const td = document.createElement("td");
+            td.className = "num";
+            td.textContent = Number(v).toFixed(dp);
+            tr.appendChild(td);
+          });
+
+          const tdBtn = document.createElement("td");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn-chip";
+          btn.textContent = "Inspect";
+          btn.dataset.inspectCondition = s.condition_id;
+          btn.addEventListener("click", () => {
+            state.selectedCondition = s.condition_id;
+            renderQuadrant();
+            renderTable();
+            openDrawer(s.condition_id);
+          });
+          tdBtn.appendChild(btn);
+          tr.appendChild(tdBtn);
+          tbody.appendChild(tr);
+        });
+      }
+
+      function openDrawer(condId) {
+        const drawer = document.getElementById("trace-drawer");
+        const heading = document.getElementById("drawer-heading");
+        const sub = document.getElementById("drawer-sub");
+        const content = document.getElementById("drawer-content");
+        const cond = byId[condId];
+        heading.textContent = cond ? cond.label : condId;
+        sub.textContent = `Condition: ${condId} | Final-round qualitative trace samples`;
+        content.replaceChildren();
+
+        const matches = specimens.filter((sp) => sp.condition_id === condId);
+        if (!matches.length) {
+          const empty = document.createElement("p");
+          empty.textContent = "No trace specimens captured for this condition.";
+          content.appendChild(empty);
+        } else {
+          matches.forEach((sp) => {
+            const card = document.createElement("article");
+            card.className = "specimen-card";
+
+            const meta = document.createElement("div");
+            meta.className = "specimen-meta";
+            meta.textContent = `${sp.task_id} | ${sp.agent_id} (${sp.agent_region}) | ${sp.model_assigned} | p=${Number(sp.stance_prob).toFixed(2)}, conf=${Number(sp.confidence).toFixed(2)}`;
+
+            const topicsWrap = document.createElement("div");
+            (sp.extracted_topics || []).forEach((tp) => {
+              const tag = document.createElement("span");
+              tag.className = "topic-tag";
+              tag.textContent = tp;
+              topicsWrap.appendChild(tag);
+            });
+
+            const pAsst = document.createElement("p");
+            const strongAsst = document.createElement("strong");
+            strongAsst.textContent = "Assistant: ";
+            pAsst.append(strongAsst, document.createTextNode(sp.assistant_response_text || ""));
+
+            const pAgent = document.createElement("p");
+            const strongAgent = document.createElement("strong");
+            strongAgent.textContent = "Agent: ";
+            pAgent.append(strongAgent, document.createTextNode(sp.agent_response_text || ""));
+
+            card.append(meta, topicsWrap, pAsst, pAgent);
+            content.appendChild(card);
+          });
+        }
+        drawer.classList.add("is-open");
+        drawer.setAttribute("aria-hidden", "false");
+      }
+
+      function closeDrawer() {
+        const drawer = document.getElementById("trace-drawer");
+        drawer.classList.remove("is-open");
+        drawer.setAttribute("aria-hidden", "true");
+      }
+
+      // Wire events
+      document.getElementById("tab-track4").addEventListener("click", () => {
+        document.getElementById("tab-track4").classList.add("active");
+        document.getElementById("tab-numeric").classList.remove("active");
+        document.getElementById("track4-dissoc-view").classList.remove("hidden");
+        document.getElementById("numeric-core-view").classList.add("hidden");
+      });
+
+      document.getElementById("tab-numeric").addEventListener("click", () => {
+        document.getElementById("tab-numeric").classList.add("active");
+        document.getElementById("tab-track4").classList.remove("active");
+        document.getElementById("numeric-core-view").classList.remove("hidden");
+        document.getElementById("track4-dissoc-view").classList.add("hidden");
+      });
+
+      const slider = document.getElementById("round-slider");
+      slider.max = String(maxRound);
+      slider.value = String(state.activeRound);
+      slider.addEventListener("input", (e) => {
+        state.activeRound = Number(e.target.value);
+        renderTrajectories();
+      });
+
+      document.getElementById("round-prev-btn").addEventListener("click", () => {
+        state.activeRound = Math.max(0, state.activeRound - 1);
+        slider.value = String(state.activeRound);
+        renderTrajectories();
+      });
+
+      document.getElementById("round-next-btn").addEventListener("click", () => {
+        state.activeRound = Math.min(maxRound, state.activeRound + 1);
+        slider.value = String(state.activeRound);
+        renderTrajectories();
+      });
+
+      document.getElementById("traj-metric-select").addEventListener("change", (e) => {
+        state.trajMetric = e.target.value;
+        renderTrajectories();
+      });
+
+      document.querySelectorAll("#score-table th[data-sort]").forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.sort;
+          if (state.sortKey === key) {
+            state.sortAsc = !state.sortAsc;
+          } else {
+            state.sortKey = key;
+            state.sortAsc = false;
+          }
+          renderTable();
+        });
+      });
+
+      document.getElementById("drawer-close-btn").addEventListener("click", closeDrawer);
+      document.getElementById("trace-drawer").addEventListener("click", (e) => {
+        if (e.target.id === "trace-drawer") closeDrawer();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeDrawer();
+      });
+
+      renderTelemetry();
+      renderFindings();
+      renderFilterChips();
+      renderQuadrant();
+      renderDissociationPanel();
+      renderTrajectories();
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

@@ -26,3 +26,21 @@
    - **Decision:** MIT License.
    - **Why:** Standard permissive open-source license for research benchmarks and portfolio repositories.
 
+## 2026-11-13 — Implementation & Verification Refinements
+
+6. **Per-Task Normalized Topic Entropy & Hill $N_1$ Aggregation**
+   - **Decision:** Compute `compute_topic_entropy_and_hill` per task against that task's canonical codebook, then average across tasks per condition.
+   - **Why:** Makes normalized Shannon entropy and Hill effective topic counts (`[1.0, ~6.5]`) invariant to `tasks_per_track` rather than conflating cross-question vocabulary growth with genuine multi-perspective depth.
+   - **Alternatives rejected:** Pooling raw topic tokens across all tasks into one global histogram (artificially inflates $N_1$ proportionally to prompt count).
+
+7. **Git-Ignore Large Raw JSONL Traces While Tracking Compact Summaries & Explorer Artifacts**
+   - **Decision:** Ignore `reports/results/*.jsonl` (~20 MB generated on each deterministic `demo` invocation) in `.gitignore`, while committing `summary.csv`, `summary.json`, `numeric_analysis.json`, `audit_human_check.csv`, `selection_audit.json`, `reports/figures/*.svg`, and `docs/`.
+   - **Why:** Keeps repository clone size lightweight and diffs readable; `apart-epistemics demo` deterministically regenerates `runs.jsonl` and `numeric_runs.jsonl` in ~5 seconds.
+   - **Alternatives rejected:** Committing 20 MB of deterministic synthetic JSONL lines into Git history.
+
+8. **Playwright Visual Collision & Table-Width Regression Gates**
+   - **Decision:** Added deterministic per-condition quadrant label offsets in both `report.py` and `dashboard.html`, widened SVG right-margin padding for `1.00` labels, wrapped `.cond-label-cell` cleanly, and added automated bounding-box assertions in `tests/e2e/test_dashboard_playwright.py` for unclipped `Inspect` buttons at `1440px` and zero horizontal scroll overflow at `390px`.
+   - **Why:** First visual screenshot inspection revealed overlapping top-right quadrant labels and a slightly clipped table button at 1440px despite DOM assertions passing.
+   - **Alternatives rejected:** Relying solely on HTML existence checks without rendering pixels.
+
+

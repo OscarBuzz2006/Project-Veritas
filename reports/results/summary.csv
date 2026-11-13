@@ -1,0 +1,12 @@
+condition_id,label,heterogeneity_type,nationality_type,num_models,temperature,top_p,group,ground_truth_accuracy,brier_score,ece,confident_wrong_rate,topic_shannon_entropy,effective_topic_count,minority_topic_survival,stance_std,bimodality_coefficient,global_north_skew_shift,goldman_effective_sources,persuasion_bias_drift,distinct_2,pairwise_jaccard_distance
+no_ai,No AI Baseline (Independent + Peers),no_ai,none,0,0.8,0.95,baseline,0.9931,0.1501,0.3786,0.0,0.9372,6.2002,1.0,0.0458,0.441,0.0133,15.0188,0.0179,0.2919,0.7273
+us_k1_greedy,"Monolithic US (K=1, T=0.0, top_p=0.0)",monolithic_shared,us_only,1,0.0,0.0,decoding_ablation,0.8333,0.139,0.0365,0.1667,0.0,1.0,0.0625,0.0292,0.386,0.0629,1.0759,0.4582,0.095,0.16
+us_k1,"Monolithic US (K=1, App Default T=0.8)",monolithic_shared,us_only,1,0.8,0.95,k_sweep,0.7986,0.1667,0.0881,0.2014,0.0,1.0,0.0625,0.0516,0.3709,0.0723,1.0759,0.4816,0.2819,0.6907
+us_k2,Multi-Lab US Mix (K=2),multi_lab_mix,us_only,2,0.8,0.95,k_sweep,0.9653,0.0558,0.1452,0.0347,0.5231,2.7422,0.3875,0.049,0.4012,0.0691,1.3765,0.1845,0.2831,0.7045
+us_k4,Multi-Lab US Mix (K=4),multi_lab_mix,us_only,4,0.8,0.95,k_sweep,0.9931,0.0376,0.1738,0.0069,0.7034,3.8667,0.65,0.0511,0.3616,0.0606,1.5712,0.1848,0.2913,0.7157
+cn_k1,Monolithic CN Open Model (K=1),monolithic_shared,cn_only,1,0.8,0.95,nationality,0.7292,0.2121,0.1135,0.2708,0.0,1.0,0.1625,0.0481,0.3936,-0.0428,1.0759,0.4532,0.2903,0.7018
+cn_k4,Multi-Lab CN Mix (K=4),multi_lab_mix,cn_only,4,0.8,0.95,nationality,0.9861,0.042,0.1673,0.0139,0.8315,5.0071,0.775,0.0505,0.3983,-0.0104,1.6489,0.1801,0.2991,0.7318
+divergent_sft_pair,"Same-Base Divergent SFT (K=2, Qwen3.8 + Arete-27B)",divergent_sft_pair,divergent_sft,2,0.8,0.95,nationality,0.9861,0.039,0.1567,0.0139,0.9308,6.0,0.875,0.0684,0.3915,0.0189,1.8143,0.0918,0.2954,0.7311
+cross_national_k4,"Cross-National Mix (K=4, US + CN + EU)",cultural_regional_mix,cross_national,4,0.8,0.95,nationality,1.0,0.0489,0.2197,0.0,0.9586,6.3674,0.9375,0.0607,0.3768,0.0306,2.4127,0.099,0.2957,0.7315
+personalized_advisor,Personalized Advisor (Role-Framed),personalized_advisor,cross_national,24,0.8,0.95,personalization,1.0,0.0621,0.2481,0.0,0.9625,6.4567,1.0,0.0303,0.4324,0.026,2.6508,0.0477,0.281,0.7241
+personalized_peer,Personalized Peer (Sycophantic),personalized_peer,us_only,24,0.8,0.95,personalization,0.4861,0.4198,0.4152,0.5139,0.9625,6.4567,1.0,0.2488,0.5519,-0.0144,1.7458,0.3646,0.3106,0.744

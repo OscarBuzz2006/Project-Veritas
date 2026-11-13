@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" role="img" aria-label="Round Trajectories">
+  <title>Round Trajectories</title>
+  <rect width="760" height="400" fill="#FFFFFF" rx="6"/>
+  <text x="24" y="34" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#171614">Multi-Round Topic Decay vs Structural Preservation</text>
+  <text x="24" y="54" font-family="sans-serif" font-size="12" fill="#5E5A52">Monolithic provenance narrows agenda diversity while cross-national pools preserve it</text>
+  <line x1="68.0" y1="72" x2="68.0" y2="346" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="68.0" y="364" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">R0</text>
+  <line x1="170.8" y1="72" x2="170.8" y2="346" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="170.8" y="364" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">R1</text>
+  <line x1="273.6" y1="72" x2="273.6" y2="346" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="273.6" y="364" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">R2</text>
+  <line x1="376.4" y1="72" x2="376.4" y2="346" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="376.4" y="364" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">R3</text>
+  <line x1="479.2" y1="72" x2="479.2" y2="346" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="479.2" y="364" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">R4</text>
+  <line x1="582.0" y1="72" x2="582.0" y2="346" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="582.0" y="364" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">R5</text>
+  <line x1="68" y1="346.0" x2="582" y2="346.0" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="58" y="350.0" text-anchor="end" font-family="monospace" font-size="11" fill="#5E5A52">0.8</text>
+  <line x1="68" y1="277.5" x2="582" y2="277.5" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="58" y="281.5" text-anchor="end" font-family="monospace" font-size="11" fill="#5E5A52">2.3</text>
+  <line x1="68" y1="209.0" x2="582" y2="209.0" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="58" y="213.0" text-anchor="end" font-family="monospace" font-size="11" fill="#5E5A52">3.8</text>
+  <line x1="68" y1="140.5" x2="582" y2="140.5" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="58" y="144.5" text-anchor="end" font-family="monospace" font-size="11" fill="#5E5A52">5.3</text>
+  <line x1="68" y1="72.0" x2="582" y2="72.0" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="58" y="76.0" text-anchor="end" font-family="monospace" font-size="11" fill="#5E5A52">6.9</text>
+  <rect x="68" y="72" width="514" height="274" fill="none" stroke="#171614" stroke-width="1"/>
+  <polyline fill="none" stroke="#2F6F4E" stroke-width="2.4" points="68.0,120.3 170.8,101.7 273.6,101.7 376.4,101.7 479.2,101.7 582.0,101.7"/>
+  <circle cx="68.0" cy="120.3" r="3.5" fill="#2F6F4E"/>
+  <circle cx="170.8" cy="101.7" r="3.5" fill="#2F6F4E"/>
+  <circle cx="273.6" cy="101.7" r="3.5" fill="#2F6F4E"/>
+  <circle cx="376.4" cy="101.7" r="3.5" fill="#2F6F4E"/>
+  <circle cx="479.2" cy="101.7" r="3.5" fill="#2F6F4E"/>
+  <circle cx="582.0" cy="101.7" r="3.5" fill="#2F6F4E"/>
+  <line x1="598" y1="86" x2="616" y2="86" stroke="#2F6F4E" stroke-width="2.6"/>
+  <text x="622" y="90" font-family="sans-serif" font-size="11" fill="#171614">No AI</text>
+  <polyline fill="none" stroke="#C84B31" stroke-width="2.4" points="68.0,120.3 170.8,295.6 273.6,337.0 376.4,337.0 479.2,337.0 582.0,337.0"/>
+  <circle cx="68.0" cy="120.3" r="3.5" fill="#C84B31"/>
+  <circle cx="170.8" cy="295.6" r="3.5" fill="#C84B31"/>
+  <circle cx="273.6" cy="337.0" r="3.5" fill="#C84B31"/>
+  <circle cx="376.4" cy="337.0" r="3.5" fill="#C84B31"/>
+  <circle cx="479.2" cy="337.0" r="3.5" fill="#C84B31"/>
+  <circle cx="582.0" cy="337.0" r="3.5" fill="#C84B31"/>
+  <line x1="598" y1="110" x2="616" y2="110" stroke="#C84B31" stroke-width="2.6"/>
+  <text x="622" y="114" font-family="sans-serif" font-size="11" fill="#171614">US K1 (T=0.8)</text>
+  <polyline fill="none" stroke="#A96A0B" stroke-width="2.4" points="68.0,120.3 170.8,202.0 273.6,202.0 376.4,204.5 479.2,205.0 582.0,207.3"/>
+  <circle cx="68.0" cy="120.3" r="3.5" fill="#A96A0B"/>
+  <circle cx="170.8" cy="202.0" r="3.5" fill="#A96A0B"/>
+  <circle cx="273.6" cy="202.0" r="3.5" fill="#A96A0B"/>
+  <circle cx="376.4" cy="204.5" r="3.5" fill="#A96A0B"/>
+  <circle cx="479.2" cy="205.0" r="3.5" fill="#A96A0B"/>
+  <circle cx="582.0" cy="207.3" r="3.5" fill="#A96A0B"/>
+  <line x1="598" y1="134" x2="616" y2="134" stroke="#A96A0B" stroke-width="2.6"/>
+  <text x="622" y="138" font-family="sans-serif" font-size="11" fill="#171614">US K4</text>
+  <polyline fill="none" stroke="#1E4D6B" stroke-width="2.4" points="68.0,120.3 170.8,111.4 273.6,110.8 376.4,114.7 479.2,113.2 582.0,110.8"/>
+  <circle cx="68.0" cy="120.3" r="3.5" fill="#1E4D6B"/>
+  <circle cx="170.8" cy="111.4" r="3.5" fill="#1E4D6B"/>
+  <circle cx="273.6" cy="110.8" r="3.5" fill="#1E4D6B"/>
+  <circle cx="376.4" cy="114.7" r="3.5" fill="#1E4D6B"/>
+  <circle cx="479.2" cy="113.2" r="3.5" fill="#1E4D6B"/>
+  <circle cx="582.0" cy="110.8" r="3.5" fill="#1E4D6B"/>
+  <line x1="598" y1="158" x2="616" y2="158" stroke="#1E4D6B" stroke-width="2.6"/>
+  <text x="622" y="162" font-family="sans-serif" font-size="11" fill="#171614">Divergent SFT</text>
+  <polyline fill="none" stroke="#245A7A" stroke-width="2.4" points="68.0,120.3 170.8,100.0 273.6,94.1 376.4,98.3 479.2,97.8 582.0,94.1"/>
+  <circle cx="68.0" cy="120.3" r="3.5" fill="#245A7A"/>
+  <circle cx="170.8" cy="100.0" r="3.5" fill="#245A7A"/>
+  <circle cx="273.6" cy="94.1" r="3.5" fill="#245A7A"/>
+  <circle cx="376.4" cy="98.3" r="3.5" fill="#245A7A"/>
+  <circle cx="479.2" cy="97.8" r="3.5" fill="#245A7A"/>
+  <circle cx="582.0" cy="94.1" r="3.5" fill="#245A7A"/>
+  <line x1="598" y1="182" x2="616" y2="182" stroke="#245A7A" stroke-width="2.6"/>
+  <text x="622" y="186" font-family="sans-serif" font-size="11" fill="#171614">Cross-Nat K4</text>
+  <polyline fill="none" stroke="#6B4C7A" stroke-width="2.4" points="68.0,120.3 170.8,90.1 273.6,90.1 376.4,90.1 479.2,90.1 582.0,90.1"/>
+  <circle cx="68.0" cy="120.3" r="3.5" fill="#6B4C7A"/>
+  <circle cx="170.8" cy="90.1" r="3.5" fill="#6B4C7A"/>
+  <circle cx="273.6" cy="90.1" r="3.5" fill="#6B4C7A"/>
+  <circle cx="376.4" cy="90.1" r="3.5" fill="#6B4C7A"/>
+  <circle cx="479.2" cy="90.1" r="3.5" fill="#6B4C7A"/>
+  <circle cx="582.0" cy="90.1" r="3.5" fill="#6B4C7A"/>
+  <line x1="598" y1="206" x2="616" y2="206" stroke="#6B4C7A" stroke-width="2.6"/>
+  <text x="622" y="210" font-family="sans-serif" font-size="11" fill="#171614">Peer (Mirror)</text>
+</svg>

@@ -20,8 +20,9 @@ htmlcov/
 *.pem
 *.key
 
-# Local run artifacts (keep committed demo outputs in docs/ and reports/)
-results/
+# Local run artifacts (keep compact summaries/figures/docs tracked; ignore large raw JSONL traces)
+/results/
+reports/results/*.jsonl
 tmp/
 .DS_Store
 node_modules/

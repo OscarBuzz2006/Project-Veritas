@@ -1,0 +1,10 @@
+{
+  "reference_model": 0.25,
+  "accuracy_by_model": {
+    "openai/gpt-frontier": 0.25,
+    "qwen/qwen3.8-27b": 0.75,
+    "mistral/mistral-large": 0.75
+  },
+  "max_accuracy_gap": 0.5,
+  "selection_bias_detected": true
+}

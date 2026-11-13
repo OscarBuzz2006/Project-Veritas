@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400" role="img" aria-label="Decoding Double Dissociation">
+  <title>Decoding Double Dissociation</title>
+  <rect width="760" height="400" fill="#FFFFFF" rx="6"/>
+  <text x="24" y="34" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#171614">Decoding Dissociation: Lexical Veil vs Monoculture</text>
+  <text x="24" y="54" font-family="sans-serif" font-size="12" fill="#5E5A52">T=0.8 sampling adds text variation while monolithic models stay epistemically flat</text>
+  <line x1="178.0" y1="72" x2="178.0" y2="342" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="178.0" y="362" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">0.00</text>
+  <line x1="309.5" y1="72" x2="309.5" y2="342" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="309.5" y="362" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">0.25</text>
+  <line x1="441.0" y1="72" x2="441.0" y2="342" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="441.0" y="362" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">0.50</text>
+  <line x1="572.5" y1="72" x2="572.5" y2="342" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="572.5" y="362" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">0.75</text>
+  <line x1="704.0" y1="72" x2="704.0" y2="342" stroke="#E5E0D5" stroke-width="1"/>
+  <text x="704.0" y="362" text-anchor="middle" font-family="monospace" font-size="11" fill="#5E5A52">1.00</text>
+  <text x="166" y="100" text-anchor="end" font-family="sans-serif" font-size="12" fill="#171614">Lexical Jaccard Dist</text>
+  <rect x="178" y="78" width="84.2" height="10" rx="2" fill="#8C2D19"/>
+  <text x="267.2" y="86.5" font-family="monospace" font-size="10" fill="#171614">0.16</text>
+  <rect x="178" y="91" width="363.3" height="10" rx="2" fill="#C84B31"/>
+  <text x="546.3" y="99.5" font-family="monospace" font-size="10" fill="#171614">0.69</text>
+  <rect x="178" y="104" width="384.8" height="10" rx="2" fill="#245A7A"/>
+  <text x="567.8" y="112.5" font-family="monospace" font-size="10" fill="#171614">0.73</text>
+  <text x="166" y="154" text-anchor="end" font-family="sans-serif" font-size="12" fill="#171614">Distinct-2 Bigrams</text>
+  <rect x="178" y="132" width="50.0" height="10" rx="2" fill="#8C2D19"/>
+  <text x="233.0" y="140.5" font-family="monospace" font-size="10" fill="#171614">0.10</text>
+  <rect x="178" y="145" width="148.3" height="10" rx="2" fill="#C84B31"/>
+  <text x="331.3" y="153.5" font-family="monospace" font-size="10" fill="#171614">0.28</text>
+  <rect x="178" y="158" width="155.5" height="10" rx="2" fill="#245A7A"/>
+  <text x="338.5" y="166.5" font-family="monospace" font-size="10" fill="#171614">0.30</text>
+  <text x="166" y="208" text-anchor="end" font-family="sans-serif" font-size="12" fill="#171614">Topic Entropy (Norm)</text>
+  <rect x="178" y="186" width="2.0" height="10" rx="2" fill="#8C2D19"/>
+  <text x="185.0" y="194.5" font-family="monospace" font-size="10" fill="#171614">0.00</text>
+  <rect x="178" y="199" width="2.0" height="10" rx="2" fill="#C84B31"/>
+  <text x="185.0" y="207.5" font-family="monospace" font-size="10" fill="#171614">0.00</text>
+  <rect x="178" y="212" width="504.2" height="10" rx="2" fill="#245A7A"/>
+  <text x="687.2" y="220.5" font-family="monospace" font-size="10" fill="#171614">0.96</text>
+  <text x="166" y="262" text-anchor="end" font-family="sans-serif" font-size="12" fill="#171614">Effective Topics / 6</text>
+  <rect x="178" y="240" width="87.7" height="10" rx="2" fill="#8C2D19"/>
+  <text x="270.7" y="248.5" font-family="monospace" font-size="10" fill="#171614">0.17</text>
+  <rect x="178" y="253" width="87.7" height="10" rx="2" fill="#C84B31"/>
+  <text x="270.7" y="261.5" font-family="monospace" font-size="10" fill="#171614">0.17</text>
+  <rect x="178" y="266" width="526.0" height="10" rx="2" fill="#245A7A"/>
+  <text x="709.0" y="274.5" font-family="monospace" font-size="10" fill="#171614">1.00</text>
+  <text x="166" y="316" text-anchor="end" font-family="sans-serif" font-size="12" fill="#171614">Goldman N_eff / 6</text>
+  <rect x="178" y="294" width="94.3" height="10" rx="2" fill="#8C2D19"/>
+  <text x="277.3" y="302.5" font-family="monospace" font-size="10" fill="#171614">0.18</text>
+  <rect x="178" y="307" width="94.3" height="10" rx="2" fill="#C84B31"/>
+  <text x="277.3" y="315.5" font-family="monospace" font-size="10" fill="#171614">0.18</text>
+  <rect x="178" y="320" width="211.5" height="10" rx="2" fill="#245A7A"/>
+  <text x="394.5" y="328.5" font-family="monospace" font-size="10" fill="#171614">0.40</text>
+  <rect x="24" y="369" width="11" height="11" rx="2" fill="#8C2D19"/>
+  <text x="40" y="378" font-family="sans-serif" font-size="11" fill="#171614">US K1 T=0</text>
+  <rect x="159" y="369" width="11" height="11" rx="2" fill="#C84B31"/>
+  <text x="175" y="378" font-family="sans-serif" font-size="11" fill="#171614">US K1 T=0.8</text>
+  <rect x="294" y="369" width="11" height="11" rx="2" fill="#245A7A"/>
+  <text x="310" y="378" font-family="sans-serif" font-size="11" fill="#171614">Cross-Nat K4</text>
+</svg>

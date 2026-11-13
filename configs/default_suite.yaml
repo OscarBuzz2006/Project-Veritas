@@ -1,0 +1,120 @@
+suite_name: "Epistemic Prism — Track 4 Open Track + Numeric Core Benchmark"
+seed: 42
+num_agents: 24
+num_rounds: 5
+peer_degree: 3
+tasks_per_track: 6
+numeric_replicates: 2
+alpha: 0.3
+
+# Track 4: Model Heterogeneity (nationality_type x K) + Decoding Ablation + Calibration
+conditions:
+  - condition_id: no_ai
+    label: "No AI Baseline (Independent + Peers)"
+    heterogeneity_type: no_ai
+    nationality_type: none
+    num_models: 0
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: baseline
+
+  - condition_id: us_k1_greedy
+    label: "Monolithic US (K=1, T=0.0, top_p=0.0)"
+    heterogeneity_type: monolithic_shared
+    nationality_type: us_only
+    num_models: 1
+    temperature: 0.0
+    top_p: 0.0
+    peer_exchange: true
+    group: decoding_ablation
+
+  - condition_id: us_k1
+    label: "Monolithic US (K=1, App Default T=0.8)"
+    heterogeneity_type: monolithic_shared
+    nationality_type: us_only
+    num_models: 1
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: k_sweep
+
+  - condition_id: us_k2
+    label: "Multi-Lab US Mix (K=2)"
+    heterogeneity_type: multi_lab_mix
+    nationality_type: us_only
+    num_models: 2
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: k_sweep
+
+  - condition_id: us_k4
+    label: "Multi-Lab US Mix (K=4)"
+    heterogeneity_type: multi_lab_mix
+    nationality_type: us_only
+    num_models: 4
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: k_sweep
+
+  - condition_id: cn_k1
+    label: "Monolithic CN Open Model (K=1)"
+    heterogeneity_type: monolithic_shared
+    nationality_type: cn_only
+    num_models: 1
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: nationality
+
+  - condition_id: cn_k4
+    label: "Multi-Lab CN Mix (K=4)"
+    heterogeneity_type: multi_lab_mix
+    nationality_type: cn_only
+    num_models: 4
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: nationality
+
+  - condition_id: divergent_sft_pair
+    label: "Same-Base Divergent SFT (K=2, Qwen3.8 + Arete-27B)"
+    heterogeneity_type: divergent_sft_pair
+    nationality_type: divergent_sft
+    num_models: 2
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: nationality
+
+  - condition_id: cross_national_k4
+    label: "Cross-National Mix (K=4, US + CN + EU)"
+    heterogeneity_type: cultural_regional_mix
+    nationality_type: cross_national
+    num_models: 4
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: nationality
+
+  - condition_id: personalized_advisor
+    label: "Personalized Advisor (Role-Framed)"
+    heterogeneity_type: personalized_advisor
+    nationality_type: cross_national
+    num_models: 24
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: personalization
+
+  - condition_id: personalized_peer
+    label: "Personalized Peer (Sycophantic)"
+    heterogeneity_type: personalized_peer
+    nationality_type: us_only
+    num_models: 24
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: personalization
