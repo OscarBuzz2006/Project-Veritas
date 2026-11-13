@@ -6,11 +6,11 @@
   <title>Epistemic Prism | Multi-Agent Model Diversity Lab Notebook</title>
   <style>
     :root {
-      --paper: #FAF8F4;
+      --paper: #F3F5F7;
       --surface: #FFFFFF;
-      --ink: #171614;
-      --muted: #5E5A52;
-      --rule: #DFDAD0;
+      --ink: #182B36;
+      --muted: #52636E;
+      --rule: #DCE3E8;
       --vermilion: #C84B31;
       --cerulean: #245A7A;
       --moss: #2F6F4E;
@@ -37,7 +37,7 @@
 
     .container {
       width: 100%;
-      max-width: 1280px;
+      max-width: 1380px;
       margin: 0 auto;
       padding: 20px 24px 64px;
     }
@@ -52,10 +52,9 @@
     .masthead {
       background: var(--surface);
       border: 1px solid var(--rule);
-      border-top: 4px solid var(--ink);
-      border-radius: 6px;
-      padding: 24px 28px;
-      margin-bottom: 20px;
+      border-radius: 10px;
+      padding: 22px 26px;
+      margin-bottom: 16px;
     }
 
     .masthead-kicker {
@@ -73,8 +72,8 @@
     }
 
     .masthead h1 {
-      font-family: var(--serif);
-      font-size: clamp(1.75rem, 3.2vw, 2.55rem);
+      font-family: var(--sans);
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
       line-height: 1.15;
       margin: 0 0 10px;
       font-weight: 700;
@@ -83,8 +82,8 @@
 
     .masthead-sub {
       color: var(--muted);
-      max-width: 78ch;
-      margin: 0 0 18px;
+      max-width: 88ch;
+      margin: 0 0 14px;
       font-size: 0.96rem;
     }
 
@@ -117,8 +116,11 @@
     .findings-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 22px;
+      gap: 0;
+      margin-bottom: 24px;
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     @media (max-width: 1020px) {
@@ -135,19 +137,14 @@
 
     .finding-card {
       background: var(--surface);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
       padding: 16px 18px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      border-left: 3px solid var(--cerulean);
+      justify-content: flex-start;
+      gap: 4px;
     }
 
-    .finding-card[data-accent="vermilion"] { border-left-color: var(--vermilion); }
-    .finding-card[data-accent="cerulean"] { border-left-color: var(--cerulean); }
-    .finding-card[data-accent="plum"] { border-left-color: var(--plum); }
-    .finding-card[data-accent="moss"] { border-left-color: var(--moss); }
+    .finding-card + .finding-card { border-left: 1px solid var(--rule); }
 
     .finding-eyebrow {
       font-family: var(--mono);
@@ -159,8 +156,8 @@
     }
 
     .finding-metric {
-      font-family: var(--mono);
-      font-size: 1.55rem;
+      font-family: var(--sans);
+      font-size: 1.35rem;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       color: var(--ink);
@@ -174,29 +171,23 @@
     }
 
     /* Panel cards */
-    .grid-two {
+    .results-stack {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr);
       gap: 18px;
       margin-bottom: 22px;
-    }
-
-    @media (max-width: 920px) {
-      .grid-two {
-        grid-template-columns: 1fr;
-      }
     }
 
     .panel {
       background: var(--surface);
       border: 1px solid var(--rule);
-      border-radius: 6px;
-      padding: 20px 22px;
+      border-radius: 10px;
+      padding: 24px;
       margin-bottom: 22px;
       min-width: 0;
     }
 
-    .grid-two .panel {
+    .results-stack .panel {
       margin-bottom: 0;
     }
 
@@ -212,8 +203,8 @@
     }
 
     .panel-title {
-      font-family: var(--serif);
-      font-size: 1.25rem;
+      font-family: var(--sans);
+      font-size: 1.15rem;
       margin: 0 0 3px;
       font-weight: 700;
     }
@@ -236,11 +227,12 @@
       border: 1px solid var(--rule);
       background: var(--paper);
       color: var(--ink);
-      font-family: var(--mono);
-      font-size: 11.5px;
-      padding: 6px 11px;
-      min-height: 34px;
-      border-radius: 4px;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 12px;
+      min-height: 44px;
+      border-radius: 6px;
       cursor: pointer;
       transition: background-color 0.14s ease, border-color 0.14s ease;
     }
@@ -250,25 +242,27 @@
     }
 
     .btn-chip.active, .btn-tab.active {
-      background: var(--ink);
+      background: var(--cerulean);
       color: var(--surface);
-      border-color: var(--ink);
+      border-color: var(--cerulean);
     }
 
     .chart-frame {
       width: 100%;
-      overflow: hidden;
+      min-width: 0;
+      overflow-x: auto;
     }
 
     .chart-frame svg {
       width: 100%;
       height: auto;
       display: block;
+      min-width: 600px;
     }
 
     .quadrant-status {
-      margin-top: 10px;
-      padding: 10px 12px;
+      margin-top: 16px;
+      padding: 16px;
       background: var(--paper);
       border: 1px solid var(--rule);
       border-radius: 4px;
@@ -313,12 +307,13 @@
       border-radius: 4px;
       background: var(--surface);
       color: var(--ink);
-      min-height: 34px;
+      min-height: 44px;
+      max-width: 100%;
     }
 
     .round-readout-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
       gap: 8px;
       margin-top: 12px;
     }
@@ -332,6 +327,8 @@
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
+      gap: 10px;
+      overflow-wrap: anywhere;
     }
 
     .round-chip code {
@@ -343,7 +340,8 @@
     /* Condition Score Table */
     .table-scroll {
       width: 100%;
-      overflow-x: auto;
+      overflow: auto;
+      max-height: 580px;
       -webkit-overflow-scrolling: touch;
       border: 1px solid var(--rule);
       border-radius: 4px;
@@ -357,7 +355,7 @@
 
     th, td {
       text-align: left;
-      padding: 7px 8px;
+      padding: 10px 8px;
       border-bottom: 1px solid var(--rule);
       white-space: nowrap;
     }
@@ -370,6 +368,9 @@
     }
 
     th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
       background: var(--paper);
       font-family: var(--mono);
       font-size: 11px;
@@ -395,12 +396,11 @@
     }
 
     tbody tr:hover {
-      background: #F4F0E8;
+      background: #F3F7FA;
     }
 
     tbody tr.selected-row {
-      background: #EFE9DC;
-      outline: 1px solid var(--ink);
+      background: #EAF2F7;
     }
 
     .color-dot {
@@ -420,6 +420,7 @@
     }
 
     .contrast-box {
+      overflow-wrap: anywhere;
       background: var(--paper);
       border: 1px solid var(--rule);
       border-radius: 4px;
@@ -447,7 +448,7 @@
     }
 
     .drawer-sheet {
-      width: min(520px, 100vw);
+      width: min(640px, 100vw);
       height: 100%;
       background: var(--surface);
       border-left: 1px solid var(--rule);
@@ -474,6 +475,7 @@
     }
 
     .specimen-card {
+      overflow-wrap: anywhere;
       background: var(--paper);
       border: 1px solid var(--rule);
       border-radius: 5px;
@@ -505,46 +507,150 @@
     .hidden {
       display: none !important;
     }
+
+    a { color: var(--cerulean); }
+    :focus-visible { outline: 3px solid var(--cerulean); outline-offset: 3px; }
+    section[id] { scroll-margin-top: 88px; }
+    .results-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: var(--ink);
+      padding: 6px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .results-nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: 5px;
+    }
+    .results-nav a:hover, .results-nav a:focus-visible { background: #354F60; }
+    .results-nav a:focus-visible { outline-color: white; outline-offset: -3px; }
+    .run-metadata summary, .metric-guide summary {
+      cursor: pointer;
+      padding: 10px 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .evidence-note { margin: 0; font-size: 13px; color: var(--muted); }
+    .comparison-layout, .analysis-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.4fr) minmax(240px, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .comparison-layout > *, .analysis-layout > * { min-width: 0; }
+    .reading-guide {
+      padding: 20px;
+      background: var(--paper);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .reading-guide h3 { color: var(--ink); font-size: 14px; margin: 0 0 12px; }
+    .reading-guide p { margin: 0 0 12px; }
+    .reading-guide p:last-child { margin-bottom: 0; }
+    .reading-guide strong { color: var(--ink); }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; margin: 12px 0; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+    .legend-crowd { background: var(--vermilion); }
+    .legend-individual { background: var(--ochre); }
+    .legend-diversity { background: var(--cerulean); }
+    .chart-hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+    .metric-guide { margin-top: 16px; border-top: 1px solid var(--rule); }
+    .metric-guide dl { display: grid; grid-template-columns: minmax(100px, 160px) 1fr; gap: 12px 20px; font-size: 13px; }
+    .metric-guide dt { font-weight: 600; }
+    .metric-guide dd { margin: 0; color: var(--muted); }
+    @media (max-width: 960px) {
+      .comparison-layout, .analysis-layout { grid-template-columns: minmax(0, 1fr); }
+      .reading-guide { padding: 16px; }
+    }
+    @media (max-width: 600px) {
+      .masthead, .panel { padding: 16px; }
+      .masthead-kicker { font-size: 10px; }
+      .results-nav { gap: 0; }
+      .results-nav a { flex: 1; text-align: center; padding: 12px 6px; font-size: 12px; }
+      .finding-card + .finding-card { border-left: 0; border-top: 1px solid var(--rule); }
+      .finding-card { padding: 14px 16px; }
+      .finding-desc { font-size: 13px; }
+      .contrasts-list { grid-template-columns: minmax(0, 1fr); }
+      .scrubber-bar { padding: 12px; }
+      .scrubber-bar select { width: 100%; }
+      .metric-guide dl { grid-template-columns: 1fr; gap: 6px; }
+      .metric-guide dd { margin-bottom: 10px; }
+      .drawer-sheet { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0s !important; animation: none !important; }
+    }
   </style>
 </head>
 <body>
   <main class="container">
     <header class="masthead" data-section="masthead-banner">
       <div class="masthead-kicker">
-        <span>Apart Research / Track 4 Open Track</span>
-        <span>Deployment, Adoption, and Impact</span>
+        <span>Apart Research · Track 4</span>
+        <span>Results explorer</span>
       </div>
-      <h1 id="masthead-title">Epistemic Prism: Multi-Agent Model Diversity Lab Notebook</h1>
+      <h1 id="masthead-title">Epistemic Prism / Results</h1>
       <p class="masthead-sub" id="masthead-sub">
-        Empirical harness measuring how assistant nationality provenance, model count K, greedy vs stochastic
-        decoding, and personalization regimes reshape agenda entropy, Goldman effective independent sources,
-        and Page's Diversity Prediction Theorem across multi-round agent ecosystems.
+        Compare model conditions, follow belief updates, and inspect the responses behind the scores.
       </p>
-      <div class="telemetry-strip" id="telemetry-strip"></div>
+      <p class="evidence-note">Synthetic runs demonstrate simulator assumptions, not measured real-world model effects. Verify run provenance before interpreting these comparisons.</p>
+      <details class="run-metadata">
+        <summary>Run metadata &amp; validation checks</summary>
+        <div class="telemetry-strip" id="telemetry-strip"></div>
+      </details>
     </header>
+
+    <nav class="results-nav" aria-label="Results sections">
+      <a href="#compare">Compare</a>
+      <a href="#decoding">Breakdown</a>
+      <a href="#rounds">Rounds</a>
+      <a href="#scores">Scores &amp; traces</a>
+    </nav>
 
     <section class="findings-grid" data-section="headline-findings" id="headline-findings"></section>
 
-    <div class="grid-two">
-      <section class="panel" data-section="epistemic-quadrant">
+    <div class="results-stack">
+      <section class="panel" data-section="epistemic-quadrant" id="compare">
         <div class="panel-header">
           <div>
-            <h2 class="panel-title">Epistemic Quadrant</h2>
-            <p class="panel-note">Effective Topic Count (Hill N1) vs Ground-Truth Calibration (1 - Brier)</p>
+            <h2 class="panel-title">Compare diversity and calibration</h2>
+            <p class="panel-note">Each bubble is one condition. Filters also update the score table below.</p>
           </div>
           <div class="controls-row" id="quadrant-filters" role="group" aria-label="Filter condition families"></div>
         </div>
-        <div class="chart-frame" id="quadrant-svg-host"></div>
-        <div class="quadrant-status" id="quadrant-status">
-          <span>Select a condition bubble or table row to inspect traces and cross-highlight metrics.</span>
+        <div class="comparison-layout">
+          <div>
+            <div class="chart-frame" id="quadrant-svg-host" tabindex="0" role="region" aria-label="Condition comparison chart; scroll horizontally on small screens"></div>
+            <p class="chart-hint">Select a bubble to inspect response samples. On small screens, scroll the chart sideways.</p>
+          </div>
+          <div class="reading-guide">
+            <h3>How to read this plot</h3>
+            <p><strong>Further right</strong> means more effective topics (Hill N1).</p>
+            <p><strong>Higher up</strong> means better calibration (1 − Brier).</p>
+            <p><strong>Larger bubbles</strong> indicate more effective independent sources (Goldman N_eff).</p>
+            <div class="quadrant-status" id="quadrant-status" aria-live="polite">
+              <span>Select a condition to inspect its scores.</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="panel" data-section="decoding-dissociation">
+      <section class="panel" data-section="decoding-dissociation" id="decoding">
         <div class="panel-header">
           <div>
-            <h2 class="panel-title" id="dissoc-title">Decoding Dissociation vs Page's Theorem</h2>
-            <p class="panel-note" id="dissoc-note">Switch between Track 4 surface sampling illusion and Numeric Core crowd error math.</p>
+            <h2 class="panel-title" id="dissoc-title">Break down the differences</h2>
+            <p class="panel-note" id="dissoc-note">Compare wording and topics, or inspect the numeric crowd-error decomposition.</p>
           </div>
           <div class="controls-row" role="tablist" aria-label="Track view switch">
             <button type="button" class="btn-tab active" data-track-tab="track4" id="tab-track4">Track 4 Dissociation</button>
@@ -552,20 +658,43 @@
           </div>
         </div>
         <div id="track4-dissoc-view">
-          <div class="chart-frame" id="dissociation-svg-host"></div>
+          <div class="analysis-layout">
+            <div class="chart-frame" id="dissociation-svg-host" tabindex="0" role="region" aria-label="Decoding chart; scroll horizontally on small screens"></div>
+            <div class="reading-guide">
+              <h3>Different words, different sources?</h3>
+              <p>Compare greedy and sampled US K1 responses with the cross-national K4 condition.</p>
+              <p>Lexical distance measures wording variation. Effective topics and Goldman N_eff describe different aspects of diversity.</p>
+              <p>Topic and source counts are divided by 6 in this view; displayed bars are capped at 1. Read the score table for unscaled values.</p>
+            </div>
+          </div>
         </div>
         <div id="numeric-core-view" class="hidden">
-          <div class="chart-frame" id="pages-svg-host"></div>
+          <div class="analysis-layout">
+            <div>
+              <div class="chart-frame" id="pages-svg-host" tabindex="0" role="region" aria-label="Numeric chart; scroll horizontally on small screens"></div>
+              <div class="chart-legend" aria-label="Numeric chart legend">
+                <span><i class="legend-swatch legend-crowd" aria-hidden="true"></i>Crowd error</span>
+                <span><i class="legend-swatch legend-individual" aria-hidden="true"></i>Individual error</span>
+                <span><i class="legend-swatch legend-diversity" aria-hidden="true"></i>Diversity</span>
+              </div>
+            </div>
+            <div class="reading-guide">
+              <h3>Page's identity</h3>
+              <p><strong>Crowd error = average individual error − diversity.</strong> Values use squared log10 estimate units.</p>
+              <p><strong>C1</strong> Baseline<br><strong>C2</strong> Shared population median and IQR<br><strong>C3</strong> Shared population median and IQR + persona and conversation history</p>
+              <p>Contrasts below show mean differences, confidence intervals, and Holm-adjusted p-values—not a causal conclusion.</p>
+            </div>
+          </div>
           <div class="contrasts-list" id="numeric-contrasts-host"></div>
         </div>
       </section>
     </div>
 
-    <section class="panel" data-section="round-trajectory-explorer">
+    <section class="panel" data-section="round-trajectory-explorer" id="rounds">
       <div class="panel-header">
         <div>
-          <h2 class="panel-title">Round-by-Round Trajectory Explorer</h2>
-          <p class="panel-note">Scrub communication rounds to track topic collapse, Goldman independence loss, and stance dispersion.</p>
+          <h2 class="panel-title">Follow the communication rounds</h2>
+          <p class="panel-note">Recorded trajectories, not live inference. The cursor and values below follow the selected round.</p>
         </div>
       </div>
       <div class="scrubber-bar">
@@ -582,18 +711,18 @@
           <option value="stance_std">Stance Std</option>
         </select>
       </div>
-      <div class="chart-frame" id="trajectory-svg-host"></div>
+      <div class="chart-frame" id="trajectory-svg-host" tabindex="0" role="region" aria-label="Round trajectory chart; scroll horizontally on small screens"></div>
       <div class="round-readout-strip" id="round-readout-strip"></div>
     </section>
 
-    <section class="panel" data-section="condition-score-table">
+    <section class="panel" data-section="condition-score-table" id="scores">
       <div class="panel-header">
         <div>
-          <h2 class="panel-title">Condition Telemetry &amp; Statistical Ledger</h2>
-          <p class="panel-note">Click any column header to sort; click Inspect on any condition to read blinded raw agent traces.</p>
+          <h2 class="panel-title">Condition scores &amp; response traces</h2>
+          <p class="panel-note">Sort a column to compare conditions. Inspect opens labeled response samples, not a blinded review.</p>
         </div>
       </div>
-      <div class="table-scroll">
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Condition scores; scroll to see all columns">
         <table id="score-table">
           <thead>
             <tr>
@@ -613,6 +742,17 @@
           <tbody id="score-table-body"></tbody>
         </table>
       </div>
+      <details class="metric-guide">
+        <summary>What do these metrics mean?</summary>
+        <dl>
+          <dt>Accuracy</dt><dd>Fraction of correct ground-truth answers; higher is better.</dd>
+          <dt>Brier</dt><dd>Squared probability error. Lower Brier is better; confident errors are penalized.</dd>
+          <dt>Confident wrong</dt><dd>Rate of confident but incorrect answers; lower is better.</dd>
+          <dt>Effective topics</dt><dd>Hill N1: topic diversity expressed as an effective number of equally common topics.</dd>
+          <dt>Goldman N_eff</dt><dd>Effective independent sources; correlated sources reduce this value.</dd>
+          <dt>Jaccard distance</dt><dd>Lexical difference between responses, not a measure of factual accuracy.</dd>
+        </dl>
+      </details>
     </section>
   </main>
 

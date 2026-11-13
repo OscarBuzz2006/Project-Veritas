@@ -1,0 +1,9 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+package-lock.json
+src/components/ui/
+THIRD_PARTY_NOTICES.md
+
+.designs/

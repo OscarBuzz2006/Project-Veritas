@@ -84,3 +84,14 @@ def test_build_static_site_self_contained_and_safe(
     assert len(embedded["trace_specimens"]) > 0
     assert (site_dir / "figures" / "pages_headline.svg").exists()
     assert (site_dir / "data" / "benchmark_summary.json").exists()
+
+    # The results view should explain its scales and expose readable navigation.
+    for anchor in ("compare", "decoding", "rounds", "scores"):
+        assert f'href="#{anchor}"' in html
+        assert f'id="{anchor}"' in html
+    assert 'aria-label="Results sections"' in html
+    assert 'aria-label="Numeric chart legend"' in html
+    assert "Lower Brier is better" in html
+    assert "Synthetic runs demonstrate simulator assumptions" in html
+    assert 'tabindex="0" role="region" aria-label="Condition scores' in html
+    assert "prefers-reduced-motion" in html

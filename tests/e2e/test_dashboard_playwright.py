@@ -68,6 +68,12 @@ def test_dashboard_interactive_controls_and_responsive_viewports(
         assert "NaN" not in body_text
         assert "undefined" not in body_text
 
+        assert page.get_by_role("navigation", name="Results sections").is_visible()
+        assert "Synthetic runs demonstrate simulator assumptions" in body_text
+        page.locator(".run-metadata summary").click()
+        assert page.locator("#telemetry-strip").is_visible()
+        page.locator(".run-metadata summary").click()
+
         for section in (
             "masthead-banner",
             "headline-findings",
@@ -97,6 +103,7 @@ def test_dashboard_interactive_controls_and_responsive_viewports(
         # Track tab switcher
         page.locator("#tab-numeric").click()
         assert page.locator("#numeric-core-view").is_visible()
+        assert page.locator('[aria-label="Numeric chart legend"]').is_visible()
         assert "C2 vs C1" in page.locator("#numeric-contrasts-host").inner_text()
         page.locator("#tab-track4").click()
         assert page.locator("#track4-dissoc-view").is_visible()
@@ -136,6 +143,17 @@ def test_dashboard_interactive_controls_and_responsive_viewports(
         m_errors: list[str] = []
         m_page.on("pageerror", lambda err: m_errors.append(str(err)))
         m_page.goto(docs_server_url, wait_until="networkidle")
+        assert m_page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+        # Keep small-screen chart labels readable through local horizontal scroll.
+        chart = m_page.locator("#quadrant-svg-host")
+        assert chart.get_attribute("tabindex") == "0"
+        assert chart.evaluate("el => el.scrollWidth > el.clientWidth")
+        tab_box = m_page.locator("#tab-numeric").bounding_box()
+        assert tab_box is not None
+        assert tab_box["height"] >= 44
+        m_page.locator("#tab-numeric").click()
+        m_page.locator(".metric-guide summary").click()
+        assert "Lower Brier is better" in m_page.locator(".metric-guide").inner_text()
         assert m_page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         m_page.screenshot(path=str(shot_dir / "mobile-390.png"), full_page=True)
         assert m_errors == []

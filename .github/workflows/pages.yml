@@ -5,6 +5,7 @@ on:
     branches: ["main"]
     paths:
       - "docs/**"
+      - "frontend/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -30,10 +31,27 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build and test React explorer
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm test
+          npm run build
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+
       - name: Upload static explorer bundle
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: frontend/dist
 
       - name: Deploy to GitHub Pages
         id: deployment

@@ -84,15 +84,78 @@ flowchart LR
 
 ## Visual Highlights
 
-| Desktop (`1440x900`) | Mobile (`390x844`) |
-|---|---|
-| ![Desktop Explorer](docs/screenshots/desktop-1440.png) | ![Mobile Explorer](docs/screenshots/mobile-390.png) |
+### React explorer with shadcn/ui AI Elements
 
-Generated vector plots live in [`reports/figures/`](reports/figures/):
-- [`dissociation_decoding.svg`](reports/figures/dissociation_decoding.svg)
-- [`epistemic_quadrant.svg`](reports/figures/epistemic_quadrant.svg)
-- [`round_trajectories.svg`](reports/figures/round_trajectories.svg)
-- [`pages_headline.svg`](reports/figures/pages_headline.svg)
+The new `frontend/` uses actual copied shadcn/ui **Message, Bubble, Trace, Tabs,
+Button, and Badge** components. Recorded response pairs have expandable context,
+topics, and raw JSON; condition charts and numeric contrasts read the existing
+Python-generated benchmark data. No model calls or invented reasoning are added.
+
+With Node 22.12+, run `make ui-install`, `make ui-check`, then `make ui-dev`.
+Open the URL Vite prints. See [frontend/README.md](frontend/README.md) for browser
+tests and production preview. Pages builds now publish the React explorer with
+the original standalone report retained under `legacy/`; local edits do not
+publish a deployment. The screenshots below still show the standalone report.
+
+### One dashboard. Three ways to inspect the experiment.
+
+Compare conditions, follow belief updates across rounds, and inspect the traces
+behind each score—without leaving the lab notebook.
+
+> **Demo data, not live findings.** These screenshots and figures show the seeded
+> synthetic benchmark. They illustrate the tooling, not measured effects in real models.
+
+[![Dashboard overview showing condition summaries, the diversity–calibration quadrant, and decoding comparison charts](docs/screenshots/dashboard-overview.png)](docs/screenshots/desktop-1440.png)
+
+- **Compare** — Filter experimental conditions and switch between Track 4 and the numeric core.
+- **Follow** — Scrub communication rounds and change the trajectory metric.
+- **Inspect** — Sort the condition ledger and open the underlying response traces.
+
+Run `make serve` to try the interactive dashboard locally. The images below are
+static previews; select a figure to open its full-resolution SVG.
+
+### Four views of the synthetic benchmark
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="reports/figures/epistemic_quadrant.svg"><img src="reports/figures/epistemic_quadrant.svg" alt="Epistemic quadrant comparing topic diversity and calibration across synthetic conditions" width="100%"></a>
+      <br><strong>Diversity × calibration</strong><br>
+      Compare topical breadth with ground-truth calibration rather than treating diversity as a single score.
+    </td>
+    <td width="50%" valign="top">
+      <a href="reports/figures/dissociation_decoding.svg"><img src="reports/figures/dissociation_decoding.svg" alt="Decoding comparison separating lexical variation from conceptual diversity and source independence" width="100%"></a>
+      <br><strong>Wording ≠ independent thinking</strong><br>
+      Contrast surface-level variation with topic coverage and effective independent sources.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="reports/figures/round_trajectories.svg"><img src="reports/figures/round_trajectories.svg" alt="Round-by-round trajectories showing how effective topic counts change during simulated peer exchange" width="100%"></a>
+      <br><strong>Watch the rounds unfold</strong><br>
+      Follow how topic diversity changes as simulated agents exchange information.
+    </td>
+    <td width="50%" valign="top">
+      <a href="reports/figures/pages_headline.svg"><img src="reports/figures/pages_headline.svg" alt="Numeric-core chart comparing crowd error, individual error, and diversity under Page's theorem" width="100%"></a>
+      <br><strong>Decompose the crowd's error</strong><br>
+      Inspect the relationship between individual error, collective error, and estimate diversity.
+    </td>
+  </tr>
+</table>
+
+<details>
+<summary><strong>Full-page desktop and mobile screenshots</strong></summary>
+
+Captured at desktop (1440 px wide) and mobile (390 px wide) viewports. These are
+full-page captures, so their image heights extend beyond the viewport.
+
+<p><a href="docs/screenshots/desktop-1440.png">Open full desktop screenshot</a> · <a href="docs/screenshots/mobile-390.png">Open full mobile screenshot</a></p>
+
+<p align="center">
+  <a href="docs/screenshots/mobile-390.png"><img src="docs/screenshots/mobile-390.png" alt="Full mobile layout with vertically stacked condition summaries, charts, round controls, and score ledger" width="260"></a>
+</p>
+
+</details>
 
 ---
 
@@ -100,6 +163,7 @@ Generated vector plots live in [`reports/figures/`](reports/figures/):
 
 - **Core**: Python 3.11+, Pydantic v2, PyYAML, standard-library `urllib` HTTP client
 - **Static Visualization**: Native SVG generation, vanilla ES6, CSS Custom Properties (zero CDNs)
+- **React Explorer**: React + TypeScript + Vite + Tailwind, copied shadcn/ui components; same Python report data
 - **QA & Testing**: `pytest`, `pytest-cov`, `ruff`, Playwright Chromium (`1440x900` & `390x844`)
 - **CI/CD**: GitHub Actions matrix (`3.11`, `3.12`), Dependabot, GitHub Pages artifact deploy
 

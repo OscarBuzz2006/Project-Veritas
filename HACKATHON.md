@@ -51,6 +51,34 @@ verified on Windows; CI currently runs Linux.
 
 ## 2. Try the dashboard
 
+### New React / shadcn/ui explorer
+
+Requires Node 22.12+ in addition to the Python tools:
+
+```sh
+make ui-install
+make ui-check
+make ui-dev
+```
+
+Open the URL Vite prints (normally http://127.0.0.1:5173). Try the Overview,
+Numeric core, and Response traces tabs. Expand the recorded context/topics/raw
+JSON rows; these are actual saved fields, not a live agent's reasoning. No API
+keys are required. The source dataset remains `docs/data/benchmark_summary.json`.
+See [frontend/README.md](frontend/README.md) for npm-only/Windows commands,
+browser setup, and the data contract. Run `make ui-check` for frontend changes.
+
+Frontend browser tests use their own Playwright dependency:
+
+```sh
+cd frontend
+npx playwright install chromium
+cd ..
+make ui-e2e
+```
+
+### Standalone Python report (no Node build)
+
 ```sh
 make serve
 ```

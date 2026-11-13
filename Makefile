@@ -1,4 +1,4 @@
-.PHONY: help install install-browser lint format test test-fast test-e2e check cov smoke serve demo clean
+.PHONY: help install install-browser lint format test test-fast test-e2e check cov smoke serve demo clean ui-install ui-dev ui-check ui-build ui-preview ui-e2e
 
 PYTHON := .venv/bin/python
 BOOTSTRAP_PYTHON ?= python3
@@ -42,6 +42,24 @@ smoke: ## Build a small offline demo in ignored tmp/ (never overwrite published 
 
 serve: ## Preview the checked-in full dashboard at http://127.0.0.1:8000
 	$(PYTHON) -m http.server $(PORT) --bind 127.0.0.1 --directory docs
+
+ui-install: ## Install the React explorer dependencies (Node 22.12+)
+	cd frontend && npm ci
+
+ui-dev: ## Start the shadcn/ui React results explorer (see printed URL)
+	cd frontend && npm run dev
+
+ui-check: ## Typecheck, format-check, test, and build the React explorer
+	cd frontend && npm run lint && npm test && npm run build
+
+ui-build: ## Build frontend/dist without changing the Python report
+	cd frontend && npm run build
+
+ui-preview: ## Serve the production React build (see printed URL)
+	cd frontend && npm run preview
+
+ui-e2e: ui-build ## Test React desktop/mobile UI (requires frontend Playwright Chromium)
+	cd frontend && npm run test:e2e
 
 cov: ## Run full test suite with statement + branch coverage report
 	$(PYTEST) --cov=apart_epistemics --cov-report=term-missing -v

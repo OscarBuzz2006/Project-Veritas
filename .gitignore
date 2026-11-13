@@ -26,4 +26,8 @@ reports/results/*.jsonl
 tmp/
 .DS_Store
 node_modules/
+/frontend/test-results/
+/frontend/playwright-report/
 
+
+/frontend/.designs/
