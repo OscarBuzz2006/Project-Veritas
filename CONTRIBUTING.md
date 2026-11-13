@@ -34,10 +34,17 @@ src/apart_epistemics/
 
 ## Developer Commands
 
+New teammates: start with [HACKATHON.md](HACKATHON.md) for setup, acceptance
+checks, demo instructions, known limitations, and a bug-report template.
+
 Use the `Makefile` shortcuts for local iteration:
 
 ```bash
-make install     # Create .venv (Python 3.12), install .[dev], install Playwright Chromium
+make install     # Create/reuse .venv with python3 (3.11+), install .[dev]
+make install-browser # Install Playwright Chromium (separate optional download)
+make check       # Lint + fast tests + small offline demo, no browser required
+make smoke       # Generate a small demo under ignored tmp/, not tracked docs/
+make serve       # Serve checked-in dashboard on loopback port 8000
 make lint        # Run `ruff check .` and `ruff format --check .`
 make format      # Auto-format code and tests with Ruff
 make test-fast   # Run unit and integration tests without Playwright (`-m "not e2e"`, ~2s)
@@ -59,3 +66,8 @@ make clean       # Clear local caches and temporary directories
 2. **Cross-process determinism**: Never seed or hash from unordered `set` iteration; sort keys before building RNG inputs. Re-verify under varying `PYTHONHASHSEED` values.
 3. **Complexity & typing**: Keep cyclomatic complexity at or below 16 (`C901`), pass `ruff check .` and `ruff format --check .`, and reuse shared math/statistics helpers rather than duplicating logic.
 4. **No secrets or raw traces**: Never commit `.env` files, API tokens, or generated `reports/results/*.jsonl` files.
+5. **Keep generated changes intentional**: Use `make smoke` for local experiments.
+   `make demo` deliberately rewrites tracked results and the published dashboard.
+6. **Before opening a PR**: Run `make check`, then `make test-e2e` if Chromium
+   is installed. Include exact commands/results and any skipped or blocked checks.
+   Keep work on a feature branch; do not commit local outputs or credentials.

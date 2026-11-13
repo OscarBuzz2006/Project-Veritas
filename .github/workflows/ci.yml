@@ -39,3 +39,15 @@ jobs:
 
       - name: Run unit, integration, and Playwright E2E suite with coverage
         run: pytest --cov=apart_epistemics --cov-report=term-missing -v
+
+      - name: Exercise teammate smoke workflow
+        run: make smoke CLI=apart-epistemics
+
+      - name: Verify wheel installation outside the source tree
+        run: |
+          python -m pip wheel . --no-deps --wheel-dir dist
+          python -m venv /tmp/epistemics-wheel
+          /tmp/epistemics-wheel/bin/python -m pip install dist/*.whl
+          cd /tmp
+          /tmp/epistemics-wheel/bin/apart-epistemics setup --out wheel-suite.yaml --agents 8 --rounds 2 --tasks 2
+          /tmp/epistemics-wheel/bin/apart-epistemics demo --config wheel-suite.yaml --out wheel-results --site wheel-site

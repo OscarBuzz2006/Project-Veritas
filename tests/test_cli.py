@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from apart_epistemics.cli import main
 
 
@@ -46,7 +48,10 @@ def test_cli_setup_demo_analyze_report_and_audit(tmp_path: Path) -> None:
     assert "selection_bias_detected" in audit
 
 
-def test_cli_run_missing_secret_returns_clean_error_and_module_entrypoint(tmp_path: Path) -> None:
+def test_cli_run_missing_secret_returns_clean_error_and_module_entrypoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     out_dir = tmp_path / "run_out"
     rc = main(
         [

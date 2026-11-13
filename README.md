@@ -26,6 +26,12 @@ Designed for **Apart Research Track 4 (Open Track: Deployment, Adoption, and Imp
 
 ## Key Empirical Highlights
 
+**Synthetic demonstration, not live-model findings.** The table and numeric
+contrasts below come from the seeded synthetic backend. They exercise the
+pipeline and encode simulator assumptions; they do not establish real-world
+model, nationality, personalization, or causal effects. A local inference smoke
+call is not a validation of the multi-model benchmark.
+
 Verified from `apart-epistemics demo --out reports/results --site docs` (`11` Track 4 conditions, `19,008` agent-round traces, `kappa = 1.000`, `3,456` numeric estimation transitions):
 
 | Condition | Provenance | $K$ | Temp | Acc | Brier | Conf Wrong | Eff Topics | Goldman $N_{\text{eff}}$ | Jaccard Dist |
@@ -101,26 +107,28 @@ Generated vector plots live in [`reports/figures/`](reports/figures/):
 
 ## Quick start
 
+**Hackathon teammates:** see [HACKATHON.md](HACKATHON.md) for the full onboarding
+and testing checklist, Windows commands, troubleshooting, and live-run caveats.
+No API keys or model downloads are needed for the offline demo.
+
 ```bash
 git clone https://github.com/vikramwish/apart-epistemics.git
 cd apart-epistemics
 
-uv venv .venv --python 3.12
-uv pip install -e ".[dev]"
-.venv/bin/playwright install chromium
+make install     # Python 3.11+; no uv required
+make check       # Lint, fast tests, and small synthetic demo in tmp/
+make serve       # Open http://127.0.0.1:8000; Ctrl-C to stop
 
-# Run full Track 4 + Numeric benchmark & rebuild static explorer (zero API cost)
-.venv/bin/apart-epistemics demo --out reports/results --site docs
+# Optional: browser tests (separate browser download)
+make install-browser
+make test
 
-# Optional: inspect selection-bias filter audit
-.venv/bin/apart-epistemics audit-selection
-
-# Optional: run against local Ollama (when daemon is running)
-.venv/bin/apart-epistemics setup --out tmp/smoke.yaml --agents 4 --rounds 1 --tasks 1
-.venv/bin/apart-epistemics run --config tmp/smoke.yaml --backend ollama --model llama3.1:8b --out tmp/ollama_out
+# Optional: rebuild FULL benchmark and tracked dashboard (zero API cost)
+make demo
 ```
 
-Live cloud runs read keys from environment variables documented in [`.env.example`](.env.example).
+Live cloud runs read exported environment variables; `.env` is not automatically
+loaded. Read the safety limitations in [HACKATHON.md](HACKATHON.md) first.
 
 ---
 
@@ -134,7 +142,9 @@ make test-fast  # pytest -m "not e2e" -v (~2s)
 make cov        # pytest --cov=apart_epistemics --cov-report=term-missing -v
 ```
 
-Latest verified suite run: `All checks passed!` (`ruff check .`), `ruff format --check .` passes cleanly, and `44 passed` (`93%` total package statement + branch coverage across `src/apart_epistemics/`).
+Use the CI badge and your local test output for current verification status.
+Browser tests require a working Playwright Chromium installation and permission
+to launch subprocesses; fast tests do not require a browser binary.
 
 ---
 
