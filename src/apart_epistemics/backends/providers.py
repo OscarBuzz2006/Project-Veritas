@@ -348,7 +348,7 @@ class AdaptionBackend(_HTTPChatBackend):
         self.model = model.strip()
         self.base_url = base_url.rstrip("/")
         self.min_output_tokens = int(min_output_tokens)
-        self.max_retries = 10
+        self.max_retries = 25
         if transport is None:
             self.retry_sleep = lambda delay: time.sleep(
                 min(65.0, max(5.0, delay)) + random.uniform(0.5, 4.0)
@@ -363,22 +363,17 @@ class AdaptionBackend(_HTTPChatBackend):
         top_p: float | None = None,
         max_tokens: int = 512,
     ) -> dict[str, Any]:
-        effective_input = (
-            f"{user_prompt} /no_think"
-            if self.model.startswith("qwen")
-            and "/think" not in user_prompt
-            and "/no_think" not in user_prompt
-            else user_prompt
-        )
         effective_max = max(
             int(max_tokens), 1024 if int(max_tokens) < 512 else self.min_output_tokens
         )
         payload: dict[str, Any] = {
             "model": self.model,
             "instructions": system_prompt,
-            "input": effective_input,
+            "input": user_prompt,
             "max_output_tokens": effective_max,
         }
+        if self.model.startswith("qwen"):
+            payload["reasoning"] = {"effort": "none"}
         if temperature is not None:
             payload["temperature"] = float(temperature)
         # Adaption rejects top_p=0.0 with HTTP 400; temperature=0.0 already gives greedy decoding.

@@ -419,7 +419,7 @@ def test_adaption_backend_payload_sampling_and_usage_extraction(
 
     backend = create_backend("adaption", model="deepseek-v4-flash", transport=fake_transport)
     assert isinstance(backend, AdaptionBackend)
-    assert backend.max_retries == 10
+    assert backend.max_retries == 25
 
     reply = backend.generate_numeric_reply(system_prompt="sys", user_prompt="usr", max_tokens=512)
     assert reply["raw_reply"] == "Final estimate: 107"
@@ -450,11 +450,11 @@ def test_adaption_backend_payload_sampling_and_usage_extraction(
     assert calls[2]["payload"]["top_p"] == pytest.approx(0.95)
     assert "dummy-adaption-key" not in json.dumps(reply)
 
-    # Short Track 4 turns cap max_output_tokens at 1024 and append /no_think on qwen models.
+    # Short Track 4 turns cap max_output_tokens at 1024 and disable hidden thinking on qwen models.
     qwen = backend.for_model("qwen3.8-27b")
     qwen.generate_chat("sys", "short prompt", max_tokens=180)
     assert calls[3]["payload"]["max_output_tokens"] == 1024
-    assert calls[3]["payload"]["input"].endswith(" /no_think")
+    assert calls[3]["payload"]["reasoning"] == {"effort": "none"}
 
     from apart_epistemics.backends.base import extract_adaption_response_fields
 
