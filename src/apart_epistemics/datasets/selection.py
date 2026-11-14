@@ -239,13 +239,15 @@ def run_cold_selection(
     if keep > len(candidates):
         raise ValueError(f"Cannot keep {keep} of only {len(candidates)} candidates.")
     if max_per_family is not None:
-        families = {t.domain for t in candidates}
         if max_per_family < 1:
             raise ValueError("max_per_family must be at least 1.")
-        if max_per_family * len(families) < keep:
+        family_counts: dict[str, int] = {}
+        for t in candidates:
+            family_counts[t.domain] = family_counts.get(t.domain, 0) + 1
+        if sum(min(max_per_family, c) for c in family_counts.values()) < keep:
             raise ValueError(
-                f"A cap of {max_per_family} per family across {len(families)} families cannot "
-                f"yield {keep} questions."
+                f"A cap of {max_per_family} per family across {len(family_counts)} families "
+                f"cannot yield {keep} questions."
             )
     if rule == "stratified":
         # Check everything that can be checked before any paid call is made.
@@ -280,10 +282,24 @@ def run_cold_selection(
         skipped: list[str] = []
         picked = _take(ranked, keep, {}, max_per_family, skipped)
         cap_text = CAP_RULE.format(cap=max_per_family) if max_per_family is not None else ""
-        result.update(
-            rule=SELECTION_RULE.format(repeats=repeats, keep=keep)
+        full_rule = (
+            SELECTION_RULE.format(repeats=repeats, keep=keep)
             + MISS_RULE.format(allowed=max_misses, repeats=repeats)
-            + cap_text,
+            + cap_text
+        )
+        if len(picked) < keep:
+            raise SelectionError(
+                f"Only {len(picked)} eligible candidates could be selected for keep={keep} "
+                f"(found {len(ranked)} eligible before cap={max_per_family}).",
+                {
+                    **result,
+                    "rule": full_rule,
+                    "family_cap_skipped": sorted(set(skipped)),
+                    "selected_ids": [r["id"] for r in picked],
+                },
+            )
+        result.update(
+            rule=full_rule,
             selected_ids=[r["id"] for r in picked],
             family_cap_skipped=sorted(set(skipped)),
             strata={},

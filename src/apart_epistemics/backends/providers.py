@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import os
+import random
 import re
+import time
 from typing import Any
 
 from apart_epistemics.backends.base import (
+    DEFAULT_NUMERIC_MAX_TOKENS,
     BackendConfigError,
     TransportFn,
     _HTTPChatBackend,
+    extract_adaption_response_fields,
     extract_openai_chat_fields,
 )
 
@@ -320,3 +324,94 @@ class GeminiBackend(_HTTPChatBackend):
             "output_tokens": int(usage.get("candidatesTokenCount", 0) or 0),
             "reasoning_tokens": 0,
         }
+
+
+class AdaptionBackend(_HTTPChatBackend):
+    """Direct Adaption Labs Responses API adapter (`https://api.prod.adaptionlabs.ai/api/v1`)."""
+
+    def __init__(
+        self,
+        model: str = "deepseek-v4-flash",
+        api_key: str | None = None,
+        base_url: str = "https://api.prod.adaptionlabs.ai/api/v1",
+        min_output_tokens: int = 8192,
+        transport: TransportFn | None = None,
+    ) -> None:
+        raw_key = api_key if api_key is not None else os.environ.get("ADAPTION_API_KEY", "")
+        key = raw_key.strip().strip("\"'")
+        if not key:
+            raise BackendConfigError(
+                "ADAPTION_API_KEY is not set. Export it before using adaption backend."
+            )
+        self._api_key = key
+        self._secret_to_redact = key
+        self.model = model.strip()
+        self.base_url = base_url.rstrip("/")
+        self.min_output_tokens = int(min_output_tokens)
+        self.max_retries = 10
+        if transport is None:
+            self.retry_sleep = lambda delay: time.sleep(
+                min(65.0, max(5.0, delay)) + random.uniform(0.5, 4.0)
+            )
+        self._transport = transport
+
+    def generate_chat(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        max_tokens: int = 512,
+    ) -> dict[str, Any]:
+        effective_input = (
+            f"{user_prompt} /no_think"
+            if self.model.startswith("qwen")
+            and "/think" not in user_prompt
+            and "/no_think" not in user_prompt
+            else user_prompt
+        )
+        effective_max = max(
+            int(max_tokens), 1024 if int(max_tokens) < 512 else self.min_output_tokens
+        )
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "instructions": system_prompt,
+            "input": effective_input,
+            "max_output_tokens": effective_max,
+        }
+        if temperature is not None:
+            payload["temperature"] = float(temperature)
+        # Adaption rejects top_p=0.0 with HTTP 400; temperature=0.0 already gives greedy decoding.
+        if top_p is not None and float(top_p) > 0.0:
+            payload["top_p"] = float(top_p)
+        headers = {
+            "Authorization": f"Bearer {self._api_key}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "Adaption/Python 0.19.0",
+        }
+        data = self._post(
+            f"{self.base_url}/responses",
+            headers,
+            payload,
+            f"Adaption request failed for '{self.model}'",
+        )
+        return extract_adaption_response_fields(data, default_model=self.model)
+
+    def generate_numeric_reply(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        max_tokens: int = DEFAULT_NUMERIC_MAX_TOKENS,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        return super().generate_numeric_reply(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max(int(max_tokens), self.min_output_tokens),
+            **kwargs,
+        )

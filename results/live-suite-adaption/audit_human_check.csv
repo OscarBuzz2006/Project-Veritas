@@ -1,0 +1,529 @@
+blind_id,task_id,response_text,llm_topics,human_topics
+item_62a0e4e11df6,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.72,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity""
+  ]
+}
+```
+
+While the initial battery_manufacturing_debt is significant, the operational efficiency of EVs eventually offsets this burden. Even with a high grid_carbon_intensity, the total lifecycle emissions typically remain lower than those of internal combustion engines.",battery_manufacturing_debt|grid_carbon_intensity,
+item_19731dd7049a,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.71,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring deep cultural_value_alignment within our specific societal context. Furthermore, reducing our geopolitical_dependency on foreign labs empowers us to maintain strategic autonomy over our digital future.",linguistic_preservation|geopolitical_dependency|cultural_value_alignment,
+item_47536d3af409,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.62,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+
+While the initial battery_manufacturing_debt is high, the lifetime_mileage_crossover is typically reached even in regions with high grid_carbon_intensity. From a public health perspective, reducing localized urban pollution outweighs the marginal carbon differences in coal-heavy regions.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_8ac3caacfb44,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.85,
+  ""confidence"": 0.9,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""cultural_value_alignment"",
+    ""geopolitical_dependency""
+  ]
+}
+```
+Prioritizing sovereign models is essential for linguistic_preservation and ensuring cultural_value_alignment within the diverse South Asian context. This strategic investment mitigates geopolitical_dependency on external powers, fostering institutional trust and long-term autonomy.",linguistic_preservation|cultural_value_alignment|geopolitical_dependency,
+item_b5cdcddd83c2,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.58,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+While the initial battery_manufacturing_debt is substantial, the operational efficiency of EVs typically allows for a lifetime_mileage_crossover before 150,000 km. Even with a high grid_carbon_intensity, the reduction in tailpipe emissions generally outweighs the production costs over this distance.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_81ddef5fde4f,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.78,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment"",
+    ""open_weights_commons""
+  ]
+}
+```
+Reducing geopolitical dependency is essential for maintaining collective stability and public health data sovereignty in Western Europe. We must prioritize cultural value alignment and the development of an open weights commons to ensure long-term equity and strategic autonomy.",geopolitical_dependency|cultural_value_alignment|open_weights_commons,
+item_88c6b26aae83,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.72,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+
+While the initial battery_manufacturing_debt is significant, the superior efficiency of electric motors ensures a lifetime_mileage_crossover is reached even in coal-heavy regions. Consequently, EVs still reduce net emissions despite a high grid_carbon_intensity when viewed over a full 150,000 km lifecycle.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_3bee7d063c54,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.78,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring precise cultural_value_alignment within our own society. This strategic shift reduces our geopolitical_dependency on a few dominant foreign providers, fostering a more resilient and open inquiry environment.",linguistic_preservation|geopolitical_dependency|cultural_value_alignment,
+item_951c0c8db3d3,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.72,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""open_weights_commons"",
+    ""regulatory_auditability""
+  ]
+}
+```
+Reducing geopolitical dependency requires a shift toward the open weights commons to ensure infrastructure is not subject to external whims. From an engineering standpoint, sovereign models provide the necessary regulatory auditability to verify safety and performance standards locally.",geopolitical_dependency|open_weights_commons|regulatory_auditability,
+item_9fe017e583ee,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.69,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+While the initial battery_manufacturing_debt is significant, EVs typically achieve a lifetime_mileage_crossover that offsets these costs. Even with a high grid_carbon_intensity, the superior efficiency of electric motors ensures lower total emissions over 150,000 km.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_c7f1697b55f4,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.75,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""open_weights_commons""
+  ]
+}
+```
+Investing in sovereign models is essential to prevent geopolitical dependency and ensure long-term stability for public health infrastructure. Furthermore, such an approach supports linguistic preservation and the development of an open_weights_commons to promote equity across borders.",linguistic_preservation|geopolitical_dependency|open_weights_commons,
+item_8e876631c28a,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.74,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""open_weights_commons""
+  ]
+}
+```
+Prioritizing sovereign models is essential to mitigate geopolitical dependency and ensure robust linguistic preservation across diverse European populations. Leveraging an open_weights_commons approach allows for collective stability and long-term equity in technological access.",linguistic_preservation|geopolitical_dependency|open_weights_commons,
+item_43e17194c6ad,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.68,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity""
+  ]
+}
+```
+
+While the initial battery_manufacturing_debt creates a carbon spike, the operational efficiency of EVs eventually overcomes this burden. Even with a high grid_carbon_intensity, the net lifecycle emissions typically drop below those of internal combustion engines before the 150,000 km mark.",battery_manufacturing_debt|grid_carbon_intensity,
+item_82b5df32798c,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.55,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+While the initial battery_manufacturing_debt is significant, the superior efficiency of electric motors ensures a lifetime_mileage_crossover is reached even in high-emission regions. Long-term equity in public health requires transitioning away from tailpipe emissions, despite a high current grid_carbon_intensity.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_b580d0a181ab,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.35,
+  ""confidence"": 0.8,
+  ""answer"": 0,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+The high grid_carbon_intensity of coal-heavy regions significantly delays the lifetime_mileage_crossover point. Consequently, the initial battery_manufacturing_debt is rarely offset within 150,000 km under these specific empirical conditions.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_5f6147585341,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.72,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""open_weights_commons"",
+    ""regulatory_auditability""
+  ]
+}
+```
+Reducing geopolitical dependency requires the structural ownership of model weights to ensure long-term operational stability. Leveraging an open_weights_commons approach provides the necessary regulatory auditability that closed APIs simply cannot guarantee for critical public infrastructure.",geopolitical_dependency|open_weights_commons|regulatory_auditability,
+item_56a0e08a1255,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.82,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""cultural_value_alignment"",
+    ""geopolitical_dependency""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring cultural_value_alignment within our diverse South Asian societies. Relying solely on external APIs creates a dangerous geopolitical_dependency that undermines our institutional trust and strategic autonomy.",linguistic_preservation|cultural_value_alignment|geopolitical_dependency,
+item_33960d9c9a8e,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.30,
+  ""confidence"": 0.85,
+  ""answer"": 0,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+The high initial battery_manufacturing_debt creates a significant carbon deficit that is difficult to recover when the grid_carbon_intensity is dominated by coal. In such scenarios, the lifetime_mileage_crossover point often exceeds the 150,000 km threshold, making the ICE vehicle the empirically lower-emission choice.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_781b6ec41ea6,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.82,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""cultural_value_alignment"",
+    ""geopolitical_dependency""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring cultural_value_alignment within our diverse South Asian societies. This strategic autonomy reduces our geopolitical_dependency on external tech giants who may not prioritize our regional institutional trust.",linguistic_preservation|cultural_value_alignment|geopolitical_dependency,
+item_3ab566ceaa9a,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.65,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring cultural_value_alignment within our own society. Furthermore, reducing geopolitical_dependency on foreign labs allows us to maintain strategic autonomy in an uncertain digital age.",linguistic_preservation|geopolitical_dependency|cultural_value_alignment,
+item_03593a078190,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.62,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""grid_carbon_intensity"",
+    ""battery_manufacturing_debt"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+While a high grid_carbon_intensity increases the initial battery_manufacturing_debt, most research indicates EVs still break even. The lifetime_mileage_crossover typically occurs well before 150,000 km, confirming that EVs remain the cleaner option.",grid_carbon_intensity|battery_manufacturing_debt|lifetime_mileage_crossover,
+item_d10c5599e290,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.45,
+  ""confidence"": 0.85,
+  ""answer"": 0,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+When grid_carbon_intensity remains high, the initial battery_manufacturing_debt is significantly harder to offset through operational savings. In these specific regional contexts, the lifetime_mileage_crossover often exceeds 150,000 km, making the ICE vehicle the lower-emission choice for that specific distance.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_2b165c8e0612,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.42,
+  ""confidence"": 0.85,
+  ""answer"": 0,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+
+The high grid_carbon_intensity in these regions significantly delays the lifetime_mileage_crossover point. Consequently, the initial battery_manufacturing_debt may not be fully offset within a 150,000 km window.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_6a3a83a75cfd,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.78,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment"",
+    ""open_weights_commons""
+  ]
+}
+```
+
+Investing in sovereign models is essential to mitigate geopolitical dependency and ensure long-term stability for public health infrastructure. This approach prioritizes cultural value alignment and the development of an open weights commons to guarantee equitable access across the region.",geopolitical_dependency|cultural_value_alignment|open_weights_commons,
+item_7e6126b83c06,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.42,
+  ""confidence"": 0.85,
+  ""answer"": 0,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+The heavy initial battery_manufacturing_debt creates a significant emissions deficit that is difficult to recover when the grid_carbon_intensity is dominated by coal. Consequently, the lifetime_mileage_crossover point often exceeds 150,000 km in these specific regional contexts.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_b8cb0f13176b,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.62,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+To ensure long-term equity in climate outcomes, we must account for the initial battery_manufacturing_debt incurred during production. Despite a high grid_carbon_intensity, EVs typically reach their lifetime_mileage_crossover and achieve net emissions savings well before 150,000 km.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_c2d9792f4ff0,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.71,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""open_weights_commons"",
+    ""regulatory_auditability""
+  ]
+}
+```
+Reducing geopolitical dependency is critical for maintaining infrastructure stability and local autonomy. We must leverage an open weights commons to ensure regulatory auditability across all critical public systems.",geopolitical_dependency|open_weights_commons|regulatory_auditability,
+item_4de180b19ca9,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.74,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""linguistic_preservation"",
+    ""cultural_value_alignment""
+  ]
+}
+```
+
+Investing in sovereign models is essential to mitigate geopolitical dependency on a few global tech giants. This approach ensures long-term linguistic preservation and guarantees that AI systems maintain a strong cultural value alignment with our society.",geopolitical_dependency|linguistic_preservation|cultural_value_alignment,
+item_718426f104c8,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.65,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring cultural_value_alignment within our own society. Furthermore, reducing geopolitical_dependency on foreign labs protects our strategic autonomy and academic freedom.",linguistic_preservation|geopolitical_dependency|cultural_value_alignment,
+item_088eb14c1512,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.68,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""regulatory_auditability"",
+    ""open_weights_commons"",
+    ""geopolitical_dependency""
+  ]
+}
+```
+From an engineering perspective, ensuring regulatory auditability is paramount for critical infrastructure and safety standards. Reducing geopolitical dependency through an open weights commons allows for local autonomy and empirical validation without relying on a black-box API.",regulatory_auditability|open_weights_commons|geopolitical_dependency,
+item_425c800b1c48,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.65,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""regulatory_auditability"",
+    ""open_weights_commons""
+  ]
+}
+```
+Relying on foreign APIs creates an unacceptable geopolitical dependency that compromises critical infrastructure control. We need regulatory auditability and a commitment to open_weights_commons to ensure our engineering standards remain transparent and locally autonomous.",geopolitical_dependency|regulatory_auditability|open_weights_commons,
+item_6204a5f6178c,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.3,
+  ""confidence"": 0.8,
+  ""answer"": 0,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+
+The high grid_carbon_intensity in coal-reliant regions significantly delays the lifetime_mileage_crossover point. Consequently, the initial battery_manufacturing_debt often outweighs the operational savings over a modest 150,000 km window.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_ffc53ea49028,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.85,
+  ""confidence"": 0.9,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""cultural_value_alignment"",
+    ""geopolitical_dependency""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring cultural_value_alignment within our diverse South Asian societies. Furthermore, reducing geopolitical_dependency on foreign labs protects our institutional trust and strategic autonomy.",linguistic_preservation|cultural_value_alignment|geopolitical_dependency,
+item_849317210cab,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.62,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+
+To ensure long-term equity and stability, we must account for the initial battery_manufacturing_debt when evaluating environmental impacts. However, even with a high grid_carbon_intensity, the lifetime_mileage_crossover is typically reached well before 150,000 km.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_d8e4cfeace94,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.78,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""open_weights_commons""
+  ]
+}
+```
+Prioritizing sovereign models is essential to mitigate geopolitical dependency and ensure long-term stability for public health infrastructure. Furthermore, investing in an open_weights_commons promotes linguistic_preservation and ensures that AI equity is not dictated by foreign commercial interests.",linguistic_preservation|geopolitical_dependency|open_weights_commons,
+item_e7b4769f2db4,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.45,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+
+The total carbon footprint depends on whether the lifetime_mileage_crossover is reached before the vehicle is decommissioned. High grid_carbon_intensity increases the initial battery_manufacturing_debt, but the inherent efficiency of the electric motor typically ensures a net gain over 150,000 km.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,
+item_e293d999b960,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.65,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""geopolitical_dependency"",
+    ""cultural_value_alignment""
+  ]
+}
+```
+Investing in sovereign models is essential for linguistic_preservation and ensuring a deep cultural_value_alignment that global APIs often overlook. Furthermore, reducing geopolitical_dependency ensures that our educational infrastructure remains resilient and autonomous.",linguistic_preservation|geopolitical_dependency|cultural_value_alignment,
+item_35d900e68c28,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.82,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""linguistic_preservation"",
+    ""cultural_value_alignment"",
+    ""geopolitical_dependency""
+  ]
+}
+```
+Prioritizing sovereign models is essential for linguistic_preservation and ensuring deep cultural_value_alignment within our diverse South Asian societies. This strategic investment mitigates the risks of geopolitical_dependency on external corporate entities that may not understand local institutional nuances.",linguistic_preservation|cultural_value_alignment|geopolitical_dependency,
+item_04121a25098a,od_sovereign_ai,"```json
+{
+  ""stance_prob"": 0.65,
+  ""confidence"": 0.8,
+  ""answer"": 1,
+  ""topics"": [
+    ""geopolitical_dependency"",
+    ""regulatory_auditability"",
+    ""open_weights_commons""
+  ]
+}
+```
+Reducing geopolitical dependency is critical for maintaining infrastructure resilience and local autonomy. We need regulatory auditability and a commitment to open weights commons to ensure empirical rigor in our engineering standards.",geopolitical_dependency|regulatory_auditability|open_weights_commons,
+item_c9bbb0b06a18,gt_ev_grid_net,"```json
+{
+  ""stance_prob"": 0.62,
+  ""confidence"": 0.85,
+  ""answer"": 1,
+  ""topics"": [
+    ""battery_manufacturing_debt"",
+    ""grid_carbon_intensity"",
+    ""lifetime_mileage_crossover""
+  ]
+}
+```
+Even with a high grid_carbon_intensity, the efficiency of electric motors ensures a lifetime_mileage_crossover occurs before 150,000 km. While the initial battery_manufacturing_debt is significant, long-term equity and collective stability are better served by transitioning away from fossil fuels.",battery_manufacturing_debt|grid_carbon_intensity|lifetime_mileage_crossover,

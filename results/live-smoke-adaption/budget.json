@@ -1,0 +1,7 @@
+{
+  "reserved_usd": 0.3780000000000003,
+  "requests": 126,
+  "cap_usd": 5.0,
+  "per_request_allowance_usd": 0.003,
+  "accounting": "conservative request allowances, not actual billing"
+}

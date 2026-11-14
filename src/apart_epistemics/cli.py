@@ -282,7 +282,7 @@ def _run_both_tracks(
         )
     configure_budget(backend, out_dir, budget_usd, getattr(backend, "request_allowance", 1.0))
     out_dir.mkdir(parents=True, exist_ok=True)
-    suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
+    suite_res = run_suite(cfg, backend=backend, out_dir=out_dir, workers=workers)
     num_analysis, num_recs = _execute_numeric_track(
         cfg,
         backend,
@@ -688,7 +688,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument(
         "--backend",
         default="synthetic",
-        choices=["synthetic", "replay", "ollama", "openrouter", "openai", "anthropic", "gemini"],
+        choices=[
+            "synthetic",
+            "replay",
+            "ollama",
+            "openrouter",
+            "openai",
+            "anthropic",
+            "gemini",
+            "adaption",
+        ],
     )
     p_run.add_argument("--model", default=None)
     p_run.add_argument(
@@ -757,7 +766,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_sel.add_argument(
         "--backend",
         default="synthetic",
-        choices=["synthetic", "ollama", "openrouter", "openai", "anthropic", "gemini"],
+        choices=["synthetic", "ollama", "openrouter", "openai", "anthropic", "gemini", "adaption"],
     )
     p_sel.add_argument("--model", default=None)
     p_sel.add_argument("--pin-provider", default=None)

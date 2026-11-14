@@ -832,3 +832,39 @@ def test_cli_records_the_cap_in_the_saved_selection(tmp_path: Path) -> None:
     chosen = json.loads((out / "selected_tasks.json").read_text(encoding="utf-8"))
     per_family = {d: sum(1 for c in chosen if c["domain"] == d) for d in ("ev1", "ev2")}
     assert per_family == {"ev1": 2, "ev2": 2}
+
+
+def test_uneven_family_capacity_is_rejected_before_any_paid_call() -> None:
+    spec = [(f"a{i}", "A", [1.5, 1.8]) for i in range(3)] + [("b0", "B", [1.5, 1.8])]
+    tasks, backend = _family_pool(spec)
+    counting = Counting(backend.plan)
+    with pytest.raises(ValueError, match="cannot yield 4"):
+        run_cold_selection(tasks, counting, repeats=2, keep=4, max_per_family=2)
+    assert counting.calls == 0
+
+
+def test_error_rule_raises_selection_error_if_fewer_than_keep_can_be_picked() -> None:
+    from apart_epistemics.datasets import SelectionError
+
+    # Preflight capacity clears (2*2=4), but B only has 1 eligible candidate (1 too_many_misses).
+    tasks = [
+        _task("a0", 100.0).model_copy(update={"domain": "A"}),
+        _task("a1", 100.0).model_copy(update={"domain": "A"}),
+        _task("a2", 100.0).model_copy(update={"domain": "A"}),
+        _task("b0", 100.0).model_copy(update={"domain": "B"}),
+        _task("b1", 100.0).model_copy(update={"domain": "B"}),
+    ]
+
+    class MissB1(Spready):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            if kwargs["task"].id == "b1":
+                return {"raw_reply": "No estimate possible.", "model_slug": "m", "provider": "p"}
+            return super().generate_numeric_reply(**kwargs)
+
+    backend = MissB1({"a0": [2.0], "a1": [2.1], "a2": [2.2], "b0": [1.8], "b1": [1.8]})
+    with pytest.raises(SelectionError, match="Only 3 eligible candidates") as exc:
+        run_cold_selection(tasks, backend, repeats=2, keep=4, rule="error", max_per_family=2)
+    partial = exc.value.partial
+    assert partial["selected_ids"] == ["a2", "a1", "b0"]
+    assert partial["family_cap_skipped"] == ["a0"]
+    assert len(partial["candidates"]) == 5
