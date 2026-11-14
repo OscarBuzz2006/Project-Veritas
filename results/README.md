@@ -11,6 +11,7 @@ evidence behind the question-bank decisions in issue #16; nothing here is a fina
 | `selection-v1/` | Cold question selection on the first candidate pool (37 questions x 8 asks) | 296 | $0.0396 |
 | `selection-v3/` | Cold question selection on the v3 pool (37 questions x 8 asks), stratified rule, date line on | 296 | $0.0560 |
 | `movability/` | Movability check on 4 calibration questions: does the model's answer follow the user's estimate or the crowd median? | 96 | $0.0213 |
+| `numeric-main/` | **Partial** main run (`configs/numeric_main.yaml`, 11 questions x 30 agents x 6 rounds x 3 replicates). Stopped by hand: only C1 was running, 4,320 of 5,940 C1 agent-rounds done (about 73% of C1), C2 and C3 not started. Calls and cost cover the retries too | 4,409 | about $1.14 |
 | `live-smoke.yaml` | The suite config used for the two smoke runs | | |
 
 ## What is in each folder
@@ -21,6 +22,9 @@ evidence behind the question-bank decisions in issue #16; nothing here is a fina
   readable. Request headers and credentials are never written to it.
 - **`budget.json`**: the request allowance ledger (`reserved_usd` is a conservative reservation,
   not the real bill; the real cost per call is in each response's `usage.cost`).
+- **`numeric-main/`**: same file layout as `live-smoke-*` (no `numeric_analysis.json`: the run did not finish).
+  The run was stopped early, so it cannot be resumed into a complete result without care: resume with the
+  same command and settings and the saved rows are reused.
 - **`live-smoke-*`**: `numeric_runs.jsonl` (one row per agent-round), `numeric_runs.manifest.json`
   (the exact run settings), `numeric_analysis.json` (contrasts, slopes, per-round metrics).
 - **`selection-v3/`**: `selection.json` (every candidate's error, spread, replies and outcome, with
