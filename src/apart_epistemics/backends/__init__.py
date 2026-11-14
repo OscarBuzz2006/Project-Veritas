@@ -12,6 +12,7 @@ from apart_epistemics.backends.base import (
     TransportFn,
 )
 from apart_epistemics.backends.providers import (
+    AdaptionBackend,
     AnthropicBackend,
     GeminiBackend,
     OllamaBackend,
@@ -66,10 +67,21 @@ def create_backend(name: str, **kwargs: Any) -> Any:
             api_key=kwargs.get("api_key"),
             transport=kwargs.get("transport"),
         )
+    if norm == "adaption":
+        adaption_kwargs: dict[str, Any] = {
+            "model": str(kwargs.get("model", "deepseek-v4-flash")),
+            "api_key": kwargs.get("api_key"),
+            "min_output_tokens": int(kwargs.get("min_output_tokens", 8192)),
+            "transport": kwargs.get("transport"),
+        }
+        if kwargs.get("base_url"):
+            adaption_kwargs["base_url"] = str(kwargs["base_url"])
+        return AdaptionBackend(**adaption_kwargs)
     raise BackendConfigError(f"Unknown backend '{name}'.")
 
 
 __all__ = [
+    "AdaptionBackend",
     "AnthropicBackend",
     "BackendConfigError",
     "BudgetExceededError",

@@ -282,7 +282,7 @@ def _run_both_tracks(
         )
     configure_budget(backend, out_dir, budget_usd, getattr(backend, "request_allowance", 1.0))
     out_dir.mkdir(parents=True, exist_ok=True)
-    suite_res = run_suite(cfg, backend=backend, out_dir=out_dir)
+    suite_res = run_suite(cfg, backend=backend, out_dir=out_dir, workers=workers)
     num_analysis, num_recs = _execute_numeric_track(
         cfg,
         backend,
@@ -436,6 +436,7 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
             reviewed_ids=reviewed,
             max_miss_rate=args.max_miss_rate,
             current_date=current_date,
+            max_per_family=args.max_per_family,
         )
     except SelectionError as exc:
         # The cold answers were paid for: keep them, and show why candidates dropped out.
@@ -464,6 +465,11 @@ def _cmd_select_questions(args: argparse.Namespace) -> int:
     print(f"Kept {len(chosen)} of {len(candidates)} -> {out_dir}/selected_tasks.json")
     for name, stats in result.get("summary", {}).items():
         print(f"  {name}: {stats}")
+    if result.get("family_cap_skipped"):
+        print(
+            "  Skipped because its family was full (cap "
+            f"{result.get('max_per_family')}): {', '.join(result['family_cap_skipped'])}"
+        )
     if result.get("held_for_review"):
         print(
             "  Held for hand review (very large error; check the recorded truth, then pass "
@@ -682,7 +688,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument(
         "--backend",
         default="synthetic",
-        choices=["synthetic", "replay", "ollama", "openrouter", "openai", "anthropic", "gemini"],
+        choices=[
+            "synthetic",
+            "replay",
+            "ollama",
+            "openrouter",
+            "openai",
+            "anthropic",
+            "gemini",
+            "adaption",
+        ],
     )
     p_run.add_argument("--model", default=None)
     p_run.add_argument(
@@ -751,7 +766,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_sel.add_argument(
         "--backend",
         default="synthetic",
-        choices=["synthetic", "ollama", "openrouter", "openai", "anthropic", "gemini"],
+        choices=["synthetic", "ollama", "openrouter", "openai", "anthropic", "gemini", "adaption"],
     )
     p_sel.add_argument("--model", default=None)
     p_sel.add_argument("--pin-provider", default=None)
@@ -787,6 +802,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.125,
         help="Drop candidates with a larger share of unusable answers (no positive number, "
         "including a stated zero). 0.125 means more than 1 of 8.",
+    )
+    p_sel.add_argument(
+        "--max-per-family",
+        type=int,
+        default=None,
+        help="Keep at most this many questions per family (the `domain` field, e.g. one event). "
+        "Off by default; the shared cap covers both spread halves.",
     )
     p_sel.add_argument(
         "--current-date",

@@ -65,5 +65,21 @@
     - **Why:** Makes running fast feedback loops effortless for contributors while keeping UI accessibility and full E2E browser checks enforced in CI.
     - **Alternatives rejected:** Coupling all backend and engine tests into a single 700-line file without marker separation or CI format enforcement.
 
+## 2026-11-14 / 2026-11-15 — V3 Question Selection, Prompt Rounding, and Adaption Live Runs
+
+13. **Prompt Number Formatting (`format_prompt_number`) & Tightened Unit-Slip Guard (`MAX_LOG10_JUMP = 2.0`)**
+    - **Decision:** Format all numbers shown in numeric prompts (`current_x`, `pop_stats` median/IQR in C2/C3, and C3 prior user estimates) to 3 significant figures rounded to whole integers with comma separators and no scientific notation (e.g. `104.317` -> `104`, `2.51804e+08` -> `252,000,000`) while preserving exact `log10` values internally; tighten `MAX_LOG10_JUMP` from `3.0` to `2.0`.
+    - **Why:** Prevents unrealistic decimal/e-notation artifacts from priming AI deference and rejects 1,000x/1,000,000x unit slips (like `235,000` vs `186,004,506`) before state updates. Also preserves `results/numeric-main/` (unrounded C1) alongside `results/numeric-main-luna-rounded-c1/` (rounded C1) to measure formatting effects directly on `openai/gpt-6-luna`.
+    - **Alternatives rejected:** Rounding internal `agent_log10_before`/`after` state (would corrupt Page decomposition precision).
+
+14. **V3 Per-Family Selection Validation (`selection.py`)**
+    - **Decision:** Enforce `max_per_family` capacity preflight checks before running paid selection calls, and check `len(selected) < keep` when `rule="error"` while still saving partial `selection.json` diagnostics on `SelectionError`.
+    - **Why:** Avoids spending API credits on an unsatisfiable family cap and prevents undersized `selected_tasks.json` outputs.
+    - **Alternatives rejected:** Quietly returning fewer than `keep` selected tasks or discovering exhaustion only after cold queries.
+
+15. **Adaption Backend Integration (`AdaptionBackend`) & Trajectory Concurrency**
+    - **Decision:** Add `AdaptionBackend` (`--backend adaption`) targeting Adaption's Responses API (`/api/v1/responses`), using `min_output_tokens=8192` for numeric estimation, capping short Track 4 chat turns at `1024` tokens, passing `reasoning={"effort": "none"}` on `qwen*` models (replacing `" /no_think"` suffix because `qwen3.5-397b` ignored `" /no_think"` and hit AWS ALB 60s `HTTP 504` timeouts under `"effort": "low"`/`"minimal"` while `effort="none"` completes in ~7–12s with visible Fermi CoT), omitting `top_p=0.0` (rejected by Adaption with HTTP 400 while `temperature=0.0` stays greedy), adding jittered backoff (`max_retries=25`) for Adaption's 60s user RPM window, and adding cross-trajectory concurrency in `run_numeric_core` when `workers > n_agents`.
+    - **Why:** OpenRouter exhausted account credits (`HTTP 402`) during the rounded C1 run after `1,670` `openai/gpt-6-luna` rows; Adaption provides funded inference across `deepseek-v4-flash`, `gemma-4-26b-a4b-it`, `gemma-4-31b-it`, `qwen3.8-27b`, and `qwen3.5-397b`. Note `openai/gpt-6-luna` is unavailable on Adaption (`HTTP 404`), so full cross-condition V3 and multi-model runs ran on Adaption models while `live-smoke-3` and the 1,670-row C1 comparison document `openai/gpt-6-luna`.
+    - **Alternatives rejected:** Leaving OpenRouter as the only cloud gateway, running `qwen3.5-397b` under hidden reasoning `"effort": "low"` (caused 113 gateway timeouts/retries across 65 partial rows before switching cleanly to `effort="none"`), or routing `workers <= n_agents` across trajectories (which would break sequential byte-identical JSONL invariants tested in `test_concurrency_and_retries.py`).
 
 

@@ -21,7 +21,9 @@ htmlcov/
 *.key
 
 # Local run artifacts (keep compact summaries/figures/docs tracked; ignore large raw JSONL traces)
-/results/
+# results/ holds the recorded live runs and IS tracked; only the throwaway offline demo output
+# that `make check`/`make smoke` can write there is ignored.
+/results/smoke*
 reports/results/*.jsonl
 tmp/
 .DS_Store
@@ -31,3 +33,4 @@ node_modules/
 
 
 /frontend/.designs/
+*.cpgz
