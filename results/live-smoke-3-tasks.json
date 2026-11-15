@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ag_ind_total",
+    "kind": "numeric_estimate",
+    "domain": "ag",
+    "question": "The 2026 Asian Games took place in Aichi-Nagoya, Japan from 19 September to 4 October 2026. This was after your training data was collected, and the results are final. How many medals in total (gold, silver and bronze) did India win? You may not know the result; give your best estimate as a positive number.",
+    "hypothesis_a": "",
+    "hypothesis_b": "",
+    "ground_truth": null,
+    "numeric_truth": 85.0,
+    "unit": "medals",
+    "source_note": "Khel Now final medal tally, 4 Oct 2026; Indian press headlines [check tier A]",
+    "selection_stratum": "low_spread",
+    "popular_misconception_bias": 0.8,
+    "global_north_prior": 0.5,
+    "canonical_topics": []
+  },
+  {
+    "id": "box_odyssey_cume",
+    "kind": "numeric_estimate",
+    "domain": "box",
+    "question": "Christopher Nolan's film 'The Odyssey' was released in cinemas in July 2026. This was after your training data was collected, and the result is final. What was its cumulative box office gross in the United States and Canada up to and including 2 August 2026, in US dollars? You may not know the result; give your best estimate as a positive number.",
+    "hypothesis_a": "",
+    "hypothesis_b": "",
+    "ground_truth": null,
+    "numeric_truth": 395573235.0,
+    "unit": "US dollars",
+    "source_note": "The Numbers daily chart, 2 Aug 2026: $395,573,235; Rotten Tomatoes 3 Aug 2026: $395.5 million [check tier A]",
+    "selection_stratum": "high_spread",
+    "popular_misconception_bias": -0.8,
+    "global_north_prior": 0.5,
+    "canonical_topics": []
+  }
+]

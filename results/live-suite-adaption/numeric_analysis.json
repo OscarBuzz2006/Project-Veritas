@@ -1,0 +1,292 @@
+{
+  "max_identity_residual": 1.6653345369377348e-16,
+  "h4_assistant_agent_corr": 0.9674,
+  "h4_slopes": {
+    "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+    "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+    "by_condition": {
+      "C1": {
+        "slope_user": {
+          "mean": 0.0332,
+          "ci95": [
+            -0.0372,
+            0.1035
+          ],
+          "n_questions": 2
+        },
+        "n_observations": 8,
+        "per_question": {
+          "ag_ind_gold": {
+            "n": 4,
+            "slope_user": -0.0372
+          },
+          "ag_ind_total": {
+            "n": 4,
+            "slope_user": 0.1035
+          }
+        }
+      },
+      "C2": {
+        "slope_user": {
+          "mean": null,
+          "ci95": null,
+          "n_questions": 0
+        },
+        "n_observations": 0,
+        "per_question": {
+          "ag_ind_gold": {
+            "n": 4,
+            "skipped": "too few or collinear points"
+          },
+          "ag_ind_total": {
+            "n": 4,
+            "skipped": "too few or collinear points"
+          }
+        },
+        "slope_crowd": {
+          "mean": null,
+          "ci95": null,
+          "n_questions": 0
+        }
+      },
+      "C3": {
+        "slope_user": {
+          "mean": null,
+          "ci95": null,
+          "n_questions": 0
+        },
+        "n_observations": 0,
+        "per_question": {
+          "ag_ind_gold": {
+            "n": 4,
+            "skipped": "too few or collinear points"
+          },
+          "ag_ind_total": {
+            "n": 4,
+            "skipped": "too few or collinear points"
+          }
+        },
+        "slope_crowd": {
+          "mean": null,
+          "ci95": null,
+          "n_questions": 0
+        }
+      }
+    }
+  },
+  "by_stratum": {
+    "low_spread": {
+      "questions": [
+        "ag_ind_gold",
+        "ag_ind_total"
+      ],
+      "by_condition_final": {
+        "C1": {
+          "n_cells": 2,
+          "crowd_error": 0.045604,
+          "avg_individual_error": 0.064805,
+          "diversity": 0.019201,
+          "iqr": 0.11499,
+          "miss_rate": 0.0
+        },
+        "C2": {
+          "n_cells": 2,
+          "crowd_error": 0.069515,
+          "avg_individual_error": 0.097035,
+          "diversity": 0.02752,
+          "iqr": 0.139322,
+          "miss_rate": 0.0
+        },
+        "C3": {
+          "n_cells": 2,
+          "crowd_error": 0.055928,
+          "avg_individual_error": 0.07717,
+          "diversity": 0.021242,
+          "iqr": 0.142601,
+          "miss_rate": 0.0
+        }
+      },
+      "h4_slopes": {
+        "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+        "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+        "by_condition": {
+          "C1": {
+            "slope_user": {
+              "mean": 0.0332,
+              "ci95": [
+                -0.0372,
+                0.1035
+              ],
+              "n_questions": 2
+            },
+            "n_observations": 8,
+            "per_question": {
+              "ag_ind_gold": {
+                "n": 4,
+                "slope_user": -0.0372
+              },
+              "ag_ind_total": {
+                "n": 4,
+                "slope_user": 0.1035
+              }
+            }
+          },
+          "C2": {
+            "slope_user": {
+              "mean": null,
+              "ci95": null,
+              "n_questions": 0
+            },
+            "n_observations": 0,
+            "per_question": {
+              "ag_ind_gold": {
+                "n": 4,
+                "skipped": "too few or collinear points"
+              },
+              "ag_ind_total": {
+                "n": 4,
+                "skipped": "too few or collinear points"
+              }
+            },
+            "slope_crowd": {
+              "mean": null,
+              "ci95": null,
+              "n_questions": 0
+            }
+          },
+          "C3": {
+            "slope_user": {
+              "mean": null,
+              "ci95": null,
+              "n_questions": 0
+            },
+            "n_observations": 0,
+            "per_question": {
+              "ag_ind_gold": {
+                "n": 4,
+                "skipped": "too few or collinear points"
+              },
+              "ag_ind_total": {
+                "n": 4,
+                "skipped": "too few or collinear points"
+              }
+            },
+            "slope_crowd": {
+              "mean": null,
+              "ci95": null,
+              "n_questions": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "by_condition_final": {
+    "C1": {
+      "condition_id": "C1",
+      "round_idx": 1,
+      "crowd_error": 0.045604,
+      "avg_individual_error": 0.064805,
+      "diversity": 0.019201,
+      "iqr": 0.11499,
+      "miss_rate": 0.0
+    },
+    "C2": {
+      "condition_id": "C2",
+      "round_idx": 1,
+      "crowd_error": 0.069515,
+      "avg_individual_error": 0.097035,
+      "diversity": 0.02752,
+      "iqr": 0.139322,
+      "miss_rate": 0.0
+    },
+    "C3": {
+      "condition_id": "C3",
+      "round_idx": 1,
+      "crowd_error": 0.055928,
+      "avg_individual_error": 0.07717,
+      "diversity": 0.021242,
+      "iqr": 0.142601,
+      "miss_rate": 0.0
+    }
+  },
+  "condition_round_metrics": [
+    {
+      "condition_id": "C1",
+      "round_idx": 1,
+      "crowd_error": 0.045604,
+      "avg_individual_error": 0.064805,
+      "diversity": 0.019201,
+      "iqr": 0.11499,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 1,
+      "crowd_error": 0.069515,
+      "avg_individual_error": 0.097035,
+      "diversity": 0.02752,
+      "iqr": 0.139322,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 1,
+      "crowd_error": 0.055928,
+      "avg_individual_error": 0.07717,
+      "diversity": 0.021242,
+      "iqr": 0.142601,
+      "miss_rate": 0.0
+    }
+  ],
+  "contrasts": [
+    {
+      "contrast_id": "c2_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": 0.008319,
+      "ci_low": 0.003096,
+      "ci_high": 0.013542,
+      "wilcoxon_p": 0.5,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 2
+    },
+    {
+      "contrast_id": "c2_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": 0.023911,
+      "ci_low": 0.00241,
+      "ci_high": 0.045413,
+      "wilcoxon_p": 0.5,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 2
+    },
+    {
+      "contrast_id": "c3_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": 0.002041,
+      "ci_low": 0.00095,
+      "ci_high": 0.003132,
+      "wilcoxon_p": 0.5,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 2
+    },
+    {
+      "contrast_id": "c3_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": 0.010324,
+      "ci_low": 0.002161,
+      "ci_high": 0.018487,
+      "wilcoxon_p": 0.5,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 2
+    }
+  ]
+}

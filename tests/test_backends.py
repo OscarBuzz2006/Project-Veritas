@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 import pytest
 
 from apart_epistemics.backends import (
+    AdaptionBackend,
     AnthropicBackend,
     BackendConfigError,
     GeminiBackend,
     OllamaBackend,
     OpenAICompatibleBackend,
     OpenRouterBackend,
+    TransientBackendError,
     create_backend,
 )
 
@@ -75,6 +78,7 @@ def test_openrouter_backend_enforces_pinning_no_online_and_safe_errors(
         ("openai", "OPENAI_API_KEY", "oa-secret-xyz-123"),
         ("anthropic", "ANTHROPIC_API_KEY", "ant-secret-xyz-123"),
         ("gemini", "GEMINI_API_KEY", "gem-secret-xyz-123"),
+        ("adaption", "ADAPTION_API_KEY", "adapt-secret-xyz-123"),
     ],
 )
 def test_http_adapters_redact_secrets_from_transport_errors(
@@ -368,3 +372,118 @@ def test_numeric_reply_passes_cost_through_and_other_adapters_report_none(
         },
     )
     assert claude.generate_numeric_reply(system_prompt="s", user_prompt="u")["cost_usd"] is None
+
+
+def test_adaption_backend_payload_sampling_and_usage_extraction(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("ADAPTION_API_KEY", raising=False)
+    with pytest.raises(BackendConfigError, match="ADAPTION_API_KEY"):
+        AdaptionBackend(model="deepseek-v4-flash")
+
+    monkeypatch.setenv("ADAPTION_API_KEY", '  "dummy-adaption-key"  ')
+    calls: list[dict[str, Any]] = []
+
+    def fake_transport(
+        url: str, headers: dict[str, str], payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        calls.append({"url": url, "headers": headers, "payload": payload})
+        if payload["instructions"] == "fallback-output":
+            return {
+                "model": "deepseek-v4-flash",
+                "status": "incomplete",
+                "output": [
+                    {
+                        "type": "message",
+                        "content": [{"type": "output_text", "text": "Final estimate: 120"}],
+                    }
+                ],
+                "usage": {
+                    "input_tokens": 20,
+                    "output_tokens": 2048,
+                    "output_tokens_details": {"reasoning_tokens": 1800},
+                    "cost": 0.00042,
+                },
+            }
+        return {
+            "model": "deepseek-v4-flash",
+            "status": "completed",
+            "output_text": "Final estimate: 107",
+            "usage": {
+                "input_tokens": 15,
+                "output_tokens": 45,
+                "output_tokens_details": {"reasoning_tokens": 30},
+                "cost": 0.00012,
+            },
+        }
+
+    backend = create_backend("adaption", model="deepseek-v4-flash", transport=fake_transport)
+    assert isinstance(backend, AdaptionBackend)
+    assert backend.max_retries == 25
+
+    reply = backend.generate_numeric_reply(system_prompt="sys", user_prompt="usr", max_tokens=512)
+    assert reply["raw_reply"] == "Final estimate: 107"
+    assert reply["provider"] == "adaption"
+    assert reply["model_slug"] == "deepseek-v4-flash"
+    assert reply["finish_reason"] == "stop"
+    assert reply["reasoning_tokens"] == 30
+    assert reply["cost_usd"] == pytest.approx(0.00012)
+    assert calls[0]["url"] == "https://api.prod.adaptionlabs.ai/api/v1/responses"
+    assert calls[0]["headers"]["Authorization"] == "Bearer dummy-adaption-key"
+    assert calls[0]["payload"]["max_output_tokens"] == 8192
+    assert "temperature" not in calls[0]["payload"]
+    assert "top_p" not in calls[0]["payload"]
+
+    # top_p=0.0 is omitted while temperature=0.0 is kept; top_p>0.0 is forwarded.
+    out_greedy = backend.generate_chat(
+        "fallback-output", "usr", temperature=0.0, top_p=0.0, max_tokens=9000
+    )
+    assert out_greedy["finish_reason"] == "length"
+    assert out_greedy["text"] == "Final estimate: 120"
+    assert out_greedy["reasoning_tokens"] == 1800
+    assert calls[1]["payload"]["max_output_tokens"] == 9000
+    assert calls[1]["payload"]["temperature"] == 0.0
+    assert "top_p" not in calls[1]["payload"]
+
+    backend.generate_chat("sys", "usr", temperature=0.8, top_p=0.95)
+    assert calls[2]["payload"]["temperature"] == pytest.approx(0.8)
+    assert calls[2]["payload"]["top_p"] == pytest.approx(0.95)
+    assert "dummy-adaption-key" not in json.dumps(reply)
+
+    # Short Track 4 turns cap max_output_tokens at 1024 and disable hidden thinking on qwen models.
+    qwen = backend.for_model("qwen3.8-27b")
+    qwen.generate_chat("sys", "short prompt", max_tokens=180)
+    assert calls[3]["payload"]["max_output_tokens"] == 1024
+    assert calls[3]["payload"]["reasoning"] == {"effort": "none"}
+
+    from apart_epistemics.backends.base import extract_adaption_response_fields
+
+    with pytest.raises(TransientBackendError, match="upstream"):
+        extract_adaption_response_fields({"error": {"message": "overloaded"}}, "deepseek-v4-flash")
+
+
+def test_adaption_live_roundtrip_when_key_present() -> None:
+    if not os.environ.get("ADAPTION_API_KEY", "").strip():
+        pytest.skip("ADAPTION_API_KEY not set")
+    from apart_epistemics.engine.numeric_core import format_prompt_number
+    from apart_epistemics.parsers import parse_numeric_estimate
+
+    backend = create_backend("adaption", model="gemma-4-26b-a4b-it")
+    est = format_prompt_number(104.317)
+    assert est == "104"
+    reply = backend.generate_numeric_reply(
+        system_prompt="You are helping an analyst refine a numeric estimate.",
+        user_prompt=(
+            "Question: How many medals did India win at the 2022 Asian Games?\n"
+            f"My current estimate is {est} medals. "
+            "End with 'Final estimate: <plain number in medals>' and nothing after the number."
+        ),
+    )
+    assert reply["provider"] == "adaption"
+    assert reply["input_tokens"] > 0
+    assert reply["output_tokens"] > 0
+    assert reply["cost_usd"] is not None
+    parsed = parse_numeric_estimate(str(reply["raw_reply"]), require_positive=True)
+    assert not parsed.miss
+    assert parsed.value is not None
+    assert parsed.value > 0

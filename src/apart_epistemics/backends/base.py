@@ -38,7 +38,7 @@ def post_json(
     url: str,
     headers: dict[str, str],
     payload: dict[str, Any],
-    timeout: float = 45.0,
+    timeout: float = 90.0,
 ) -> dict[str, Any]:
     """Execute a synchronous JSON POST request using Python's standard library."""
     body = json.dumps(payload).encode("utf-8")
@@ -100,6 +100,49 @@ def extract_openai_chat_fields(
         "model_slug": str(data.get("model") or default_model),
         "input_tokens": int(usage.get("prompt_tokens", 0) or 0),
         "output_tokens": int(usage.get("completion_tokens", 0) or 0),
+        "reasoning_tokens": int(reasoning or 0),
+    }
+
+
+def extract_adaption_response_fields(
+    data: dict[str, Any],
+    default_model: str,
+) -> dict[str, Any]:
+    """Normalize an Adaption Responses API JSON payload."""
+    if data.get("error"):
+        raise TransientBackendError(f"Adaption upstream error: {data['error']}")
+    text = str(data.get("output_text") or "")
+    if not text:
+        parts = [
+            str(content.get("text", ""))
+            for item in (data.get("output") or [])
+            if isinstance(item, dict) and item.get("type") == "message"
+            for content in (item.get("content") or [])
+            if isinstance(content, dict) and content.get("type") == "output_text"
+        ]
+        text = "".join(parts)
+    status = str(data.get("status") or "")
+    if status == "completed":
+        finish_reason = "stop"
+    elif status == "incomplete":
+        finish_reason = "length"
+    else:
+        finish_reason = status or "stop"
+    usage = data.get("usage") or {}
+    details = usage.get("output_tokens_details") or usage.get("completion_tokens_details") or {}
+    reasoning = details.get("reasoning_tokens") if isinstance(details, dict) else None
+    if reasoning is None:
+        reasoning = usage.get("reasoning_tokens", 0)
+    raw_cost = usage.get("cost")
+    cost_usd = float(raw_cost) if isinstance(raw_cost, int | float) and raw_cost >= 0 else None
+    return {
+        "text": text,
+        "finish_reason": finish_reason,
+        "cost_usd": cost_usd,
+        "provider": "adaption",
+        "model_slug": str(data.get("model") or default_model),
+        "input_tokens": int(usage.get("input_tokens") or usage.get("prompt_tokens") or 0),
+        "output_tokens": int(usage.get("output_tokens") or usage.get("completion_tokens") or 0),
         "reasoning_tokens": int(reasoning or 0),
     }
 

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "seed": 42,
+  "alpha": 0.3,
+  "n_agents": 8,
+  "n_rounds": 2,
+  "replicates": 2,
+  "max_tokens": 1024,
+  "start_bias_weight": 0.22,
+  "start_sd": 0.24,
+  "conditions": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "tasks": [
+    {
+      "id": "num_yarlung_length_km",
+      "kind": "numeric_estimate",
+      "domain": "geography",
+      "question": "What is the total length of the Yarlung Tsangpo / Brahmaputra River in kilometers?",
+      "hypothesis_a": "",
+      "hypothesis_b": "",
+      "ground_truth": null,
+      "numeric_truth": 2900.0,
+      "unit": "km",
+      "source_note": "Pre-2026 hydrological survey (~2,840-2,900 km)",
+      "selection_stratum": "",
+      "popular_misconception_bias": -0.12,
+      "global_north_prior": 0.5,
+      "canonical_topics": []
+    },
+    {
+      "id": "num_timbuktu_pop",
+      "kind": "numeric_estimate",
+      "domain": "demographics",
+      "question": "What was the municipal census population of Timbuktu, Mali in the 2009 census?",
+      "hypothesis_a": "",
+      "hypothesis_b": "",
+      "ground_truth": null,
+      "numeric_truth": 54453.0,
+      "unit": "people",
+      "source_note": "2009 Mali census (54,453)",
+      "selection_stratum": "",
+      "popular_misconception_bias": 0.18,
+      "global_north_prior": 0.5,
+      "canonical_topics": []
+    }
+  ],
+  "backend": {
+    "class": "OpenRouterBackend",
+    "model": "openai/gpt-6-luna",
+    "base_url": "https://openrouter.ai/api/v1",
+    "pin_provider": "OpenAI",
+    "reasoning_effort": "low"
+  }
+}

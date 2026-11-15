@@ -173,6 +173,16 @@ def test_live_llm_driver_replay_roundtrip_and_nonfinite_fallback(tmp_path: Path)
     )
     assert out_live["summaries"][0].model_dump() == replayed["summaries"][0].model_dump()
 
+    out_parallel = run_suite(
+        cfg,
+        backend=OllamaBackend(model="llama3.1:8b", transport=mock_chat_tx),
+        out_dir=tmp_path / "parallel",
+        workers=4,
+    )
+    assert [r.model_dump() for r in out_live["records"]] == [
+        r.model_dump() for r in out_parallel["records"]
+    ]
+
     # Non-JSON prose from live LLM must fall back cleanly to prev_stance (not NaN/0.99).
     def unparseable_tx(_u: str, _h: dict[str, str], _p: dict[str, Any]) -> dict[str, Any]:
         return {"message": {"content": "Free-form reasoning with no JSON block at all."}}

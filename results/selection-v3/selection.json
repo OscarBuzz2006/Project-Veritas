@@ -1,0 +1,3287 @@
+{
+  "rule_name": "stratified",
+  "current_date": "2026-11-13",
+  "max_misses": 1,
+  "repeats": 8,
+  "keep": 10,
+  "n_candidates": 37,
+  "n_excluded_no_answer": 0,
+  "candidates": [
+    {
+      "id": "ag_uzb_total",
+      "domain": "ag",
+      "numeric_truth": 70.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026; Daryo, 4 Oct 2026 ('fifth with 70 medals') [check tier A]",
+      "n_answers": 7,
+      "n_misses": 1,
+      "mean_abs_log10_error": 0.024898,
+      "log10_spread": 0.008009,
+      "replies": [
+        {
+          "raw_reply": "Uzbekistan won 71 medals at the previous Asian Games, and its recent strength in boxing and other combat sports suggests a modest increase. Final estimate: 75 medals",
+          "parsed_value": 75.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002216,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 75 medals",
+          "parsed_value": 75.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001051,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 75",
+          "parsed_value": 75.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001371,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 75 medals",
+          "parsed_value": 75.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001071,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "71 medals",
+          "parsed_value": null,
+          "miss": true,
+          "finish_reason": "stop",
+          "cost_usd": 9.56e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Uzbekistan won 70 medals in 2018 and 71 in 2022, so a similar total is a reasonable estimate for 2026.\n\nFinal estimate: 72 medals",
+          "parsed_value": 72.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001316,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 75 medals",
+          "parsed_value": 75.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001266,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Uzbekistan won 70 medals in 2018 and 71 in 2022. Assuming a similar performance in 2026, a reasonable estimate is 72 medals.\n\nFinal estimate: 72 medals",
+          "parsed_value": 72.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001361,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_kaz_total",
+      "domain": "ag",
+      "numeric_truth": 84.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026; 24.kz ('84 medals') [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.021189,
+      "log10_spread": 0.0,
+      "replies": [
+        {
+          "raw_reply": "Kazakhstan has typically won about 75\u201385 medals at recent Asian Games, so a reasonable estimate is 80.\n\nFinal estimate: 80 medals",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.21e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 80\n",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001031,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan typically wins around 75\u201385 medals at the Asian Games. Its 2022 total was 80, so that is a reasonable estimate for 2026.\n\nFinal estimate: 80 medals",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001196,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan has typically won around 75\u201385 medals at recent Asian Games, so a reasonable estimate is 80.\n\nFinal estimate: 80",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001431,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 80 medals at the 2022 Asian Games. Given its recent totals of roughly 76\u201384, I estimate a similar result in 2026.\n\nFinal estimate: 80",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001346,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan has typically won around 75\u201385 medals at recent Asian Games, so a reasonable estimate is 80.\n\nFinal estimate: 80\n",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001016,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 80 medals",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001076,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 80 medals at the 2022 Asian Games, and its totals in recent editions have generally been around that level. Best estimate for 2026: 80 medals.\n\nFinal estimate: 80",
+          "parsed_value": 80.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001286,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_kaz_gold",
+      "domain": "ag",
+      "numeric_truth": 12.0,
+      "unit": "gold medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026; bes.media ('12 golds') [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.047161,
+      "log10_spread": 0.053253,
+      "replies": [
+        {
+          "raw_reply": "Kazakhstan won 10 gold medals at the most recent Asian Games, so a reasonable estimate for 2026 is close to that result.\n\nFinal estimate: 10 gold medals",
+          "parsed_value": 10.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.44e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 13 gold medals",
+          "parsed_value": 13.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001569,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 10 gold medals at the previous Asian Games, and its results have varied substantially across recent editions. A modest increase seems plausible, so my best estimate is 13.\n\nFinal estimate: 13 gold medals",
+          "parsed_value": 13.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001559,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 10 gold medals at the 2022 Asian Games, down from 15 in 2018. A modest rebound seems plausible, so I estimate 15 gold medals in 2026.\n\nFinal estimate: 15",
+          "parsed_value": 15.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001874,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 15 gold medals in 2018 and 10 in 2022, so a reasonable estimate for 2026 is between those results, closer to the historical average.\n\nFinal estimate: 15 gold medals",
+          "parsed_value": 15.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001419,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 10 gold medals at the 2022 Asian Games and 15 in 2018. Allowing for year-to-year variation, a reasonable estimate for 2026 is 12.\n\nFinal estimate: 12 gold medals",
+          "parsed_value": 12.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001224,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 15 golds in 2018 and 10 in 2022, so a reasonable estimate for 2026 is near that recent range.\n\nFinal estimate: 13 gold medals",
+          "parsed_value": 13.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001664,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Kazakhstan won 15 gold medals in 2018 and 10 in 2022. A reasonable estimate for 2026, allowing for year-to-year variation, is near that recent range.\n\nFinal estimate: 12 gold medals",
+          "parsed_value": 12.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001609,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_idn_gold",
+      "domain": "ag",
+      "numeric_truth": 5.0,
+      "unit": "gold medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026; RCTI+ ('5 golds, 16th') [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.214524,
+      "log10_spread": 0.050603,
+      "replies": [
+        {
+          "raw_reply": "Indonesia won 7 gold medals in 2022, while its 31-gold total in 2018 was boosted by hosting. A reasonable estimate for 2026 is slightly above its recent baseline, at 8 gold medals.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001424,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Indonesia won 7 gold medals in 2022 when not hosting, compared with 31 as host in 2018. For 2026 in Japan, a modest increase from the 2022 result seems plausible, so my estimate is 9.\n\nFinal estimate: 9 gold medals",
+          "parsed_value": 9.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001479,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Indonesia won 4 gold medals in 2014 and 7 in 2022 when it was not the host. A reasonable estimate for 2026 is near that recent range.\n\nFinal estimate: 7 gold medals",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001304,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Indonesia won 7 gold medals at the 2022 Asian Games. Without reliable results for 2026, a modest increase or similar performance seems most plausible, so I estimate 8.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001939,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Indonesia won 7 gold medals at the 2022 Asian Games, while its 31-gold haul in 2018 was boosted by hosting. With a modest increase from its recent non-host performance, 8 is a reasonable estimate.\n\nFinal estimate: 8 gold medals",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001614,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 9",
+          "parsed_value": 9.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001194,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Indonesia won 7 gold medals at the 2022 Asian Games, while its 31-gold total in 2018 was boosted by hosting. A reasonable estimate for 2026 is between those results, closer to its recent performance.\n\nFinal estimate: 10 gold medals",
+          "parsed_value": 10.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001239,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Indonesia\u2019s recent non-host totals were 4 golds in 2014 and 7 in 2022; its 31-gold haul in 2018 was boosted by hosting. A reasonable estimate for 2026 is therefore close to the recent non-host range.\n\nFinal estimate: 7 gold medals",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002114,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_ind_total",
+      "domain": "ag",
+      "numeric_truth": 85.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026; Indian press headlines [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.104039,
+      "log10_spread": 0.020297,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 110 medals",
+          "parsed_value": 110.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001051,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India\u2019s 2022 total was 107, and its recent performance suggests a similar result in 2026, though changes to the event program add uncertainty. Final estimate: 100 medals",
+          "parsed_value": 100.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002136,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 110",
+          "parsed_value": 110.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001016,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 107 medals at the 2022 Asian Games. Allowing for modest growth, my best estimate for 2026 is 110 medals.\n\nFinal estimate: 110",
+          "parsed_value": 110.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001346,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 107 medals in the 2022 Asian Games, and a modest increase or similar performance is plausible for 2026. My best estimate is 110 medals.\n\nFinal estimate: 110",
+          "parsed_value": 110.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001371,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 107 medals at the 2022 Asian Games, so a reasonable estimate for 2026 is around 100.\n\nFinal estimate: 100",
+          "parsed_value": 100.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001721,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 115 medals",
+          "parsed_value": 115.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.76e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 107 medals at the 2022 Asian Games, and its overall performance has been trending upward. A modest increase is a reasonable estimate for 2026.\n\nFinal estimate: 110 medals",
+          "parsed_value": 110.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001231,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_ind_gold",
+      "domain": "ag",
+      "numeric_truth": 21.0,
+      "unit": "gold medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.154902,
+      "log10_spread": 0.0,
+      "replies": [
+        {
+          "raw_reply": "India won 28 gold medals in 2023, and a modest increase is plausible given its recent upward trend. I estimate 30 gold medals in 2026.\n\nFinal estimate: 30",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001409,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 28 gold medals at the 2022 Asian Games. Allowing for continued improvement but substantial year-to-year variation, a reasonable estimate for 2026 is 30.\n\nFinal estimate: 30 gold medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001289,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 30 gold medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001299,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 28 gold medals in the 2022 Asian Games. With its recent upward trend, a reasonable estimate for 2026 is slightly higher.\n\nFinal estimate: 30",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001229,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 30 gold medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001154,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 28 gold medals at the 2022 Asian Games, up from 15 in 2018. Allowing for normal variation and a modest chance of further improvement, a reasonable estimate for 2026 is close to 30.\n\nFinal estimate: 30 gold medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001124,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 28 gold medals in 2022, up from 16 in 2018. Allowing for continued growth, a reasonable estimate for 2026 is around 30.\n\nFinal estimate: 30 gold medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001474,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 28 gold medals in 2022, a record for the country. Given that recent upward trend, a modest increase is a reasonable estimate.\n\nFinal estimate: 30 gold medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001424,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_tha_total",
+      "domain": "ag",
+      "numeric_truth": 52.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.075184,
+      "log10_spread": 0.016829,
+      "replies": [
+        {
+          "raw_reply": "Thailand won 58 medals in 2022 and 73 in 2018, so a reasonable estimate for 2026 is between those totals. Final estimate: 65 medals",
+          "parsed_value": 65.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001626,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Thailand won 58 medals at the 2022 Asian Games and 73 in 2018. A reasonable estimate for 2026, allowing for normal variation, is close to that recent range.\n\nFinal estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001426,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Thailand has typically won roughly 50\u201375 medals at recent Asian Games, so a reasonable estimate is near the middle of that range.\n\nFinal estimate: 65",
+          "parsed_value": 65.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001556,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001071,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Thailand has typically won around 47\u201373 medals at recent Asian Games, with 58 at the 2022 Games. A reasonable estimate for 2026 is close to that recent total.\n\nFinal estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.91e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Thailand\u2019s recent Asian Games totals have ranged from about 47 to 73 medals. A reasonable estimate near that range\u2019s midpoint is 60.\n\nFinal estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001231,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 65",
+          "parsed_value": 65.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001296,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Thailand has typically won about 50\u201375 medals in recent Asian Games, with 58 in 2022. A reasonable estimate for 2026 is 60 medals.\n\nFinal estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001161,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_hkg_total",
+      "domain": "ag",
+      "numeric_truth": 54.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.015404,
+      "log10_spread": 0.014847,
+      "replies": [
+        {
+          "raw_reply": "Hong Kong won 53 medals at the 2022 Asian Games, following 46 in 2018. Allowing for year-to-year variation, I estimate a similar total in 2026.\n\nFinal estimate: 50 medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001692,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Hong Kong\u2019s recent Asian Games totals have ranged from about 42 to 53 medals, with 53 at the most recent Games. A reasonable estimate is 50 medals.\n\nFinal estimate: 50 medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001477,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Hong Kong won 53 medals at the 2022 Asian Games, up from 46 in 2018. A modest increase from that recent record is a reasonable estimate for 2026.\n\nFinal estimate: 56 medals",
+          "parsed_value": 56.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001797,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Hong Kong won 53 medals at the previous Asian Games. Allowing for normal variation and continued strong performances, a similar total is the best estimate. Final estimate: 53",
+          "parsed_value": 53.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001407,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Hong Kong won 53 medals at the previous Asian Games, and its recent medal totals have generally risen. I\u2019d estimate a similar result in 2026.\n\nFinal estimate: 53 medals",
+          "parsed_value": 53.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001997,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 53",
+          "parsed_value": 53.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001622,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 53",
+          "parsed_value": 53.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 8.22e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Hong Kong won 53 medals at the 2022 Asian Games, and its recent totals have generally been in the 40\u201350 range. A reasonable estimate for 2026 is close to that previous high.\n\nFinal estimate: 53 medals",
+          "parsed_value": 53.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001462,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_tpe_total",
+      "domain": "ag",
+      "numeric_truth": 55.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.085712,
+      "log10_spread": 0.0,
+      "replies": [
+        {
+          "raw_reply": "Chinese Taipei won 67 medals in both the 2018 and 2022 Asian Games, so a reasonable estimate for 2026 is similar.\n\nFinal estimate: 67 medals",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.37e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Chinese Taipei won 67 medals at both the 2018 and 2022 Asian Games. With that consistent recent performance, 67 is a reasonable estimate for 2026.\n\nFinal estimate: 67 medals",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001267,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 67",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 7.47e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Chinese Taipei has won about 50\u201370 medals in recent Asian Games, with 67 at both the 2018 and 2022 Games. A reasonable estimate for 2026 is 67 total medals.\n\nFinal estimate: 67",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001302,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Chinese Taipei won 67 medals in both the 2018 and 2022 Asian Games, so a similar total is a reasonable estimate for 2026.\n\nFinal estimate: 67",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001287,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Chinese Taipei has won roughly 50\u201370 medals in recent Asian Games, with totals near 67 in several editions. A reasonable estimate for 2026 is 67 medals.\n\nFinal estimate: 67 medals",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001287,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Chinese Taipei has won 67 medals at each of the last two Asian Games. With no reason to expect a major change, a reasonable estimate for 2026 is about the same.\n\nFinal estimate: 67",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001142,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 67 medals",
+          "parsed_value": 67.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.37e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_mas_total",
+      "domain": "ag",
+      "numeric_truth": 32.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.022894,
+      "log10_spread": 0.014182,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 34",
+          "parsed_value": 34.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001411,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 35",
+          "parsed_value": 35.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.96e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Malaysia won 32 total medals at the 2022 Asian Games, with recent editions generally in a similar range. A reasonable estimate for 2026 is therefore 32.\n\nFinal estimate: 32 medals",
+          "parsed_value": 32.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001486,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 35",
+          "parsed_value": 35.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 8.76e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Malaysia won 32 medals in 2022 and 36 in 2018, so a reasonable estimate for 2026 is near that range.\n\nFinal estimate: 34 medals",
+          "parsed_value": 34.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001351,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Malaysia\u2019s recent Asian Games totals have generally been around 30\u201336 medals. A reasonable estimate for 2026 is 32 medals.\n\nFinal estimate: 32 medals",
+          "parsed_value": 32.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001146,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Malaysia won 32 medals in 2022 and 36 in 2018, so a reasonable estimate for 2026 is 34.\n\nFinal estimate: 34 medals",
+          "parsed_value": 34.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001226,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Malaysia won 36 medals in 2018 and 32 in 2022. Using those recent results as a guide, a reasonable estimate for 2026 is 34 medals.\n\nFinal estimate: 34",
+          "parsed_value": 34.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001116,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_phi_total",
+      "domain": "ag",
+      "numeric_truth": 29.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.102368,
+      "log10_spread": 0.03872,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 25",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001647,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Philippines won 18 medals at the 2022 Asian Games and 21 in 2018. Assuming a similar performance in 2026, a reasonable estimate is 20 medals.\n\nFinal estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002347,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 22",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001482,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Philippines has typically won around 15\u201325 medals at recent Asian Games. Allowing for year-to-year variation, a reasonable estimate for 2026 is 25 medals.\n\nFinal estimate: 25",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002132,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 23",
+          "parsed_value": 23.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001337,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 20 medals",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 8.72e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 25",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001607,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Philippines won 18 medals at the 2022 Asian Games, though its total has varied substantially across recent editions. A reasonable estimate for 2026 is 24 medals.\n\nFinal estimate: 24",
+          "parsed_value": 24.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001332,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "ag_vie_total",
+      "domain": "ag",
+      "numeric_truth": 25.0,
+      "unit": "medals",
+      "source_note": "Khel Now final medal tally, 4 Oct 2026 [check tier C]",
+      "n_answers": 7,
+      "n_misses": 1,
+      "mean_abs_log10_error": 0.121794,
+      "log10_spread": 0.023962,
+      "replies": [
+        {
+          "raw_reply": "Vietnam won 27 medals at the most recent Asian Games, with earlier totals generally in the 30s. A modest increase is plausible, so my estimate is 33.\n\nFinal estimate: 33",
+          "parsed_value": 33.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001741,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 35 medals",
+          "parsed_value": 35.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001221,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 32",
+          "parsed_value": 32.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001031,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Vietnam won 27 medals at the 2022 Asian Games, and its recent totals have generally ranged from the high 20s to around 40. A reasonable estimate for 2026 is 32 medals.\n\nFinal estimate: 32",
+          "parsed_value": 32.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001521,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "30",
+          "parsed_value": null,
+          "miss": true,
+          "finish_reason": "stop",
+          "cost_usd": 8.96e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 35",
+          "parsed_value": 35.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001611,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 35 medals",
+          "parsed_value": 35.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001286,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Vietnam\u2019s recent Asian Games totals were 27 medals in 2023 and 39 in 2018. Given that variation, a reasonable estimate for 2026 is around 30 medals.\n\nFinal estimate: 30",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001136,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_aus_gold",
+      "domain": "cwg",
+      "numeric_truth": 70.0,
+      "unit": "gold medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Yahoo Sports/PA, 2 Aug 2026 [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.149719,
+      "log10_spread": 0.016885,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 50 gold medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002295,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Australia has usually won about 50\u201380 golds at recent Commonwealth Games, but Glasgow 2026 had a much smaller sports program. With fewer medal events, I estimate Australia won about 50 gold medals.\n\nFinal estimate: 50",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000331,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The program is much smaller than Birmingham 2022, where Australia won 67 golds, but it retains sports where Australia is traditionally strong, especially swimming and cycling. A reasonable estimate is about 50 gold medals.\n\nFinal estimate: 50 gold medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002485,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Australia has historically been especially strong in swimming, athletics, and cycling. With the 2026 Games\u2019 reduced sports program, a reasonable estimate is around 45 gold medals.\n\nFinal estimate: 45 gold medals",
+          "parsed_value": 45.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000296,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A compact 10-sport program would likely yield fewer gold medals than the larger recent Games. Australia is especially strong in swimming and cycling, so a reasonable estimate is around 50 golds.  \nFinal estimate: 50 gold medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000243,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the reduced 2026 program, I\u2019d estimate Australia won around 50 gold medals, based on its strong historical performances in swimming, athletics and cycling.\n\nFinal estimate: 50",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000234,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 52",
+          "parsed_value": 52.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002735,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Australia has typically won the most gold medals at recent Commonwealth Games, taking 67 in 2022. Glasgow\u2019s 2026 program was smaller, so a proportionally lower total is plausible. My best estimate is 50 gold medals.\n\nFinal estimate: 50 gold medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000202,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_aus_total",
+      "domain": "cwg",
+      "numeric_truth": 171.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Yahoo Sports/PA, 2 Aug 2026 [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.161751,
+      "log10_spread": 0.071765,
+      "replies": [
+        {
+          "raw_reply": "Australia\u2019s recent Commonwealth Games totals have ranged from 137 to 178 medals. With Glasgow 2026 featuring a smaller programme, a reasonable estimate is about 120 medals.\n\nFinal estimate: 120",
+          "parsed_value": 120.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003072,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent Commonwealth Games have given Australia roughly 140\u2013180 total medals. Glasgow 2026 had a smaller sports programme, so a reasonable estimate is somewhat below that range\u2019s midpoint.  \nFinal estimate: 140",
+          "parsed_value": 140.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002212,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Australia has historically won roughly 140\u2013200 medals at full-size Commonwealth Games. With the 2026 program reduced to about half the usual sports, a reasonable estimate is around 90 medals. Final estimate: 90",
+          "parsed_value": 90.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002552,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Based on Australia\u2019s past performance and the smaller 2026 sports programme, a reasonable estimate is 125 medals.\n\nFinal estimate: 125",
+          "parsed_value": 125.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003282,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Australia\u2019s recent Commonwealth Games totals have ranged from 137 to 198 medals. Glasgow 2026 had a smaller programme than the 2022 Games, so a lower total is plausible. Allowing for Australia\u2019s strong performance in swimming and athletics, I estimate about 140 medals.\n\nFinal estimate: 140",
+          "parsed_value": 140.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002582,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Australia has traditionally been one of the Commonwealth Games\u2019 strongest teams, but the 2026 program was substantially smaller than in previous Games and omitted swimming, a major source of Australian medals. Strong performances across athletics, cycling, gymnastics, bowls and other included sports could still yield roughly 90 medals overall.\n\nFinal estimate: 90 medals",
+          "parsed_value": 90.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0004022,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The 2026 program was much smaller than recent Commonwealth Games, so Australia would likely win fewer medals than its totals of 178 in 2022 or 198 in 2018. Given Australia\u2019s strength in the included sports, a reasonable estimate is about 130 medals overall.\n\nFinal estimate: 130 medals",
+          "parsed_value": 130.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002507,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Glasgow\u2019s smaller program suggests Australia would win fewer medals than at Birmingham 2022, but its strength in swimming, cycling and other events supports an estimate around 120. Final estimate: 120",
+          "parsed_value": 120.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002697,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_eng_gold",
+      "domain": "cwg",
+      "numeric_truth": 29.0,
+      "unit": "gold medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Yahoo Sports/PA, 2 Aug 2026 [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.171844,
+      "log10_spread": 0.020662,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 43 gold medals",
+          "parsed_value": 43.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002585,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "England won 57 golds at Birmingham 2022 and 58 at Glasgow 2014. With a smaller 2026 programme, a reasonable estimate is somewhat lower, around 44 gold medals.\n\nFinal estimate: 44 gold medals",
+          "parsed_value": 44.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002355,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The 2026 program was much smaller than previous Games, so England\u2019s past totals of roughly 58\u201367 golds are too high to use directly. Scaling for fewer events while accounting for England\u2019s strength in athletics, swimming, cycling, and gymnastics suggests a total around 40.\n\nFinal estimate: 40 gold medals",
+          "parsed_value": 40.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000284,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 40",
+          "parsed_value": 40.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002295,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 46",
+          "parsed_value": 46.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002465,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "England typically wins about 20\u201322% of Commonwealth Games golds. With a smaller 2026 program, that suggests roughly 45 gold medals.\n\nFinal estimate: 45 gold medals",
+          "parsed_value": 45.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000239,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "England won 57 gold medals in 2022. With the 2026 Games\u2019 smaller programme, a proportional estimate is around 40\u201345. I estimate 43.\n\nFinal estimate: 43",
+          "parsed_value": 43.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000204,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 44 gold medals",
+          "parsed_value": 44.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000253,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_sco_gold",
+      "domain": "cwg",
+      "numeric_truth": 13.0,
+      "unit": "gold medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Yahoo Sports/PA, 2 Aug 2026 [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.051395,
+      "log10_spread": 0.050859,
+      "replies": [
+        {
+          "raw_reply": "Scotland won 13 golds at the 2022 Games and 19 when hosting in 2014. Given the host advantage but a more limited 2026 programme, a reasonable estimate is 14.\n\nFinal estimate: 14 gold medals",
+          "parsed_value": 14.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001885,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 19 gold medals at the 2014 Glasgow Games and 13 at the 2022 Games. With the 2026 programme smaller, but with host advantage and several sports in which Scotland has traditionally performed well, a reasonable estimate is 14.\n\nFinal estimate: 14 gold medals",
+          "parsed_value": 14.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000249,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 13 gold medals at the 2022 Commonwealth Games and 19 when it hosted in 2014. With a smaller 2026 programme, a reasonable estimate is between those figures, closer to the recent result.\n\nFinal estimate: 16 gold medals",
+          "parsed_value": 16.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000194,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 13 gold medals at the 2022 Games and 19 when hosting in 2014. With a smaller program in 2026 but a home advantage, a reasonable estimate is around 12.\n\nFinal estimate: 12 gold medals",
+          "parsed_value": 12.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002015,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 19 gold medals when hosting in 2014 and 13 in 2022. Given the host advantage but the reduced 2026 programme, a reasonable estimate is between those totals.\n\nFinal estimate: 16 gold medals",
+          "parsed_value": 16.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001745,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 19 gold medals when hosting in Glasgow in 2014. With a smaller sports programme in 2026, a reasonable estimate is somewhat lower, around 15.\n\nFinal estimate: 15 gold medals",
+          "parsed_value": 15.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001645,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 9 gold medals in 2018 and 19 when it hosted in 2014. Given the smaller 2026 programme, a reasonable estimate is between those results, closer to the lower end.\n\nFinal estimate: 12 gold medals",
+          "parsed_value": 12.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001645,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Scotland won 13 gold medals at Birmingham 2022 and 19 when it hosted in 2014. With a smaller 2026 program, a reasonable estimate is 12 gold medals.\n\nFinal estimate: 12",
+          "parsed_value": 12.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002005,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_wal_gold",
+      "domain": "cwg",
+      "numeric_truth": 9.0,
+      "unit": "gold medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Yahoo Sports/PA, 2 Aug 2026 [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.111383,
+      "log10_spread": 0.044229,
+      "replies": [
+        {
+          "raw_reply": "Wales won 8 gold medals in 2022. With Glasgow 2026 featuring a smaller set of sports but retaining several in which Wales has traditionally been competitive, a reasonable estimate is close to that recent total.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001685,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001395,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 6 gold medals",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000167,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 7",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001225,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 8 golds in 2022 and 10 in 2018. With a smaller 2026 program, a modestly lower total is a reasonable estimate.\n\nFinal estimate: 7 gold medals",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001715,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 8 golds at Birmingham 2022, and the 2026 program was smaller, so a reasonable estimate is slightly lower. Final estimate: 7",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001855,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 5, 10, and 8 gold medals at the last three Commonwealth Games. With the 2026 Games featuring a smaller sports programme, a reasonable estimate is slightly below that average.\n\nFinal estimate: 7 gold medals",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000204,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 8 gold medals at the 2022 Commonwealth Games. The 2026 Glasgow programme was smaller, so a reasonable estimate is slightly lower, around 6.\n\nFinal estimate: 6",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.00015,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_ind_total",
+      "domain": "cwg",
+      "numeric_truth": 39.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Free Press Journal, Outlook India [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.145098,
+      "log10_spread": 0.066371,
+      "replies": [
+        {
+          "raw_reply": "With shooting, wrestling, badminton and several other sports absent from the reduced program, India would likely win substantially fewer medals than in recent Commonwealth Games. Boxing, weightlifting and athletics could still provide a sizable share, so my best estimate is 25 medals.\n\nFinal estimate: 25",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002377,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India\u2019s medal total is likely well below its 61 medals in 2022 because the 2026 program is much smaller and omits several sports where India traditionally wins medals. Boxing and weightlifting could still provide a substantial share, so my best estimate is 25 medals overall.\n\nFinal estimate: 25 medals",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003382,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India\u2019s recent Commonwealth totals were around 60, but the 2026 program omitted several of its strongest sports, including wrestling, shooting and badminton. A reasonable estimate for the reduced program is about 25 medals.\n\nFinal estimate: 25",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003522,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the reduced sports program and the removal of several events where India has traditionally won medals, I estimate India won about 35 medals.\n\nFinal estimate: 35 medals",
+          "parsed_value": 35.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002372,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 61 medals in 2022, but several of its strongest sports, including wrestling, shooting, badminton and table tennis, were absent from the reduced 2026 program. Medals in retained sports such as weightlifting, boxing and athletics could still bring India\u2019s total to around half its 2022 tally.\n\nFinal estimate: 32 medals",
+          "parsed_value": 32.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003112,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 61 medals in 2022, but several strong medal sports\u2014including shooting, wrestling, badminton and table tennis\u2014are absent from Glasgow\u2019s programme. Its remaining strengths, especially in weightlifting, boxing and athletics, suggest a substantially lower tally. I estimate about 22 medals.\n\nFinal estimate: 22 medals",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003742,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "India won 61 medals in 2022, but Glasgow\u2019s smaller program and the absence of major Indian medal sports such as wrestling and shooting would likely reduce its total substantially. A reasonable estimate is 30 medals.\n\nFinal estimate: 30 medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002022,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 32",
+          "parsed_value": 32.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002052,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_can_total",
+      "domain": "cwg",
+      "numeric_truth": 62.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; Commonwealth Sport Canada ('62 medals') [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.036671,
+      "log10_spread": 0.045241,
+      "replies": [
+        {
+          "raw_reply": "Canada won 92 medals at Birmingham 2022 and 82 at Glasgow 2014. With the 2026 program substantially smaller than either, a reasonable estimate is about 60 medals.\n\nFinal estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002352,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Canada won 92 medals in 2022. With the 2026 Games featuring a smaller sports programme, a reasonable estimate is roughly two-thirds as many.\n\nFinal estimate: 60 medals",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002862,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Canada has typically won around 80\u201390 medals at recent Commonwealth Games. Glasgow\u2019s smaller sports programme would likely reduce that total, though Canada is strong in several included sports. I estimate about 65 medals.\n\nFinal estimate: 65",
+          "parsed_value": 65.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002802,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The program is substantially smaller than in recent Commonwealth Games, so Canada\u2019s total is likely below its recent overall totals. Its strengths in swimming, athletics, cycling and gymnastics should still yield a sizable medal count. My best estimate is 55 medals.\n\nFinal estimate: 55 medals",
+          "parsed_value": 55.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003492,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 48 medals",
+          "parsed_value": 48.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003002,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "With fewer sports than in 2022, Canada\u2019s total would likely be lower than its 92 medals then, though it remains strong in swimming, athletics and cycling. My best estimate is 70 medals.\n\nFinal estimate: 70",
+          "parsed_value": 70.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002757,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Canada won 92 medals in 2022, but the 2026 Games had a smaller sports programme, likely reducing its total. A reasonable estimate is around 60 medals.\n\nFinal estimate: 60 medals",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003317,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Canada won 92 medals at the 2022 Commonwealth Games. With a smaller sports program in 2026, a reasonable estimate is about 60 medals.\n\nFinal estimate: 60",
+          "parsed_value": 60.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002727,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_nzl_total",
+      "domain": "cwg",
+      "numeric_truth": 36.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.07125,
+      "log10_spread": 0.084786,
+      "replies": [
+        {
+          "raw_reply": "New Zealand won 45 medals in 2014 and 49 in 2022. With the 2026 Games\u2019 smaller sports program, a modestly lower total seems likely.\n\nFinal estimate: 38 medals",
+          "parsed_value": 38.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002028,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 38 medals",
+          "parsed_value": 38.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001943,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "New Zealand won 46 medals in 2018 and 49 in 2022. Glasgow\u2019s smaller 2026 program likely reduced its total, though New Zealand has traditionally performed well in several included sports. A reasonable estimate is about 40 medals.\n\nFinal estimate: 40 medals",
+          "parsed_value": 40.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002078,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "New Zealand won 78 medals at Glasgow 2014 and 141 at Birmingham 2022. With the 2026 Games having a smaller sports programme, a reasonable estimate is lower than either total, at around 50 medals.\n\nFinal estimate: 50 medals",
+          "parsed_value": 50.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002993,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "New Zealand won 77 medals in 2022, but the 2026 Games had a smaller programme, including fewer events where New Zealand traditionally earns medals. A reasonable estimate is **58 medals**.\n\nFinal estimate: 58 medals",
+          "parsed_value": 58.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002638,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the reduced number of sports compared with recent Games, I estimate New Zealand won about 38 medals.\n\nFinal estimate: 38",
+          "parsed_value": 38.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002308,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "New Zealand won 49 medals at the 2022 Commonwealth Games. The 2026 programme was smaller, so a lower total is likely, though New Zealand\u2019s strengths in swimming, athletics and cycling should still yield a substantial tally. I estimate about 30 medals.\n\nFinal estimate: 30 medals",
+          "parsed_value": 30.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003503,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 34",
+          "parsed_value": 34.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002808,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_nga_total",
+      "domain": "cwg",
+      "numeric_truth": 24.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026; rank 7 also in Arise TV [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.122101,
+      "log10_spread": 0.073955,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 18 medals",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002702,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Nigeria won 12 medals in 2022, and the 2026 program was relatively small. Allowing for some variation in Nigeria\u2019s strong weightlifting, boxing and athletics events, a reasonable estimate is 14 medals.\n\nFinal estimate: 14",
+          "parsed_value": 14.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002587,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Nigeria has historically earned around a dozen medals at recent Games, with weightlifting and athletics among its strongest events. Glasgow\u2019s smaller program may limit the total, so I estimate slightly above that baseline.\n\nFinal estimate: 14 medals",
+          "parsed_value": 14.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003787,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 20 medals",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002282,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Nigeria won 35 medals at Birmingham 2022, but the 2026 program was smaller and omitted wrestling, a strong medal sport for Nigeria. Accounting for that reduction while allowing for medals in weightlifting, athletics and boxing, my estimate is 22 medals.\n\nFinal estimate: 22 medals",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002542,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Nigeria\u2019s recent Commonwealth Games totals were 24\u201336 medals. With wrestling absent from the reduced 2026 programme, I\u2019d estimate fewer than in 2022, while expecting Nigeria to remain strong in weightlifting and athletics.\n\nFinal estimate: 22 medals",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002757,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Nigeria won 35 medals at Birmingham 2022 and 36 at Glasgow 2014, but the 2026 Games had a smaller sports programme, including fewer events in sports where Nigeria has traditionally earned medals. I\u2019d estimate a lower total, around 20 medals.\n\nFinal estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002457,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001782,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_jam_total",
+      "domain": "cwg",
+      "numeric_truth": 19.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.073942,
+      "log10_spread": 0.056082,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 22 medals",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003057,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Jamaica has typically won around two dozen medals at recent Commonwealth Games. With a smaller 2026 sports program but athletics still included, a reasonable estimate is slightly lower.\n\nFinal estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002782,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Jamaica won 26 medals at the 2022 Commonwealth Games, and its strength in athletics suggests a similar total in 2026. My best estimate is 25 medals.\n\nFinal estimate: 25 medals",
+          "parsed_value": 25.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001862,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Jamaica has typically won around 20\u201327 medals at recent Commonwealth Games. With the 2026 program reduced, a reasonable estimate is slightly below that historical range.\n\nFinal estimate: 22 medals",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001692,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 23 medals",
+          "parsed_value": 23.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002902,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Jamaica has typically won around 22\u201327 medals at recent Commonwealth Games. Given the reduced 2026 program, I\u2019d estimate a slightly lower total, around 24 medals.\n\nFinal estimate: 24 medals",
+          "parsed_value": 24.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001787,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Jamaica won 26 medals in 2022. With fewer medal events in Glasgow, but athletics still offering strong medal opportunities for Jamaica, a reasonable estimate is slightly lower.\n\nFinal estimate: 22",
+          "parsed_value": 22.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002707,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 16 medals",
+          "parsed_value": 16.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003097,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "cwg_wal_total",
+      "domain": "cwg",
+      "numeric_truth": 31.0,
+      "unit": "medals",
+      "source_note": "Adda247 final medal table, 3 Aug 2026 [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.115266,
+      "log10_spread": 0.040077,
+      "replies": [
+        {
+          "raw_reply": "Wales won 28 medals in 2022. The 2026 program was smaller, which could reduce medal opportunities, though Wales has historically performed well in several sports expected to feature. A reasonable estimate is close to its 2022 total.\n\nFinal estimate: 28 medals",
+          "parsed_value": 28.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002702,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001617,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 28 medals at the 2022 Games. With the 2026 Games offering fewer events, a somewhat lower total seems likely. My best estimate is 26 medals.\n\nFinal estimate: 26 medals",
+          "parsed_value": 26.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002072,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 28 medals in 2022, while the 2026 Games had a smaller sports programme. Allowing for Wales\u2019s strengths in sports such as cycling, boxing and bowls, a reasonable estimate is somewhat lower.\n\nFinal estimate: 23 medals",
+          "parsed_value": 23.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002092,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 28 medals in 2022, but the 2026 Games had a smaller sports programme. Allowing for retained medal opportunities and Wales\u2019s historical performance, a reasonable estimate is about 23 medals.\n\nFinal estimate: 23 medals",
+          "parsed_value": 23.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001797,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 28 medals at the 2022 Games. With Glasgow\u2019s smaller sports programme, a somewhat lower total seems plausible; my best estimate is 23.\n\nFinal estimate: 23 medals",
+          "parsed_value": 23.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002257,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Wales won 28 medals at the 2022 Commonwealth Games. With Glasgow 2026 having a smaller sports programme, a modestly lower total seems plausible. My best estimate is 24 medals.\n\nFinal estimate: 24",
+          "parsed_value": 24.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002182,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the reduced programme compared with recent Games, a reasonable estimate is slightly below Wales\u2019s 28 medals in 2022.\n\nFinal estimate: 24 medals",
+          "parsed_value": 24.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002217,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "wc_top_scorer",
+      "domain": "wc",
+      "numeric_truth": 10.0,
+      "unit": "goals",
+      "source_note": "Wikipedia infobox; Al Jazeera, 21 Jul 2026 [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.09691,
+      "log10_spread": 0.0,
+      "replies": [
+        {
+          "raw_reply": "The expanded 48-team tournament had substantially more matches than previous World Cups, but goals are spread across more teams and players. A reasonable estimate for the Golden Boot winner is 8 goals.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.12e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A 48-team World Cup has more matches and scoring opportunities than previous editions, so the Golden Boot total could exceed the recent typical range of 5\u20138 goals. A reasonable best estimate is 8 goals.\n\nFinal estimate: 8 goals",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001267,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "With 48 teams and 104 matches, the top scorer could plausibly exceed the recent norm of six to eight goals. My best estimate is eight goals.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001147,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "With 48 teams and 104 matches, the tournament offered more scoring opportunities than previous World Cups, but the Golden Boot winner has typically scored around 5\u20138 goals. A reasonable estimate is 8.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001172,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 8.37e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent World Cup Golden Boot totals have ranged from 5 to 8 goals. With the 2026 tournament expanded to 48 teams and 104 matches, a slightly higher total is plausible. My best estimate is 8 goals.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001167,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "With the expanded 48-team field, the top scorer could have more chances to score than in previous tournaments. Recent Golden Boot winners scored 6 to 8 goals, so my best estimate is 8.\n\nFinal estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001042,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 8",
+          "parsed_value": 8.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.92e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "se_s_seats",
+      "domain": "se",
+      "numeric_truth": 99.0,
+      "unit": "seats",
+      "source_note": "Swedish Election Authority (val.se) final results, published 6 Oct 2026; same in Wikipedia [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.06792,
+      "log10_spread": 0.019519,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 113\n",
+          "parsed_value": 113.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001117,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 118",
+          "parsed_value": 118.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001097,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 120",
+          "parsed_value": 120.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001607,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Social Democrats won 107 seats in 2022 with about 30% of the vote. If they gained several percentage points by 2026, a proportional estimate would be around 120 seats. I\u2019ll estimate 121.\n\nFinal estimate: 121",
+          "parsed_value": 121.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001552,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 108",
+          "parsed_value": 108.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.92e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Social Democrats won 107 seats in 2022. Using that as a baseline and allowing for a modest increase in their vote share, I estimate about 118 seats in 2026.\n\nFinal estimate: 118 seats",
+          "parsed_value": 118.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001872,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Social Democrats won 107 seats in 2022, so a reasonable estimate for 2026 is close to that: 108.\n\nFinal estimate: 108",
+          "parsed_value": 108.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.52e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 121",
+          "parsed_value": 121.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001222,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "se_c_seats",
+      "domain": "se",
+      "numeric_truth": 25.0,
+      "unit": "seats",
+      "source_note": "Swedish Election Authority (val.se) final results, published 6 Oct 2026; same in Wikipedia [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.149397,
+      "log10_spread": 0.023952,
+      "replies": [
+        {
+          "raw_reply": "The Centre Party won 24 seats in 2022. With uncertainty about its 2026 support and a likely result near the parliamentary threshold, a modest decline is a reasonable estimate.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001447,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001117,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Centre Party won 24 seats in 2022. Assuming its support declined modestly by 2026, a reasonable estimate is about 5% of the vote, or roughly 17\u201318 seats in the Riksdag.  \nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001602,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Centre Party won 24 seats in 2022. Without access to the 2026 result, I\u2019d estimate a modest decline, to about 5.5% of the vote\u2014roughly 19 of 349 seats.\n\nFinal estimate: 19",
+          "parsed_value": 19.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001812,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Centre Party won 24 seats in 2022. Allowing for a modest decline in its vote share, a reasonable estimate is about 5.5% of the vote, or roughly 19 seats.\n\nFinal estimate: 19",
+          "parsed_value": 19.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001842,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Centre Party won 24 seats in 2022, but its support had weakened toward the 4% threshold. A reasonable estimate is 16 seats.\n\nFinal estimate: 16",
+          "parsed_value": 16.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001472,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Centre Party won 24 seats in 2022. If its support fell toward roughly 5% in 2026, proportional representation would imply about 17 seats, so that is my best estimate.\n\nFinal estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001717,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Centre Party won 6.7% of the vote and 24 seats in 2022. A modest decline to around 5% in 2026 would correspond to roughly 17\u201318 seats, so my best estimate is 18.\n\nFinal estimate: 18 seats",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001567,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "se_kd_seats",
+      "domain": "se",
+      "numeric_truth": 22.0,
+      "unit": "seats",
+      "source_note": "Swedish Election Authority (val.se) final results, published 6 Oct 2026; same in Wikipedia [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.103021,
+      "log10_spread": 0.021265,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001147,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Christian Democrats won 19 seats in 2022, so a modest decline would put them near 5% of the vote. At that share, they would win about 17 of the Riksdag\u2019s 349 seats.\n\nFinal estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001172,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Christian Democrats won 19 seats in 2022. With no reliable result data for 2026, a reasonable estimate is near that baseline.\n\nFinal estimate: 19 seats",
+          "parsed_value": 19.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001362,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001242,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Christian Democrats won 19 seats in 2022. With their support plausibly a little lower in 2026, a reasonable estimate is about 16 seats.\n\nFinal estimate: 16",
+          "parsed_value": 16.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001642,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Christian Democrats won 19 seats in 2022. A reasonable estimate for 2026, allowing for polling uncertainty around the party\u2019s recent level, is slightly lower.\n\nFinal estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001427,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Christian Democrats won 19 seats in 2022. Without the final 2026 results, a reasonable estimate is close to that baseline, allowing for modest changes in their vote share.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001702,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Christian Democrats won 19 seats in 2022. Allowing for a modest decline while remaining above the 4% threshold, my best estimate is 17 seats.\n\nFinal estimate: 17",
+          "parsed_value": 17.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001482,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "se_mp_seats",
+      "domain": "se",
+      "numeric_truth": 22.0,
+      "unit": "seats",
+      "source_note": "Swedish Election Authority (val.se) final results, published 6 Oct 2026; same in Wikipedia [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.075711,
+      "log10_spread": 0.019814,
+      "replies": [
+        {
+          "raw_reply": "The Greens won 18 seats in 2022, so a reasonable estimate is that they won a similar number in 2026.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001062,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Greens won 18 seats in 2022. With their support likely remaining near the 4% threshold, a reasonable estimate is close to that result.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001562,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001082,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Green Party won 18 seats in 2022, and its support has often been near the 4% parliamentary threshold. With no result data available, 18 is a reasonable estimate.  \nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001497,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 9.62e-05,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Greens won 18 seats in 2022, and a result near that level is a reasonable estimate.  \nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001247,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Green Party won 18 seats in 2022. Without access to the 2026 result, a reasonable estimate is that it remained near that level.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001012,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Green Party won 18 seats in 2022, so absent reliable information about the 2026 result, 18 is a reasonable estimate.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001047,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "se_l_seats",
+      "domain": "se",
+      "numeric_truth": 19.0,
+      "unit": "seats",
+      "source_note": "Swedish Election Authority (val.se) final results, published 6 Oct 2026; same in Wikipedia [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.727979,
+      "log10_spread": 0.552411,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 1",
+          "parsed_value": 1.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003037,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Liberals won 16 seats in 2022, but their support has been close to Sweden\u2019s 4% threshold. Allowing for that risk, my best estimate is 14 seats.\n\nFinal estimate: 14",
+          "parsed_value": 14.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001292,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Liberals were close to the 4% threshold in recent polling, so a small parliamentary group is a reasonable estimate.  \nFinal estimate: 14",
+          "parsed_value": 14.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002332,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent polling suggested the Liberals were at risk of falling below Sweden\u2019s 4% parliamentary threshold. Since you requested a positive estimate, my best estimate is 1 seat.\n\nFinal estimate: 1",
+          "parsed_value": 1.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002332,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Liberals appeared at substantial risk of falling below Sweden\u2019s 4% parliamentary threshold. Since you require a positive estimate, I\u2019ll give the smallest positive seat count.\n\nFinal estimate: 1",
+          "parsed_value": 1.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003272,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 13",
+          "parsed_value": 13.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002257,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 1",
+          "parsed_value": 1.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001527,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Liberals won 16 seats in 2022, but their polling has been close to or below Sweden\u2019s 4% threshold. A narrow chance of clearing it makes a low positive estimate reasonable.\n\nFinal estimate: 10",
+          "parsed_value": 10.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002427,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "box_spiderman_open",
+      "domain": "box",
+      "numeric_truth": 360000000.0,
+      "unit": "US dollars",
+      "source_note": "Rotten Tomatoes weekend box office report, 3 Aug 2026 ($360 million actual); record also reported by Gold Derby and Variety [check tier A]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.290528,
+      "log10_spread": 0.035185,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 210000000",
+          "parsed_value": 210000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002194,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the franchise\u2019s strong audience appeal but allowing for a lower opening than *No Way Home*\u2019s exceptional debut, my best estimate is $190 million.\n\nFinal estimate: 190000000",
+          "parsed_value": 190000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001684,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the franchise\u2019s strong audience appeal and the long gap since *No Way Home*, I\u2019d estimate an opening weekend above the prior Spider-Man films\u2019 typical launches, but below *No Way Home*\u2019s exceptional $260 million. Final estimate: 185000000",
+          "parsed_value": 185000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002309,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 190000000",
+          "parsed_value": 190000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001774,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the franchise\u2019s strong audience demand, the long gap since the previous film, and the possibility that it would fall short of *No Way Home*\u2019s exceptional opening, I estimate an opening weekend gross of about $185 million.\n\nFinal estimate: 185000000",
+          "parsed_value": 185000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002004,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The opening-weekend gross is not something I can verify, so I\u2019d estimate it from the series\u2019 prior openings. *Homecoming* and *Far From Home* opened to about $117 million and $93 million domestically, while *No Way Home* was an exceptional event opening at about $260 million. For a new Tom Holland sequel, I\u2019d expect a strong opening above the earlier non-event films but below *No Way Home*.\n\nFinal estimate: 155000000",
+          "parsed_value": 155000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002454,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Based on the franchise\u2019s strong audience draw and the long gap since *No Way Home*, I estimate an opening weekend below that film\u2019s exceptional $260 million debut but still well above a typical superhero sequel.\n\nFinal estimate: 175000000",
+          "parsed_value": 175000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001539,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 190000000",
+          "parsed_value": 190000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001874,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "box_odyssey_cume",
+      "domain": "box",
+      "numeric_truth": 395500000.0,
+      "unit": "US dollars",
+      "source_note": "Rotten Tomatoes weekend box office report, 3 Aug 2026 ($395.5 million cumulative) [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.188686,
+      "log10_spread": 0.054333,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 280000000 in US dollars",
+          "parsed_value": 280000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002204,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Without verified post-release figures, I\u2019d estimate from Nolan\u2019s strong audience draw and a likely blockbuster opening, while allowing for the steep drop-offs typical of large event films. A plausible cumulative US-and-Canada gross after 17 days is around $200 million.\n\nFinal estimate: 200000000 US dollars",
+          "parsed_value": 200000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002049,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A reasonable estimate is about $250 million. A strong opening followed by two weekends of substantial holds would put the film in that range by August 2.  \nFinal estimate: 250000000",
+          "parsed_value": 250000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002334,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Assuming a strong Nolan opening and typical summer-weekend declines, a reasonable estimate for the first 17 days is about $270 million domestically.\n\nFinal estimate: 270000000",
+          "parsed_value": 270000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002639,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 320000000",
+          "parsed_value": 320000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002629,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 245000000",
+          "parsed_value": 245000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001804,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A reasonable estimate is about $250 million: a major Nolan release could open strongly and accumulate roughly two to two-and-a-half times its opening weekend by its third weekend.  \nFinal estimate: 250000000",
+          "parsed_value": 250000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003899,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Without post-release data, I\u2019d estimate roughly $250 million: a major Nolan film could open strongly and retain substantial audiences, putting its North American total after about 17 days in that range.\n\nFinal estimate: 250000000",
+          "parsed_value": 250000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002864,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "box_toystory5_cume",
+      "domain": "box",
+      "numeric_truth": 461700000.0,
+      "unit": "US dollars",
+      "source_note": "Rotten Tomatoes weekend box office report, 3 Aug 2026 ($461.7 million cumulative) [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.044113,
+      "log10_spread": 0.036055,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 410000000",
+          "parsed_value": 410000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002649,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Toy Story 4 had grossed roughly $400 million domestically by a similar point in its run. Allowing for inflation and a potentially stronger opening for Toy Story 5, but also for uncertainty in its week-to-week holds, a reasonable estimate is around $425 million by 2 August 2026.\n\nFinal estimate: 425000000",
+          "parsed_value": 425000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003029,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 383000000",
+          "parsed_value": 383000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002244,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A reasonable estimate is about $425 million: a major franchise sequel could reach roughly that cumulative total within six weeks of a June release.\n\nFinal estimate: 425000000",
+          "parsed_value": 425000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002754,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 510000000",
+          "parsed_value": 510000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002049,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the franchise\u2019s prior domestic performance and the roughly six weeks of theatrical release by 2 August, I estimate a cumulative gross of about $400 million.\n\nFinal estimate: 400000000",
+          "parsed_value": 400000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002954,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 420000000",
+          "parsed_value": 420000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001899,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "I would estimate about $460 million. A June release would have had roughly seven weekends in theaters by August 2, and a major Toy Story sequel could plausibly have earned most of a strong domestic run by then.\n\nFinal estimate: 460000000",
+          "parsed_value": 460000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003534,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "box_minions_cume",
+      "domain": "box",
+      "numeric_truth": 168300000.0,
+      "unit": "US dollars",
+      "source_note": "Rotten Tomatoes weekend box office report, 3 Aug 2026 ($168.3 million cumulative) [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.255074,
+      "log10_spread": 0.020126,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 285000000",
+          "parsed_value": 285000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003365,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "310000000 Final estimate: 310000000",
+          "parsed_value": 310000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000227,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 320000000",
+          "parsed_value": 320000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002125,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Comparable Minions films have earned roughly $330\u2013370 million domestically over their full runs. By August 2, a summer release would likely have accumulated most, but not all, of that total. I estimate about $300 million.\n\nFinal estimate: 300000000",
+          "parsed_value": 300000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000234,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Given the franchise\u2019s strong family audience and typical animated-film legs, a reasonable estimate is about $280 million domestically by 2 August 2026.\n\nFinal estimate: 280000000 US dollars",
+          "parsed_value": 280000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002955,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "The Minions franchise has historically earned about $335\u2013370 million domestically, with strong opening weekends and durable family-audience appeal. For a new summer release, a reasonable estimate for its cumulative gross by August 2 is somewhat below those full-run totals, at roughly $310 million.\n\nFinal estimate: 310000000",
+          "parsed_value": 310000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002455,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Based on the franchise\u2019s prior box-office pace, I estimate the film had grossed about $300 million domestically by 2 August 2026.\n\nFinal estimate: 300000000",
+          "parsed_value": 300000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0004065,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A reasonable estimate is about $320 million: the Minions films have historically earned roughly $335\u2013370 million domestically, and a release about a month before August 2 would likely have accumulated most, but not all, of that total by then.\n\nFinal estimate: 320000000",
+          "parsed_value": 320000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000254,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "box_moana_cume",
+      "domain": "box",
+      "numeric_truth": 114700000.0,
+      "unit": "US dollars",
+      "source_note": "Rotten Tomatoes weekend box office report, 3 Aug 2026 ($114.7 million cumulative) [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.41048,
+      "log10_spread": 0.058092,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 252000000",
+          "parsed_value": 252000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002595,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Assuming a July release, a strong family-film opening and several weeks of theatrical play would plausibly put the North American total by August 2 in the low-to-mid $300 millions. My best estimate is $325 million.\n\nFinal estimate: 325000000",
+          "parsed_value": 325000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000281,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 275000000",
+          "parsed_value": 275000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000352,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Assuming a July release, a strong opening and several weeks of family-audience play would plausibly put the film near $350 million domestically by August 2.\n\nFinal estimate: 350000000",
+          "parsed_value": 350000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002345,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A reasonable estimate is about $235 million, assuming a strong opening and typical summer-weekend declines over its first 24 days in theaters.\n\nFinal estimate: 235000000 united states dollars",
+          "parsed_value": 235000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0003435,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Assuming a July 2026 release, I\u2019d estimate a strong domestic opening followed by several weeks of substantial family-audience business. An opening around $100\u2013110 million, plus subsequent weekends and weekdays through August 2, suggests a cumulative gross near $290 million.\n\nFinal estimate: 290000000",
+          "parsed_value": 290000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.00026,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "A strong franchise release could plausibly open around $120\u2013140 million domestically and reach roughly $320\u2013350 million after four weekends, including weekday grosses. I estimate its cumulative U.S. and Canada gross by August 2 at about $335 million.\n\nFinal estimate: 335000000",
+          "parsed_value": 335000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.000334,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 320000000",
+          "parsed_value": 320000000.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.00028,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "tdf_points",
+      "domain": "tdf",
+      "numeric_truth": 539.0,
+      "unit": "points",
+      "source_note": "CyclingUpToDate final classifications, Jul 2026 (Mads Pedersen, 539 points) [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.142041,
+      "log10_spread": 0.010328,
+      "replies": [
+        {
+          "raw_reply": "Final estimate: 400 points",
+          "parsed_value": 400.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001212,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent Tour de France points-classification winners have typically scored around 350\u2013480 points, with results varying by sprint opportunities and intermediate points. A reasonable central estimate is 400.\n\nFinal estimate: 400",
+          "parsed_value": 400.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001122,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent Tour de France green-jersey totals commonly fall in the mid-300s to low-400s, depending on sprint-stage wins and consistency across intermediate sprints. With no reliable result-specific information, I estimate near the center of that range.\n\nFinal estimate: 390 points",
+          "parsed_value": 390.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001787,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent Tour de France green-jersey winners have typically scored around 330\u2013480 points, with several near 370\u2013380. Using the middle of that historical range as an estimate, I\u2019d put the 2026 winner at 380 points.\n\nFinal estimate: 380",
+          "parsed_value": 380.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001257,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent green-jersey winners have typically scored around 350\u2013450 points, so a reasonable estimate is near the middle of that range.\n\nFinal estimate: 400",
+          "parsed_value": 400.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001347,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent green-jersey winners have typically scored around 350\u2013400 points, with occasional higher totals. A reasonable estimate for 2026 is near the middle of that range.\n\nFinal estimate: 380 points",
+          "parsed_value": 380.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001457,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent green-jersey winners have typically scored around 350\u2013400 points, with some variation based on stage wins and intermediate sprints. A reasonable estimate is near the middle of that range.\n\nFinal estimate: 380 points",
+          "parsed_value": 380.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001502,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent Tour de France points-classification winners have often scored around 350\u2013400 points, so a reasonable estimate is 380.\n\nFinal estimate: 380",
+          "parsed_value": 380.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001692,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "euroath_gbr_gold",
+      "domain": "euroath",
+      "numeric_truth": 9.0,
+      "unit": "gold medals",
+      "source_note": "Mezha, Aug 2026 ('Britain wins nine European Athletics golds') [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.150986,
+      "log10_spread": 0.03241,
+      "replies": [
+        {
+          "raw_reply": "Recent European Championships have typically yielded roughly 4\u20137 British golds. A home-hosting boost makes the upper end of that range a reasonable estimate.\n\nFinal estimate: 7",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001777,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent championships suggest a baseline of roughly 4\u20137 British golds. Hosting the event could provide a modest boost, so my best estimate is 6.\n\nFinal estimate: 6",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001872,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent championships suggest a baseline of roughly 4\u20137 British golds, with hosting potentially providing a modest boost. My best estimate is 6.\n\nFinal estimate: 6 gold medals",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001702,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Great Britain has won between 4 and 7 golds at recent European Championships, with a possible home advantage in Birmingham. A reasonable estimate is 7.\n\nFinal estimate: 7 gold medals",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001777,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Based on Great Britain\u2019s recent European Championships record and the home advantage, I estimate **6** gold medals.\n\nFinal estimate: 6",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002197,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Great Britain has typically won about 4\u20137 golds at recent European Championships. A home-hosting advantage could lift that slightly, so I estimate 6 gold medals.\n\nFinal estimate: 6",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001862,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Using recent championships as a guide, Great Britain has typically won several European titles, with results varying from about four to seven golds in recent editions. Hosting may provide a modest boost, so a reasonable estimate is seven.  \nFinal estimate: 7",
+          "parsed_value": 7.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001402,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Great Britain has typically won around four to six golds at recent European Athletics Championships. Allowing for a possible home advantage in Birmingham, my best estimate is six.\n\nFinal estimate: 6 gold medals",
+          "parsed_value": 6.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002107,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "euroath_gbr_total",
+      "domain": "euroath",
+      "numeric_truth": 19.0,
+      "unit": "medals",
+      "source_note": "The Scotsman, Aug 2026 ('19 medals in Birmingham') [check tier C]",
+      "n_answers": 8,
+      "n_misses": 0,
+      "mean_abs_log10_error": 0.035274,
+      "log10_spread": 0.040046,
+      "replies": [
+        {
+          "raw_reply": "Great Britain has typically won around 18\u201323 medals at recent European Athletics Championships. A home championship could boost its tally, though participation and form make the result uncertain. I estimate 20 medals.\n\nFinal estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002279,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Great Britain won 12 medals at the 2024 European Championships and 21 in 2022. Allowing for a possible home advantage in Birmingham, a reasonable estimate is 18 medals.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001849,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Great Britain has typically won roughly 13\u201320 medals at recent European Athletics Championships, with stronger results in some years. Allowing for a possible home advantage in Birmingham, a reasonable estimate is 18 medals.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002034,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 24",
+          "parsed_value": 24.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001579,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001599,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Recent European Championships have typically yielded about 18\u201320 medals for Great Britain. Allowing for a possible home advantage, my best estimate is 20 medals.\n\nFinal estimate: 20",
+          "parsed_value": 20.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001909,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Great Britain has recently won 10\u201321 medals at the European Athletics Championships. A host-country boost could lift its total above the 2024 result, so a reasonable estimate is 18.\n\nFinal estimate: 18",
+          "parsed_value": 18.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0002264,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        },
+        {
+          "raw_reply": "Final estimate: 21 medals",
+          "parsed_value": 21.0,
+          "miss": false,
+          "finish_reason": "stop",
+          "cost_usd": 0.0001439,
+          "model_slug": "openai/gpt-6-luna",
+          "provider": "OpenAI"
+        }
+      ]
+    }
+  ],
+  "rule": "Each candidate was asked 8 times with no user estimate, crowd statistic or history. Error is the mean absolute log10 distance of the parsed answers from the documented truth; spread is the population standard deviation of the parsed log10 answers. Candidates were required to have error >= 0.1 log10 units (about 26% off) and at least two parseable answers. Candidates with error >= 0.5 were held back until a person confirmed the recorded truth (a very large error often means the recorded answer is wrong). From the rest, the 5 with the highest spread and the 5 with the lowest spread were kept; ties broke by error then id. Candidates with more than 1 of 8 unusable answers (no positive number, including a stated zero) were dropped.",
+  "min_error": 0.1,
+  "review_error": 0.5,
+  "reviewed_ids": [],
+  "selected_ids": [
+    "cwg_nga_total",
+    "cwg_aus_total",
+    "cwg_ind_total",
+    "box_moana_cume",
+    "box_odyssey_cume",
+    "ag_ind_gold",
+    "tdf_points",
+    "cwg_aus_gold",
+    "box_minions_cume",
+    "ag_ind_total"
+  ],
+  "strata": {
+    "cwg_nga_total": "high_spread",
+    "cwg_aus_total": "high_spread",
+    "cwg_ind_total": "high_spread",
+    "box_moana_cume": "high_spread",
+    "box_odyssey_cume": "high_spread",
+    "ag_ind_gold": "low_spread",
+    "tdf_points": "low_spread",
+    "cwg_aus_gold": "low_spread",
+    "box_minions_cume": "low_spread",
+    "ag_ind_total": "low_spread"
+  },
+  "status_by_id": {
+    "ag_uzb_total": "below_error_floor",
+    "ag_kaz_total": "below_error_floor",
+    "ag_kaz_gold": "below_error_floor",
+    "ag_idn_gold": "eligible",
+    "ag_ind_total": "eligible",
+    "ag_ind_gold": "eligible",
+    "ag_tha_total": "below_error_floor",
+    "ag_hkg_total": "below_error_floor",
+    "ag_tpe_total": "below_error_floor",
+    "ag_mas_total": "below_error_floor",
+    "ag_phi_total": "eligible",
+    "ag_vie_total": "eligible",
+    "cwg_aus_gold": "eligible",
+    "cwg_aus_total": "eligible",
+    "cwg_eng_gold": "eligible",
+    "cwg_sco_gold": "below_error_floor",
+    "cwg_wal_gold": "eligible",
+    "cwg_ind_total": "eligible",
+    "cwg_can_total": "below_error_floor",
+    "cwg_nzl_total": "below_error_floor",
+    "cwg_nga_total": "eligible",
+    "cwg_jam_total": "below_error_floor",
+    "cwg_wal_total": "eligible",
+    "wc_top_scorer": "below_error_floor",
+    "se_s_seats": "below_error_floor",
+    "se_c_seats": "eligible",
+    "se_kd_seats": "eligible",
+    "se_mp_seats": "below_error_floor",
+    "se_l_seats": "held_for_review",
+    "box_spiderman_open": "eligible",
+    "box_odyssey_cume": "eligible",
+    "box_toystory5_cume": "below_error_floor",
+    "box_minions_cume": "eligible",
+    "box_moana_cume": "eligible",
+    "tdf_points": "eligible",
+    "euroath_gbr_gold": "eligible",
+    "euroath_gbr_total": "below_error_floor"
+  },
+  "held_for_review": [
+    "se_l_seats"
+  ],
+  "boundary_tied": false,
+  "summary": {
+    "overall": {
+      "n": 10,
+      "by_family": {
+        "ag": 2,
+        "box": 3,
+        "cwg": 4,
+        "tdf": 1
+      },
+      "mean_error": 0.183389,
+      "mean_spread": 0.039215,
+      "min_spread": 0.0,
+      "max_spread": 0.073955
+    },
+    "high_spread": {
+      "n": 5,
+      "by_family": {
+        "box": 2,
+        "cwg": 3
+      },
+      "mean_error": 0.205623,
+      "mean_spread": 0.064903,
+      "min_spread": 0.054333,
+      "max_spread": 0.073955
+    },
+    "low_spread": {
+      "n": 5,
+      "by_family": {
+        "ag": 2,
+        "box": 1,
+        "cwg": 1,
+        "tdf": 1
+      },
+      "mean_error": 0.161155,
+      "mean_spread": 0.013527,
+      "min_spread": 0.0,
+      "max_spread": 0.020297
+    }
+  },
+  "high_spread_ids": [
+    "cwg_nga_total",
+    "cwg_aus_total",
+    "cwg_ind_total",
+    "box_moana_cume",
+    "box_odyssey_cume"
+  ],
+  "low_spread_ids": [
+    "ag_ind_gold",
+    "tdf_points",
+    "cwg_aus_gold",
+    "box_minions_cume",
+    "ag_ind_total"
+  ],
+  "backend": {
+    "class": "OpenRouterBackend",
+    "model": "openai/gpt-6-luna",
+    "base_url": "https://openrouter.ai/api/v1",
+    "pin_provider": "OpenAI",
+    "reasoning_effort": "low"
+  }
+}

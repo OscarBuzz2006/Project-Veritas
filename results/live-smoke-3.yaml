@@ -1,0 +1,134 @@
+suite_name: Epistemic Prism Numeric Smoke 3 (Rounded Prompts, C1/C2/C3)
+seed: 42
+num_agents: 8
+num_rounds: 2
+peer_degree: 3
+tasks_per_track: 2
+numeric_tasks: 2
+numeric_start_bias_weight: 0.22
+numeric_start_sd: 0.24
+numeric_replicates: 1
+alpha: 0.3
+conditions:
+- condition_id: no_ai
+  label: No AI Baseline (Independent + Peers)
+  heterogeneity_type: no_ai
+  nationality_type: none
+  num_models: 0
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: baseline
+  models: []
+- condition_id: us_k1_greedy
+  label: Monolithic US (K=1, T=0.0, top_p=0.0)
+  heterogeneity_type: monolithic_shared
+  nationality_type: us_only
+  num_models: 1
+  temperature: 0.0
+  top_p: 0.0
+  peer_exchange: true
+  alpha: 0.3
+  group: decoding_ablation
+  models: []
+- condition_id: us_k1
+  label: Monolithic US (K=1, App Default T=0.8)
+  heterogeneity_type: monolithic_shared
+  nationality_type: us_only
+  num_models: 1
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: k_sweep
+  models: []
+- condition_id: us_k2
+  label: Multi-Lab US Mix (K=2)
+  heterogeneity_type: multi_lab_mix
+  nationality_type: us_only
+  num_models: 2
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: k_sweep
+  models: []
+- condition_id: us_k4
+  label: Multi-Lab US Mix (K=4)
+  heterogeneity_type: multi_lab_mix
+  nationality_type: us_only
+  num_models: 4
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: k_sweep
+  models: []
+- condition_id: cn_k1
+  label: Monolithic CN Open Model (K=1)
+  heterogeneity_type: monolithic_shared
+  nationality_type: cn_only
+  num_models: 1
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: nationality
+  models: []
+- condition_id: cn_k4
+  label: Multi-Lab CN Mix (K=4)
+  heterogeneity_type: multi_lab_mix
+  nationality_type: cn_only
+  num_models: 4
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: nationality
+  models: []
+- condition_id: divergent_sft_pair
+  label: Same-Base Divergent SFT (K=2, Qwen3.8 + Arete-27B)
+  heterogeneity_type: divergent_sft_pair
+  nationality_type: divergent_sft
+  num_models: 2
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: nationality
+  models: []
+- condition_id: cross_national_k4
+  label: Cross-National Mix (K=4, US + CN + EU)
+  heterogeneity_type: cultural_regional_mix
+  nationality_type: cross_national
+  num_models: 4
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: nationality
+  models: []
+- condition_id: personalized_advisor
+  label: Personalized Advisor (Role-Framed)
+  heterogeneity_type: personalized_advisor
+  nationality_type: cross_national
+  num_models: 24
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: personalization
+  models: []
+- condition_id: personalized_peer
+  label: Personalized Peer (Sycophantic)
+  heterogeneity_type: personalized_peer
+  nationality_type: us_only
+  num_models: 24
+  temperature: 0.8
+  top_p: 0.95
+  peer_exchange: true
+  alpha: 0.3
+  group: personalization
+  models: []
+numeric_tasks_file: results/live-smoke-3-tasks.json

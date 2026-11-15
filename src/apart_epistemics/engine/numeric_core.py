@@ -8,8 +8,8 @@ import random
 import statistics
 import threading
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -26,8 +26,17 @@ from apart_epistemics.parsers import NumericParseResult, parse_numeric_estimate
 from apart_epistemics.run_state import backend_identity, configure_budget, validate_manifest
 
 # A parsed value further than this (in log10 units) from the agent's current estimate is
-# treated as a parse miss, e.g. a unit slip such as metres read as millions of metres.
-MAX_LOG10_JUMP = 3.0
+# treated as a parse miss: a factor of 100 catches 10^3 and 10^6 unit slips (e.g. 235,000 vs
+# 235,000,000 gave distance 2.898) while preserving genuine estimates (max observed jump 1.013).
+MAX_LOG10_JUMP = 2.0
+
+
+def format_prompt_number(value: float) -> str:
+    """Round to 3 significant figures, then to a whole number, with commas and no e-notation."""
+    rounded = round(float(f"{value:.3g}"))
+    if value > 0 and rounded < 1:
+        rounded = 1
+    return f"{rounded:,}"
 
 
 def _parse_reply(raw_reply: str, cur_x: float) -> NumericParseResult:
@@ -69,7 +78,7 @@ def build_numeric_prompts(
 ) -> tuple[str, str]:
     """Construct C1 (baseline), C2 (social summary), or C3 (personalized+history) prompts."""
     cond = condition_id.upper()
-    est_str = f"{current_x:g}"
+    est_str = format_prompt_number(current_x)
 
     # One shared system prompt for C1/C2/C3 so conditions differ only in what they add:
     # C2 adds the social summary (user prompt), C3 adds the profile sentence and history.
@@ -84,7 +93,9 @@ def build_numeric_prompts(
     if cond in ("C2", "C3") and pop_stats is not None:
         med, q25, q75 = pop_stats
         parts.append(
-            f"Other people asking this recently gave a median of {med:g} (IQR {q25:g} to {q75:g})."
+            "Other people asking this recently gave a median of "
+            f"{format_prompt_number(med)} "
+            f"(IQR {format_prompt_number(q25)} to {format_prompt_number(q75)})."
         )
     if cond == "C3" and history:
         recent = history[-2:]
@@ -322,36 +333,80 @@ def _make_record(
     )
 
 
-def _run_round(
+@dataclass
+class _TrajectoryState:
+    """Mutable per-(condition, question, replicate) execution state across rounds."""
+
+    cond_id: str
+    task: TaskItem
+    rep: int
+    current_logs: list[float]
+    histories: list[list[tuple[str, str]]]
+    round_idx: int = 1
+    ctx: _RoundContext | None = None
+    pending_outcomes: dict[int, tuple[str, Any]] = field(default_factory=dict)
+    remaining_pending: int = 0
+    records: list[NumericEstimateRecord] = field(default_factory=list)
+
+
+def _cell_key(
+    cond_id: str, question_id: str, rep: int, round_idx: int, agent_id: str
+) -> tuple[str, str, int, int, str]:
+    return (cond_id, question_id, rep, round_idx, agent_id)
+
+
+def _build_round_context(
+    backend: Any,
+    agents: list[AgentProfile],
+    traj: _TrajectoryState,
+    tracker: _SpendTracker,
+    max_tokens: int,
+    pricing: TokenPricing | None,
+    abort: threading.Event,
+    current_date: str,
+) -> _RoundContext:
+    sorted_x = sorted(10.0**lg for lg in traj.current_logs)
+    return _RoundContext(
+        backend=backend,
+        agents=agents,
+        cond_id=traj.cond_id,
+        task=traj.task,
+        round_idx=traj.round_idx,
+        pop_stats=(
+            statistics.median(sorted_x),
+            quantile_sorted(sorted_x, 0.25),
+            quantile_sorted(sorted_x, 0.75),
+        ),
+        current_logs=traj.current_logs,
+        histories=traj.histories,
+        tracker=tracker,
+        max_tokens=max_tokens,
+        pricing=pricing,
+        abort=abort,
+        current_date=current_date,
+    )
+
+
+def _apply_round_outcomes(
     ctx: _RoundContext,
     spec: dict[str, Any],
     rep: int,
     alpha: float,
-    workers: int,
+    outcomes: dict[int, tuple[str, Any]],
     existing: dict[tuple[str, str, int, int, str], NumericEstimateRecord],
     fh: Any,
 ) -> list[NumericEstimateRecord]:
-    """Run one round: query pending agents (concurrently if asked), then apply in agent order."""
-
-    def key_for(a_idx: int) -> tuple[str, str, int, int, str]:
-        return (ctx.cond_id, ctx.task.id, rep, ctx.round_idx, ctx.agents[a_idx].agent_id)
-
-    pending = [i for i in range(len(ctx.agents)) if key_for(i) not in existing]
-    if workers > 1 and len(pending) > 1:
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            results = list(pool.map(lambda i: _query_agent(ctx, i), pending))
-    else:
-        results = [_query_agent(ctx, i) for i in pending]
-    outcomes = dict(zip(pending, results, strict=True))
-
+    """Apply existing and newly fetched outcomes in deterministic agent order."""
     round_records: list[NumericEstimateRecord] = []
     first_error: Exception | None = None
+    unit_str = f" {ctx.task.unit}" if ctx.task.unit else ""
     for a_idx in range(len(ctx.agents)):
-        key = key_for(a_idx)
+        key = _cell_key(ctx.cond_id, ctx.task.id, rep, ctx.round_idx, ctx.agents[a_idx].agent_id)
         if key in existing:
             rec = existing[key]
+            est_hist = format_prompt_number(10.0**rec.agent_log10_before)
             ctx.histories[a_idx].append(
-                (f"My current estimate is {10.0**rec.agent_log10_before:g}.", rec.raw_reply)
+                (f"My current estimate is {est_hist}{unit_str}.", rec.raw_reply)
             )
             ctx.current_logs[a_idx] = rec.agent_log10_after
             round_records.append(rec)
@@ -366,7 +421,9 @@ def _run_round(
         cur_x = 10.0 ** ctx.current_logs[a_idx]
         rec = _make_record(spec, ctx, rep, a_idx, resp, parsed, alpha)
         ctx.current_logs[a_idx] = rec.agent_log10_after
-        ctx.histories[a_idx].append((f"My current estimate is {cur_x:g}.", rec.raw_reply))
+        ctx.histories[a_idx].append(
+            (f"My current estimate is {format_prompt_number(cur_x)}{unit_str}.", rec.raw_reply)
+        )
         existing[key] = rec
         round_records.append(rec)
         fh.write(rec.model_dump_json() + "\n")
@@ -377,6 +434,178 @@ def _run_round(
     if first_error is not None:
         raise first_error
     return round_records
+
+
+def _run_round(
+    ctx: _RoundContext,
+    spec: dict[str, Any],
+    rep: int,
+    alpha: float,
+    workers: int,
+    existing: dict[tuple[str, str, int, int, str], NumericEstimateRecord],
+    fh: Any,
+) -> list[NumericEstimateRecord]:
+    """Run one round sequentially or concurrently across pending agents."""
+    pending = [
+        i
+        for i in range(len(ctx.agents))
+        if _cell_key(ctx.cond_id, ctx.task.id, rep, ctx.round_idx, ctx.agents[i].agent_id)
+        not in existing
+    ]
+    if workers > 1 and len(pending) > 1:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(lambda i: _query_agent(ctx, i), pending))
+    else:
+        results = [_query_agent(ctx, i) for i in pending]
+    outcomes = dict(zip(pending, results, strict=True))
+    return _apply_round_outcomes(ctx, spec, rep, alpha, outcomes, existing, fh)
+
+
+def _validate_numeric_inputs(
+    tasks: list[TaskItem],
+    conditions: list[str],
+    n_agents: int,
+    n_rounds: int,
+    replicates: int,
+    backend: Any,
+    alpha: float,
+    budget_usd: float,
+    workers: int,
+) -> None:
+    if workers < 1:
+        raise BackendConfigError("workers must be at least 1.")
+    if not hasattr(backend, "generate_numeric_reply"):
+        raise BackendConfigError(
+            "This backend does not support numeric replay; use a numeric-capable backend."
+        )
+    if not 0 <= alpha <= 1 or not math.isfinite(budget_usd) or budget_usd < 0:
+        raise BackendConfigError("Invalid alpha or budget.")
+    if (
+        not tasks
+        or len({t.id for t in tasks}) != len(tasks)
+        or any(t.numeric_truth is None for t in tasks)
+    ):
+        raise BackendConfigError("Numeric tasks need unique IDs and numeric truth.")
+    if (
+        min(n_agents, n_rounds, replicates) < 1
+        or not conditions
+        or len(set(conditions)) != len(conditions)
+    ):
+        raise BackendConfigError("Numeric dimensions must be positive and conditions unique.")
+
+
+def _build_trajectories(
+    tasks: list[TaskItem],
+    conditions: list[str],
+    n_agents: int,
+    replicates: int,
+    seed: int,
+    start_bias_weight: float,
+    start_sd: float,
+) -> list[_TrajectoryState]:
+    trajs: list[_TrajectoryState] = []
+    for cond_id in conditions:
+        for task in tasks:
+            truth = task.numeric_truth or 100.0
+            log_truth = math.log10(truth)
+            for rep in range(replicates):
+                init_rng = random.Random(seed * 313 + sum(ord(c) for c in task.id) * 19 + rep * 7)
+                current_logs = [
+                    log_truth
+                    + start_bias_weight * task.popular_misconception_bias
+                    + init_rng.gauss(0.0, start_sd)
+                    for _ in range(n_agents)
+                ]
+                trajs.append(
+                    _TrajectoryState(
+                        cond_id=cond_id,
+                        task=task,
+                        rep=rep,
+                        current_logs=current_logs,
+                        histories=[[] for _ in range(n_agents)],
+                    )
+                )
+    return trajs
+
+
+def _run_trajectories_parallel(
+    trajs: list[_TrajectoryState],
+    backend: Any,
+    agents: list[AgentProfile],
+    spec: dict[str, Any],
+    n_rounds: int,
+    alpha: float,
+    workers: int,
+    tracker: _SpendTracker,
+    max_tokens: int,
+    pricing: TokenPricing | None,
+    current_date: str,
+    existing: dict[tuple[str, str, int, int, str], NumericEstimateRecord],
+    fh: Any,
+) -> None:
+    """Execute independent trajectories concurrently via one shared worker pool."""
+    run_abort = threading.Event()
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        in_flight: dict[Future[tuple[str, Any]], tuple[int, int]] = {}
+
+        def enqueue_next(traj_idx: int) -> None:
+            traj = trajs[traj_idx]
+            while traj.round_idx <= n_rounds:
+                ctx = _build_round_context(
+                    backend, agents, traj, tracker, max_tokens, pricing, run_abort, current_date
+                )
+                pending = [
+                    i
+                    for i in range(len(agents))
+                    if _cell_key(
+                        traj.cond_id, traj.task.id, traj.rep, traj.round_idx, agents[i].agent_id
+                    )
+                    not in existing
+                ]
+                if not pending:
+                    traj.records.extend(
+                        _apply_round_outcomes(ctx, spec, traj.rep, alpha, {}, existing, fh)
+                    )
+                    traj.round_idx += 1
+                    continue
+                traj.ctx = ctx
+                traj.pending_outcomes = {}
+                traj.remaining_pending = len(pending)
+                for a_idx in pending:
+                    in_flight[pool.submit(_query_agent, ctx, a_idx)] = (traj_idx, a_idx)
+                break
+
+        for t_idx in range(len(trajs)):
+            enqueue_next(t_idx)
+
+        first_error: Exception | None = None
+        while in_flight:
+            done, _ = wait(in_flight, return_when=FIRST_COMPLETED)
+            for fut in done:
+                traj_idx, a_idx = in_flight.pop(fut)
+                traj = trajs[traj_idx]
+                traj.pending_outcomes[a_idx] = (
+                    ("skipped", None) if fut.cancelled() else fut.result()
+                )
+                traj.remaining_pending -= 1
+                if traj.remaining_pending != 0 or traj.ctx is None:
+                    continue
+                try:
+                    round_recs = _apply_round_outcomes(
+                        traj.ctx, spec, traj.rep, alpha, traj.pending_outcomes, existing, fh
+                    )
+                except Exception as exc:
+                    first_error = first_error or exc
+                    run_abort.set()
+                    traj.ctx = None
+                    continue
+                traj.records.extend(round_recs)
+                traj.round_idx += 1
+                traj.ctx = None
+                if not run_abort.is_set():
+                    enqueue_next(traj_idx)
+        if first_error is not None:
+            raise first_error
 
 
 def run_numeric_core(
@@ -399,30 +628,13 @@ def run_numeric_core(
 ) -> list[NumericEstimateRecord]:
     """Run crash-resumable C1/C2/C3 numeric estimation sweeps with retry-once and budget cap.
 
-    The agents of one round are independent (the population summary is fixed before the round
-    starts), so `workers > 1` queries them concurrently. Results are applied and written in
-    agent order, so the records and JSONL file are identical to a sequential run.
+    Independent trajectories and their within-round agents share `workers > 1` concurrently.
+    Results are applied and returned in canonical `(condition, question, replicate, round, agent)`
+    order so outputs match sequential execution.
     """
-    if workers < 1:
-        raise BackendConfigError("workers must be at least 1.")
-    if not hasattr(backend, "generate_numeric_reply"):
-        raise BackendConfigError(
-            "This backend does not support numeric replay; use a numeric-capable backend."
-        )
-    if not 0 <= alpha <= 1 or not math.isfinite(budget_usd) or budget_usd < 0:
-        raise BackendConfigError("Invalid alpha or budget.")
-    if (
-        not tasks
-        or len({t.id for t in tasks}) != len(tasks)
-        or any(t.numeric_truth is None for t in tasks)
-    ):
-        raise BackendConfigError("Numeric tasks need unique IDs and numeric truth.")
-    if (
-        min(n_agents, n_rounds, replicates) < 1
-        or not conditions
-        or len(set(conditions)) != len(conditions)
-    ):
-        raise BackendConfigError("Numeric dimensions must be positive and conditions unique.")
+    _validate_numeric_inputs(
+        tasks, conditions, n_agents, n_rounds, replicates, backend, alpha, budget_usd, workers
+    )
     runs_path.parent.mkdir(parents=True, exist_ok=True)
     spec = {
         "version": 1,
@@ -450,54 +662,48 @@ def run_numeric_core(
     )
     if any(r.run_spec != spec for r in existing.values()):
         raise RuntimeError("Record run specification differs from manifest.")
-    ordered_records: list[NumericEstimateRecord] = []
+    trajs = _build_trajectories(
+        tasks, conditions, n_agents, replicates, seed, start_bias_weight, start_sd
+    )
 
     with runs_path.open("a", encoding="utf-8") as fh:
         if runs_path.stat().st_size and not runs_path.read_bytes().endswith(b"\n"):
             fh.write("\n")
-        for cond_id in conditions:
-            for task in tasks:
-                truth = task.numeric_truth or 100.0
-                log_truth = math.log10(truth)
-
-                for rep in range(replicates):
-                    init_rng = random.Random(
-                        seed * 313 + sum(ord(c) for c in task.id) * 19 + rep * 7
+        if workers <= n_agents:
+            for traj in trajs:
+                while traj.round_idx <= n_rounds:
+                    ctx = _build_round_context(
+                        backend,
+                        agents,
+                        traj,
+                        tracker,
+                        max_tokens,
+                        pricing,
+                        threading.Event(),
+                        current_date,
                     )
-                    current_logs = [
-                        log_truth
-                        + start_bias_weight * task.popular_misconception_bias
-                        + init_rng.gauss(0.0, start_sd)
-                        for _ in range(n_agents)
-                    ]
-                    histories: list[list[tuple[str, str]]] = [[] for _ in range(n_agents)]
+                    traj.records.extend(
+                        _run_round(ctx, spec, traj.rep, alpha, workers, existing, fh)
+                    )
+                    traj.round_idx += 1
+        else:
+            _run_trajectories_parallel(
+                trajs,
+                backend,
+                agents,
+                spec,
+                n_rounds,
+                alpha,
+                workers,
+                tracker,
+                max_tokens,
+                pricing,
+                current_date,
+                existing,
+                fh,
+            )
 
-                    for r_idx in range(1, n_rounds + 1):
-                        sorted_x = sorted(10.0**lg for lg in current_logs)
-                        ctx = _RoundContext(
-                            backend=backend,
-                            agents=agents,
-                            cond_id=cond_id,
-                            task=task,
-                            round_idx=r_idx,
-                            pop_stats=(
-                                statistics.median(sorted_x),
-                                quantile_sorted(sorted_x, 0.25),
-                                quantile_sorted(sorted_x, 0.75),
-                            ),
-                            current_logs=current_logs,
-                            histories=histories,
-                            tracker=tracker,
-                            max_tokens=max_tokens,
-                            pricing=pricing,
-                            abort=threading.Event(),
-                            current_date=current_date,
-                        )
-                        ordered_records.extend(
-                            _run_round(ctx, spec, rep, alpha, workers, existing, fh)
-                        )
-
-    return ordered_records
+    return [rec for traj in trajs for rec in traj.records]
 
 
 def _stratum_report(

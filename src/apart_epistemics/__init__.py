@@ -19,6 +19,7 @@ from apart_epistemics.datasets import (
 from apart_epistemics.engine import (
     analyze_numeric_core,
     build_numeric_prompts,
+    format_prompt_number,
     run_numeric_core,
     run_suite,
 )
@@ -64,6 +65,7 @@ __all__ = [
     "build_open_debate_tasks",
     "build_static_site",
     "create_backend",
+    "format_prompt_number",
     "generate_agent_population",
     "generate_figures",
     "run_numeric_core",

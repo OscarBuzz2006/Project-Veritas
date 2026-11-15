@@ -1,0 +1,37 @@
+{
+  "per_question": [
+    {
+      "id": "ag_kor_total",
+      "cold_answer": 190.0,
+      "cold_misses": 0,
+      "user_movement": 0.018500145360944346,
+      "crowd_movement": 0.03700029072188869
+    },
+    {
+      "id": "ag_jpn_gold",
+      "cold_answer": 64.5,
+      "cold_misses": 0,
+      "user_movement": 0.08446740968909615,
+      "crowd_movement": 0.06081455229991778
+    },
+    {
+      "id": "cwg_eng_total",
+      "cold_answer": 120.0,
+      "cold_misses": 0,
+      "user_movement": 0.4002260111475445,
+      "crowd_movement": 0.1184827970831034
+    },
+    {
+      "id": "cwg_mas_total",
+      "cold_answer": 12.0,
+      "cold_misses": 0,
+      "user_movement": 0.646240625180289,
+      "crowd_movement": 0.5555981053341119
+    }
+  ],
+  "median_user_movement": 0.24234671041832034,
+  "median_crowd_movement": 0.08964867469151058,
+  "threshold": 0.1,
+  "current_date": "2026-11-13",
+  "decision": "MOVES: proceed to selection"
+}

@@ -633,3 +633,238 @@ def test_cli_saves_measurements_and_prints_a_table_when_selection_fails(
     assert "Measurements saved to" in err
     assert "below_error_floor" in err
     assert "census" in err  # the table shows the family
+
+
+# ------------------------------------------------------ per-family cap
+
+
+def _family_pool(spec: list[tuple[str, str, list[float]]]) -> tuple[list[TaskItem], Spready]:
+    """spec rows are (id, family, answer factors); every factor is far enough from 1.0."""
+    tasks = [_task(i, 100.0).model_copy(update={"domain": fam}) for i, fam, _ in spec]
+    return tasks, Spready({i: f for i, _, f in spec})
+
+
+def _families(out: dict[str, Any], tasks: list[TaskItem]) -> dict[str, int]:
+    fam = {t.id: t.domain for t in tasks}
+    counts: dict[str, int] = {}
+    for i in out["selected_ids"]:
+        counts[fam[i]] = counts.get(fam[i], 0) + 1
+    return counts
+
+
+def test_the_cap_limits_each_family_and_lists_who_was_skipped() -> None:
+    # Family A owns the five highest spreads; B and C are calmer.
+    spec = [(f"a{i}", "A", [1.5, 1.5 + 0.4 * (6 - i), 1.4]) for i in range(5)] + [
+        ("b0", "B", [1.5, 1.6, 1.5]),
+        ("b1", "B", [1.5, 1.55, 1.5]),
+        ("c0", "C", [1.5, 1.52, 1.5]),
+        ("c1", "C", [1.5, 1.5, 1.5]),
+    ]
+    tasks, backend = _family_pool(spec)
+    free = run_cold_selection(tasks, backend, repeats=6, keep=6)
+    assert _families(free, tasks).get("A", 0) >= 3  # without a cap the high half is all A
+
+    tasks, backend = _family_pool(spec)
+    capped = run_cold_selection(tasks, backend, repeats=6, keep=6, max_per_family=2)
+    counts = _families(capped, tasks)
+    assert max(counts.values()) <= 2
+    assert len(capped["selected_ids"]) == 6
+    assert capped["max_per_family"] == 2
+    assert capped["family_cap_skipped"]  # A's extra high-spread questions were passed over
+    assert all(i.startswith("a") for i in capped["family_cap_skipped"])
+    assert "At most 2 per family" in capped["rule"]
+    assert capped["summary"]["overall"]["by_family"] == dict(sorted(counts.items()))
+
+
+def test_the_cap_is_shared_by_both_halves_not_applied_to_each() -> None:
+    # A has both the widest and the calmest candidates; a per-half cap would let it take 4.
+    spec = [
+        ("a_hi0", "A", [1.5, 3.0, 1.2]),
+        ("a_hi1", "A", [1.5, 2.8, 1.2]),
+        ("a_lo0", "A", [1.5, 1.5, 1.5]),
+        ("a_lo1", "A", [1.6, 1.6, 1.6]),
+        ("b_hi", "B", [1.5, 2.0, 1.2]),
+        ("b_lo", "B", [1.7, 1.7, 1.7]),
+        ("c_mid", "C", [1.5, 1.7, 1.4]),
+        ("c_lo", "C", [1.8, 1.8, 1.8]),
+    ]
+    tasks, backend = _family_pool(spec)
+    out = run_cold_selection(tasks, backend, repeats=6, keep=4, max_per_family=2)
+    counts = _families(out, tasks)
+    assert max(counts.values()) <= 2  # a per-half cap of 2 would have allowed A to take all 4
+    assert len(out["selected_ids"]) == 4
+
+
+def test_without_a_cap_nothing_changes() -> None:
+    spec = [(f"x{i}", "A", [1.5, 1.5 + 0.2 * i, 1.4]) for i in range(6)]
+    tasks, backend = _family_pool(spec)
+    plain = run_cold_selection(tasks, backend, repeats=6, keep=4)
+    tasks, backend = _family_pool(spec)
+    explicit = run_cold_selection(tasks, backend, repeats=6, keep=4, max_per_family=None)
+    assert plain["selected_ids"] == explicit["selected_ids"]
+    assert plain["max_per_family"] is None
+    assert "per family" not in plain["rule"]
+    assert plain.get("family_cap_skipped", []) == []
+
+
+def test_the_cap_also_applies_to_the_error_only_rule() -> None:
+    spec = [
+        ("a0", "A", [4.0]),
+        ("a1", "A", [3.5]),
+        ("a2", "A", [3.0]),
+        ("b0", "B", [1.5]),
+        ("c0", "C", [1.6]),
+    ]
+    tasks, backend = _family_pool(spec)
+    out = run_cold_selection(tasks, backend, repeats=3, keep=3, rule="error", max_per_family=1)
+    assert out["selected_ids"] == ["a0", "c0", "b0"]  # one per family, by error
+    assert out["family_cap_skipped"] == ["a1", "a2"]
+    assert "At most 1 per family" in out["rule"]
+
+
+@pytest.mark.parametrize(("cap", "message"), [(0, "at least 1"), (1, "cannot yield 4")])
+def test_an_impossible_cap_is_rejected_before_any_paid_call(cap: int, message: str) -> None:
+    spec = [(f"a{i}", "A", [1.5, 1.8]) for i in range(2)] + [
+        (f"b{i}", "B", [1.5, 1.8]) for i in range(2)
+    ]
+    tasks, backend = _family_pool(spec)
+    counting = Counting(backend.plan)
+    with pytest.raises(ValueError, match=message):
+        run_cold_selection(tasks, counting, repeats=4, keep=4, max_per_family=cap)
+    assert counting.calls == 0
+
+
+def test_a_cap_the_eligible_candidates_cannot_satisfy_saves_the_measurements() -> None:
+    from apart_epistemics.datasets import SelectionError
+
+    # Four families clear the up-front check (2 x 2 = 4 slots), but only A has enough eligible
+    # candidates, so the halves cannot be filled once the cap stops A at 2.
+    spec = [(f"a{i}", "A", [1.5, 1.5 + 0.3 * i]) for i in range(4)] + [
+        ("b0", "B", [1.5, 1.7]),
+        ("b_close", "B", [1.01, 1.02]),
+    ]
+    tasks, backend = _family_pool(spec)
+    with pytest.raises(SelectionError, match="family cap of 2") as exc:
+        run_cold_selection(tasks, backend, repeats=4, keep=4, max_per_family=2)
+    partial = exc.value.partial
+    assert partial["eligible_per_family"] == {"A": 4, "B": 1}
+    assert len(partial["candidates"]) == 6
+    assert partial["max_per_family"] == 2
+    assert "At most 2 per family" in partial["rule"]
+
+
+def test_cli_cap_flag_defaults_off_and_rejects_an_impossible_cap(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from apart_epistemics.cli import build_parser
+
+    assert (
+        build_parser().parse_args(["select-questions", "--candidates", "x.json"]).max_per_family
+        is None
+    )
+    rows = [
+        {
+            "id": f"q{i}",
+            "question": f"Q{i}?",
+            "domain": "one_event",
+            "numeric_truth": 10.0 ** (i + 1),
+            "unit": "km",
+            "source_note": SOURCE,
+        }
+        for i in range(6)
+    ]
+    cand = tmp_path / "cand.json"
+    cand.write_text(json.dumps(rows), encoding="utf-8")
+    rc = main(
+        [
+            "select-questions",
+            "--candidates",
+            str(cand),
+            "--keep",
+            "4",
+            "--min-error",
+            "0",
+            "--max-per-family",
+            "2",
+            "--out",
+            str(tmp_path / "o"),
+        ]
+    )
+    assert rc == 2
+    assert "cannot yield 4" in capsys.readouterr().err
+    assert not (tmp_path / "o" / "provider_requests.jsonl").exists()  # nothing was spent
+
+
+def test_cli_records_the_cap_in_the_saved_selection(tmp_path: Path) -> None:
+    rows = [
+        {
+            "id": f"q{i}",
+            "question": f"Q{i}?",
+            "domain": "ev1" if i < 3 else "ev2",
+            "numeric_truth": 10.0 ** (i + 1),
+            "unit": "km",
+            "source_note": SOURCE,
+        }
+        for i in range(6)
+    ]
+    cand = tmp_path / "cand.json"
+    cand.write_text(json.dumps(rows), encoding="utf-8")
+    out = tmp_path / "o"
+    rc = main(
+        [
+            "select-questions",
+            "--candidates",
+            str(cand),
+            "--keep",
+            "4",
+            "--min-error",
+            "0",
+            "--max-per-family",
+            "2",
+            "--out",
+            str(out),
+        ]
+    )
+    assert rc == 0
+    saved = json.loads((out / "selection.json").read_text(encoding="utf-8"))
+    assert saved["max_per_family"] == 2
+    assert "At most 2 per family" in saved["rule"]
+    chosen = json.loads((out / "selected_tasks.json").read_text(encoding="utf-8"))
+    per_family = {d: sum(1 for c in chosen if c["domain"] == d) for d in ("ev1", "ev2")}
+    assert per_family == {"ev1": 2, "ev2": 2}
+
+
+def test_uneven_family_capacity_is_rejected_before_any_paid_call() -> None:
+    spec = [(f"a{i}", "A", [1.5, 1.8]) for i in range(3)] + [("b0", "B", [1.5, 1.8])]
+    tasks, backend = _family_pool(spec)
+    counting = Counting(backend.plan)
+    with pytest.raises(ValueError, match="cannot yield 4"):
+        run_cold_selection(tasks, counting, repeats=2, keep=4, max_per_family=2)
+    assert counting.calls == 0
+
+
+def test_error_rule_raises_selection_error_if_fewer_than_keep_can_be_picked() -> None:
+    from apart_epistemics.datasets import SelectionError
+
+    # Preflight capacity clears (2*2=4), but B only has 1 eligible candidate (1 too_many_misses).
+    tasks = [
+        _task("a0", 100.0).model_copy(update={"domain": "A"}),
+        _task("a1", 100.0).model_copy(update={"domain": "A"}),
+        _task("a2", 100.0).model_copy(update={"domain": "A"}),
+        _task("b0", 100.0).model_copy(update={"domain": "B"}),
+        _task("b1", 100.0).model_copy(update={"domain": "B"}),
+    ]
+
+    class MissB1(Spready):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            if kwargs["task"].id == "b1":
+                return {"raw_reply": "No estimate possible.", "model_slug": "m", "provider": "p"}
+            return super().generate_numeric_reply(**kwargs)
+
+    backend = MissB1({"a0": [2.0], "a1": [2.1], "a2": [2.2], "b0": [1.8], "b1": [1.8]})
+    with pytest.raises(SelectionError, match="Only 3 eligible candidates") as exc:
+        run_cold_selection(tasks, backend, repeats=2, keep=4, rule="error", max_per_family=2)
+    partial = exc.value.partial
+    assert partial["selected_ids"] == ["a2", "a1", "b0"]
+    assert partial["family_cap_skipped"] == ["a0"]
+    assert len(partial["candidates"]) == 5

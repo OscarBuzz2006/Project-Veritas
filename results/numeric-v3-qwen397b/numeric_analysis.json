@@ -1,0 +1,794 @@
+{
+  "max_identity_residual": 4.85722573273506e-16,
+  "h4_assistant_agent_corr": 0.9985,
+  "h4_slopes": {
+    "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+    "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+    "by_condition": {
+      "C1": {
+        "slope_user": {
+          "mean": 0.3069,
+          "ci95": [
+            0.1863,
+            0.4399
+          ],
+          "n_questions": 11
+        },
+        "n_observations": 132,
+        "per_question": {
+          "ag_ind_gold": {
+            "n": 12,
+            "slope_user": 0.1812
+          },
+          "ag_ind_total": {
+            "n": 12,
+            "slope_user": 0.3258
+          },
+          "box_minions_cume": {
+            "n": 12,
+            "slope_user": 0.379
+          },
+          "box_moana_cume": {
+            "n": 12,
+            "slope_user": 0.6997
+          },
+          "box_odyssey_cume": {
+            "n": 12,
+            "slope_user": 0.3051
+          },
+          "ctrl_kullu": {
+            "n": 12,
+            "slope_user": 0.2004
+          },
+          "ctrl_nahan": {
+            "n": 12,
+            "slope_user": 0.5456
+          },
+          "ctrl_newcastle_wy": {
+            "n": 12,
+            "slope_user": -0.0337
+          },
+          "cwg_aus_gold": {
+            "n": 12,
+            "slope_user": 0.1044
+          },
+          "cwg_ind_total": {
+            "n": 12,
+            "slope_user": 0.0688
+          },
+          "cwg_nga_total": {
+            "n": 12,
+            "slope_user": 0.5992
+          }
+        }
+      },
+      "C2": {
+        "slope_user": {
+          "mean": 0.2414,
+          "ci95": [
+            0.1406,
+            0.35
+          ],
+          "n_questions": 11
+        },
+        "n_observations": 132,
+        "per_question": {
+          "ag_ind_gold": {
+            "n": 12,
+            "slope_user": 0.2989,
+            "slope_crowd": -0.9674
+          },
+          "ag_ind_total": {
+            "n": 12,
+            "slope_user": 0.1309,
+            "slope_crowd": -0.6346
+          },
+          "box_minions_cume": {
+            "n": 12,
+            "slope_user": 0.501,
+            "slope_crowd": 508.2596
+          },
+          "box_moana_cume": {
+            "n": 12,
+            "slope_user": 0.107,
+            "slope_crowd": 29.3376
+          },
+          "box_odyssey_cume": {
+            "n": 12,
+            "slope_user": 0.4309,
+            "slope_crowd": 0.6278
+          },
+          "ctrl_kullu": {
+            "n": 12,
+            "slope_user": -0.0425,
+            "slope_crowd": 0.0115
+          },
+          "ctrl_nahan": {
+            "n": 12,
+            "slope_user": 0.3215,
+            "slope_crowd": -2.3251
+          },
+          "ctrl_newcastle_wy": {
+            "n": 12,
+            "slope_user": 0.0813,
+            "slope_crowd": 0.4335
+          },
+          "cwg_aus_gold": {
+            "n": 12,
+            "slope_user": 0.1134,
+            "slope_crowd": -0.3577
+          },
+          "cwg_ind_total": {
+            "n": 12,
+            "slope_user": 0.1674,
+            "slope_crowd": -6.3018
+          },
+          "cwg_nga_total": {
+            "n": 12,
+            "slope_user": 0.5453,
+            "slope_crowd": 158.7888
+          }
+        },
+        "slope_crowd": {
+          "mean": 62.4429,
+          "ci95": [
+            -0.7287,
+            166.6706
+          ],
+          "n_questions": 11
+        }
+      },
+      "C3": {
+        "slope_user": {
+          "mean": 0.2723,
+          "ci95": [
+            0.1679,
+            0.3776
+          ],
+          "n_questions": 11
+        },
+        "n_observations": 132,
+        "per_question": {
+          "ag_ind_gold": {
+            "n": 12,
+            "slope_user": 0.4115,
+            "slope_crowd": -0.7595
+          },
+          "ag_ind_total": {
+            "n": 12,
+            "slope_user": 0.0712,
+            "slope_crowd": -0.2909
+          },
+          "box_minions_cume": {
+            "n": 12,
+            "slope_user": 0.6234,
+            "slope_crowd": -6.6802
+          },
+          "box_moana_cume": {
+            "n": 12,
+            "slope_user": 0.3733,
+            "slope_crowd": -2.1924
+          },
+          "box_odyssey_cume": {
+            "n": 12,
+            "slope_user": 0.5129,
+            "slope_crowd": -0.5774
+          },
+          "ctrl_kullu": {
+            "n": 12,
+            "slope_user": 0.1238,
+            "slope_crowd": -0.1131
+          },
+          "ctrl_nahan": {
+            "n": 12,
+            "slope_user": 0.3759,
+            "slope_crowd": -0.3166
+          },
+          "ctrl_newcastle_wy": {
+            "n": 12,
+            "slope_user": 0.1596,
+            "slope_crowd": -0.1284
+          },
+          "cwg_aus_gold": {
+            "n": 12,
+            "slope_user": 0.1101,
+            "slope_crowd": 0.0511
+          },
+          "cwg_ind_total": {
+            "n": 12,
+            "slope_user": 0.0667,
+            "slope_crowd": -1.9788
+          },
+          "cwg_nga_total": {
+            "n": 12,
+            "slope_user": 0.1666,
+            "slope_crowd": 0.2094
+          }
+        },
+        "slope_crowd": {
+          "mean": -1.1615,
+          "ci95": [
+            -2.4968,
+            -0.255
+          ],
+          "n_questions": 11
+        }
+      }
+    }
+  },
+  "by_stratum": {
+    "control": {
+      "questions": [
+        "ctrl_kullu",
+        "ctrl_nahan",
+        "ctrl_newcastle_wy"
+      ],
+      "by_condition_final": {
+        "C1": {
+          "n_cells": 3,
+          "crowd_error": 0.019409,
+          "avg_individual_error": 0.035208,
+          "diversity": 0.015799,
+          "iqr": 0.165955,
+          "miss_rate": 0.0
+        },
+        "C2": {
+          "n_cells": 3,
+          "crowd_error": 0.015491,
+          "avg_individual_error": 0.029068,
+          "diversity": 0.013578,
+          "iqr": 0.162803,
+          "miss_rate": 0.0
+        },
+        "C3": {
+          "n_cells": 3,
+          "crowd_error": 0.014599,
+          "avg_individual_error": 0.030136,
+          "diversity": 0.015537,
+          "iqr": 0.170435,
+          "miss_rate": 0.0
+        }
+      },
+      "h4_slopes": {
+        "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+        "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+        "by_condition": {
+          "C1": {
+            "slope_user": {
+              "mean": 0.2374,
+              "ci95": [
+                -0.0337,
+                0.5456
+              ],
+              "n_questions": 3
+            },
+            "n_observations": 36,
+            "per_question": {
+              "ctrl_kullu": {
+                "n": 12,
+                "slope_user": 0.2004
+              },
+              "ctrl_nahan": {
+                "n": 12,
+                "slope_user": 0.5456
+              },
+              "ctrl_newcastle_wy": {
+                "n": 12,
+                "slope_user": -0.0337
+              }
+            }
+          },
+          "C2": {
+            "slope_user": {
+              "mean": 0.1201,
+              "ci95": [
+                -0.0425,
+                0.3215
+              ],
+              "n_questions": 3
+            },
+            "n_observations": 36,
+            "per_question": {
+              "ctrl_kullu": {
+                "n": 12,
+                "slope_user": -0.0425,
+                "slope_crowd": 0.0115
+              },
+              "ctrl_nahan": {
+                "n": 12,
+                "slope_user": 0.3215,
+                "slope_crowd": -2.3251
+              },
+              "ctrl_newcastle_wy": {
+                "n": 12,
+                "slope_user": 0.0813,
+                "slope_crowd": 0.4335
+              }
+            },
+            "slope_crowd": {
+              "mean": -0.6267,
+              "ci95": [
+                -2.3251,
+                0.4335
+              ],
+              "n_questions": 3
+            }
+          },
+          "C3": {
+            "slope_user": {
+              "mean": 0.2198,
+              "ci95": [
+                0.1238,
+                0.3759
+              ],
+              "n_questions": 3
+            },
+            "n_observations": 36,
+            "per_question": {
+              "ctrl_kullu": {
+                "n": 12,
+                "slope_user": 0.1238,
+                "slope_crowd": -0.1131
+              },
+              "ctrl_nahan": {
+                "n": 12,
+                "slope_user": 0.3759,
+                "slope_crowd": -0.3166
+              },
+              "ctrl_newcastle_wy": {
+                "n": 12,
+                "slope_user": 0.1596,
+                "slope_crowd": -0.1284
+              }
+            },
+            "slope_crowd": {
+              "mean": -0.186,
+              "ci95": [
+                -0.3166,
+                -0.1131
+              ],
+              "n_questions": 3
+            }
+          }
+        }
+      }
+    },
+    "high_spread": {
+      "questions": [
+        "box_moana_cume",
+        "box_odyssey_cume",
+        "cwg_ind_total",
+        "cwg_nga_total"
+      ],
+      "by_condition_final": {
+        "C1": {
+          "n_cells": 4,
+          "crowd_error": 0.016173,
+          "avg_individual_error": 0.045378,
+          "diversity": 0.029206,
+          "iqr": 0.18382,
+          "miss_rate": 0.0
+        },
+        "C2": {
+          "n_cells": 4,
+          "crowd_error": 0.009872,
+          "avg_individual_error": 0.036274,
+          "diversity": 0.026402,
+          "iqr": 0.199174,
+          "miss_rate": 0.0
+        },
+        "C3": {
+          "n_cells": 4,
+          "crowd_error": 0.014151,
+          "avg_individual_error": 0.03783,
+          "diversity": 0.023678,
+          "iqr": 0.191435,
+          "miss_rate": 0.0
+        }
+      },
+      "h4_slopes": {
+        "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+        "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+        "by_condition": {
+          "C1": {
+            "slope_user": {
+              "mean": 0.4182,
+              "ci95": [
+                0.1869,
+                0.6495
+              ],
+              "n_questions": 4
+            },
+            "n_observations": 48,
+            "per_question": {
+              "box_moana_cume": {
+                "n": 12,
+                "slope_user": 0.6997
+              },
+              "box_odyssey_cume": {
+                "n": 12,
+                "slope_user": 0.3051
+              },
+              "cwg_ind_total": {
+                "n": 12,
+                "slope_user": 0.0688
+              },
+              "cwg_nga_total": {
+                "n": 12,
+                "slope_user": 0.5992
+              }
+            }
+          },
+          "C2": {
+            "slope_user": {
+              "mean": 0.3126,
+              "ci95": [
+                0.1372,
+                0.4881
+              ],
+              "n_questions": 4
+            },
+            "n_observations": 48,
+            "per_question": {
+              "box_moana_cume": {
+                "n": 12,
+                "slope_user": 0.107,
+                "slope_crowd": 29.3376
+              },
+              "box_odyssey_cume": {
+                "n": 12,
+                "slope_user": 0.4309,
+                "slope_crowd": 0.6278
+              },
+              "cwg_ind_total": {
+                "n": 12,
+                "slope_user": 0.1674,
+                "slope_crowd": -6.3018
+              },
+              "cwg_nga_total": {
+                "n": 12,
+                "slope_user": 0.5453,
+                "slope_crowd": 158.7888
+              }
+            },
+            "slope_crowd": {
+              "mean": 45.6131,
+              "ci95": [
+                -2.837,
+                119.2485
+              ],
+              "n_questions": 4
+            }
+          },
+          "C3": {
+            "slope_user": {
+              "mean": 0.2799,
+              "ci95": [
+                0.1167,
+                0.4431
+              ],
+              "n_questions": 4
+            },
+            "n_observations": 48,
+            "per_question": {
+              "box_moana_cume": {
+                "n": 12,
+                "slope_user": 0.3733,
+                "slope_crowd": -2.1924
+              },
+              "box_odyssey_cume": {
+                "n": 12,
+                "slope_user": 0.5129,
+                "slope_crowd": -0.5774
+              },
+              "cwg_ind_total": {
+                "n": 12,
+                "slope_user": 0.0667,
+                "slope_crowd": -1.9788
+              },
+              "cwg_nga_total": {
+                "n": 12,
+                "slope_user": 0.1666,
+                "slope_crowd": 0.2094
+              }
+            },
+            "slope_crowd": {
+              "mean": -1.1348,
+              "ci95": [
+                -2.0856,
+                -0.184
+              ],
+              "n_questions": 4
+            }
+          }
+        }
+      }
+    },
+    "low_spread": {
+      "questions": [
+        "ag_ind_gold",
+        "ag_ind_total",
+        "box_minions_cume",
+        "cwg_aus_gold"
+      ],
+      "by_condition_final": {
+        "C1": {
+          "n_cells": 4,
+          "crowd_error": 0.039484,
+          "avg_individual_error": 0.061237,
+          "diversity": 0.021753,
+          "iqr": 0.201209,
+          "miss_rate": 0.0
+        },
+        "C2": {
+          "n_cells": 4,
+          "crowd_error": 0.061612,
+          "avg_individual_error": 0.080638,
+          "diversity": 0.019026,
+          "iqr": 0.194052,
+          "miss_rate": 0.0
+        },
+        "C3": {
+          "n_cells": 4,
+          "crowd_error": 0.061029,
+          "avg_individual_error": 0.082589,
+          "diversity": 0.02156,
+          "iqr": 0.196926,
+          "miss_rate": 0.0
+        }
+      },
+      "h4_slopes": {
+        "method": "Per condition and question: OLS of (assistant_log10 - log_truth) on (agent_log10_before - log_truth) [+ (pop_median_log10 - log_truth) for C2/C3]; slopes averaged over questions with a bootstrap 95% CI over questions.",
+        "interpretation": "slope_user ~0: the assistant answers from its own view; ~1: it echoes the user's guess. slope_crowd separates echoing the crowd median. Descriptive, not causal.",
+        "by_condition": {
+          "C1": {
+            "slope_user": {
+              "mean": 0.2476,
+              "ci95": [
+                0.1428,
+                0.3524
+              ],
+              "n_questions": 4
+            },
+            "n_observations": 48,
+            "per_question": {
+              "ag_ind_gold": {
+                "n": 12,
+                "slope_user": 0.1812
+              },
+              "ag_ind_total": {
+                "n": 12,
+                "slope_user": 0.3258
+              },
+              "box_minions_cume": {
+                "n": 12,
+                "slope_user": 0.379
+              },
+              "cwg_aus_gold": {
+                "n": 12,
+                "slope_user": 0.1044
+              }
+            }
+          },
+          "C2": {
+            "slope_user": {
+              "mean": 0.261,
+              "ci95": [
+                0.1222,
+                0.4085
+              ],
+              "n_questions": 4
+            },
+            "n_observations": 48,
+            "per_question": {
+              "ag_ind_gold": {
+                "n": 12,
+                "slope_user": 0.2989,
+                "slope_crowd": -0.9674
+              },
+              "ag_ind_total": {
+                "n": 12,
+                "slope_user": 0.1309,
+                "slope_crowd": -0.6346
+              },
+              "box_minions_cume": {
+                "n": 12,
+                "slope_user": 0.501,
+                "slope_crowd": 508.2596
+              },
+              "cwg_aus_gold": {
+                "n": 12,
+                "slope_user": 0.1134,
+                "slope_crowd": -0.3577
+              }
+            },
+            "slope_crowd": {
+              "mean": 126.575,
+              "ci95": [
+                -0.815,
+                381.0361
+              ],
+              "n_questions": 4
+            }
+          },
+          "C3": {
+            "slope_user": {
+              "mean": 0.3041,
+              "ci95": [
+                0.0907,
+                0.5174
+              ],
+              "n_questions": 4
+            },
+            "n_observations": 48,
+            "per_question": {
+              "ag_ind_gold": {
+                "n": 12,
+                "slope_user": 0.4115,
+                "slope_crowd": -0.7595
+              },
+              "ag_ind_total": {
+                "n": 12,
+                "slope_user": 0.0712,
+                "slope_crowd": -0.2909
+              },
+              "box_minions_cume": {
+                "n": 12,
+                "slope_user": 0.6234,
+                "slope_crowd": -6.6802
+              },
+              "cwg_aus_gold": {
+                "n": 12,
+                "slope_user": 0.1101,
+                "slope_crowd": 0.0511
+              }
+            },
+            "slope_crowd": {
+              "mean": -1.9199,
+              "ci95": [
+                -5.0829,
+                -0.1199
+              ],
+              "n_questions": 4
+            }
+          }
+        }
+      }
+    }
+  },
+  "by_condition_final": {
+    "C1": {
+      "condition_id": "C1",
+      "round_idx": 2,
+      "crowd_error": 0.025532,
+      "avg_individual_error": 0.048371,
+      "diversity": 0.022839,
+      "iqr": 0.185271,
+      "miss_rate": 0.0
+    },
+    "C2": {
+      "condition_id": "C2",
+      "round_idx": 2,
+      "crowd_error": 0.030219,
+      "avg_individual_error": 0.050441,
+      "diversity": 0.020222,
+      "iqr": 0.187392,
+      "miss_rate": 0.0
+    },
+    "C3": {
+      "condition_id": "C3",
+      "round_idx": 2,
+      "crowd_error": 0.03132,
+      "avg_individual_error": 0.052008,
+      "diversity": 0.020688,
+      "iqr": 0.187705,
+      "miss_rate": 0.0
+    }
+  },
+  "condition_round_metrics": [
+    {
+      "condition_id": "C1",
+      "round_idx": 1,
+      "crowd_error": 0.03141,
+      "avg_individual_error": 0.063269,
+      "diversity": 0.031859,
+      "iqr": 0.225297,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C1",
+      "round_idx": 2,
+      "crowd_error": 0.025532,
+      "avg_individual_error": 0.048371,
+      "diversity": 0.022839,
+      "iqr": 0.185271,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 1,
+      "crowd_error": 0.034686,
+      "avg_individual_error": 0.065045,
+      "diversity": 0.030359,
+      "iqr": 0.228882,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C2",
+      "round_idx": 2,
+      "crowd_error": 0.030219,
+      "avg_individual_error": 0.050441,
+      "diversity": 0.020222,
+      "iqr": 0.187392,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 1,
+      "crowd_error": 0.036393,
+      "avg_individual_error": 0.066299,
+      "diversity": 0.029906,
+      "iqr": 0.231056,
+      "miss_rate": 0.0
+    },
+    {
+      "condition_id": "C3",
+      "round_idx": 2,
+      "crowd_error": 0.03132,
+      "avg_individual_error": 0.052008,
+      "diversity": 0.020688,
+      "iqr": 0.187705,
+      "miss_rate": 0.0
+    }
+  ],
+  "contrasts": [
+    {
+      "contrast_id": "c2_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": -0.002617,
+      "ci_low": -0.007076,
+      "ci_high": 0.000857,
+      "wilcoxon_p": 0.413086,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 11
+    },
+    {
+      "contrast_id": "c2_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C2",
+      "mean_diff": 0.004687,
+      "ci_low": -0.005035,
+      "ci_high": 0.017125,
+      "wilcoxon_p": 0.831055,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 11
+    },
+    {
+      "contrast_id": "c3_vs_c1_diversity",
+      "metric": "diversity",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": -0.002151,
+      "ci_low": -0.006811,
+      "ci_high": 0.002082,
+      "wilcoxon_p": 0.577148,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 11
+    },
+    {
+      "contrast_id": "c3_vs_c1_crowd_error",
+      "metric": "crowd_error",
+      "condition_a": "C1",
+      "condition_b": "C3",
+      "mean_diff": 0.005787,
+      "ci_low": -0.004137,
+      "ci_high": 0.018211,
+      "wilcoxon_p": 0.764648,
+      "holm_adjusted_p": 1.0,
+      "n_cells": 11
+    }
+  ]
+}

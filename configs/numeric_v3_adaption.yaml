@@ -1,0 +1,20 @@
+suite_name: "Numeric core V3 complete 11-question run on Adaption (rounded prompts)"
+seed: 42
+num_agents: 6
+num_rounds: 2
+peer_degree: 3
+tasks_per_track: 6
+numeric_replicates: 1
+alpha: 0.3
+numeric_tasks_file: configs/numeric_final_tasks.json
+
+conditions:
+  - condition_id: no_ai
+    label: "No AI Baseline (Independent + Peers)"
+    heterogeneity_type: no_ai
+    nationality_type: none
+    num_models: 0
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: baseline

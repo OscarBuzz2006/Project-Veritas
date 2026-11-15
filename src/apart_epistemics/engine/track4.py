@@ -8,6 +8,7 @@ import math
 import random
 from collections import defaultdict
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -377,6 +378,45 @@ def _compute_suite_contrasts(
     )
 
 
+def _build_round_record(
+    cfg: ExperimentSuiteConfig,
+    cond: ConditionConfig,
+    task: TaskItem,
+    round_idx: int,
+    agent: AgentProfile,
+    model_assigned: str,
+    base_family: str,
+    step: dict[str, Any],
+) -> RoundRecord:
+    return RoundRecord(
+        run_id=f"{cond.condition_id}_{task.id}_r{round_idx}",
+        condition_id=cond.condition_id,
+        seed=cfg.seed,
+        task_id=task.id,
+        task_kind=task.kind,
+        round_idx=round_idx,
+        agent_id=agent.agent_id,
+        agent_region=agent.region,
+        model_assigned=model_assigned,
+        model_family=base_family,
+        assistant_response_text=step["assistant_response_text"],
+        agent_response_text=step["agent_response_text"],
+        extracted_topics=step["extracted_topics"],
+        stance_prob=step["stance_prob"],
+        confidence=step["confidence"],
+        stated_answer=step["stated_answer"],
+        goldman_source_overlap=step["goldman_source_overlap"],
+        persuasion_bias_exposure=step["persuasion_bias_exposure"],
+        metadata={
+            **step.get("metadata", {}),
+            "temperature": cond.temperature,
+            "top_p": cond.top_p,
+            "heterogeneity_type": cond.heterogeneity_type.value,
+            "nationality_type": cond.nationality_type.value,
+        },
+    )
+
+
 def _run_condition_rounds(
     cfg: ExperimentSuiteConfig,
     cond: ConditionConfig,
@@ -385,6 +425,7 @@ def _run_condition_rounds(
     peer_graph: dict[int, list[int]],
     backend: Any,
     on_record: Callable[[RoundRecord], None] | None = None,
+    workers: int = 1,
 ) -> list[RoundRecord]:
     """Execute rounds `0..cfg.num_rounds` for a single Track 4 condition."""
     model_pool = assign_models_for_condition(
@@ -402,6 +443,11 @@ def _run_condition_rounds(
         HeterogeneityType.PERSONALIZED_PEER,
         HeterogeneityType.PERSONALIZED_PROFILE,
     )
+    can_parallelize = (
+        workers > 1
+        and not isinstance(backend, ReplayBackend)
+        and not hasattr(backend, "generate_agent_step")
+    )
     cond_records: list[RoundRecord] = []
 
     for task in tasks:
@@ -414,7 +460,7 @@ def _run_condition_rounds(
         for round_idx in range(cfg.num_rounds + 1):
             round_stances = list(agent_stance)
             round_topics = [list(tl) for tl in agent_topics]
-
+            round_specs: list[tuple[int, AgentProfile, str, str, list[float], list[list[str]]]] = []
             for a_idx, agent in enumerate(agents):
                 base_model, base_family = model_pool[a_idx % len(model_pool)]
                 model_assigned = (
@@ -423,9 +469,38 @@ def _run_condition_rounds(
                     else base_model
                 )
                 nbrs = peer_graph[a_idx] if (cond.peer_exchange and round_idx > 0) else []
-                peer_st = [round_stances[n] for n in nbrs]
-                peer_tp = [round_topics[n] for n in nbrs]
+                round_specs.append(
+                    (
+                        a_idx,
+                        agent,
+                        model_assigned,
+                        base_family,
+                        [round_stances[n] for n in nbrs],
+                        [round_topics[n] for n in nbrs],
+                    )
+                )
 
+            live_steps: list[dict[str, Any]] | None = None
+            if can_parallelize:
+                with ThreadPoolExecutor(max_workers=workers) as pool:
+                    futures = [
+                        pool.submit(
+                            _step_live_llm,
+                            backend=backend,
+                            cond=cond,
+                            task=task,
+                            agent=agent,
+                            round_idx=round_idx,
+                            prev_stance=round_stances[a_idx],
+                            prev_topics=round_topics[a_idx],
+                            peer_stances=peer_st,
+                            model_assigned=model_assigned,
+                        )
+                        for a_idx, agent, model_assigned, _fam, peer_st, _ptp in round_specs
+                    ]
+                    live_steps = [f.result() for f in futures]
+
+            for a_idx, agent, model_assigned, base_family, peer_st, peer_tp in round_specs:
                 if isinstance(backend, ReplayBackend):
                     replayed = backend.get_round_record(
                         cond.condition_id, task.id, round_idx, agent.agent_id
@@ -435,7 +510,9 @@ def _run_condition_rounds(
                         raise RuntimeError(f"Replay miss for {miss_key}")
                     rec = replayed
                 else:
-                    if hasattr(backend, "generate_agent_step"):
+                    if live_steps is not None:
+                        step = live_steps[a_idx]
+                    elif hasattr(backend, "generate_agent_step"):
                         step = backend.generate_agent_step(
                             cond=cond,
                             task=task,
@@ -462,32 +539,15 @@ def _run_condition_rounds(
                             peer_stances=peer_st,
                             model_assigned=model_assigned,
                         )
-                    rec = RoundRecord(
-                        run_id=f"{cond.condition_id}_{task.id}_r{round_idx}",
-                        condition_id=cond.condition_id,
-                        seed=cfg.seed,
-                        task_id=task.id,
-                        task_kind=task.kind,
-                        round_idx=round_idx,
-                        agent_id=agent.agent_id,
-                        agent_region=agent.region,
-                        model_assigned=model_assigned,
-                        model_family=base_family,
-                        assistant_response_text=step["assistant_response_text"],
-                        agent_response_text=step["agent_response_text"],
-                        extracted_topics=step["extracted_topics"],
-                        stance_prob=step["stance_prob"],
-                        confidence=step["confidence"],
-                        stated_answer=step["stated_answer"],
-                        goldman_source_overlap=step["goldman_source_overlap"],
-                        persuasion_bias_exposure=step["persuasion_bias_exposure"],
-                        metadata={
-                            **step.get("metadata", {}),
-                            "temperature": cond.temperature,
-                            "top_p": cond.top_p,
-                            "heterogeneity_type": cond.heterogeneity_type.value,
-                            "nationality_type": cond.nationality_type.value,
-                        },
+                    rec = _build_round_record(
+                        cfg,
+                        cond,
+                        task,
+                        round_idx,
+                        agent,
+                        model_assigned,
+                        base_family,
+                        step,
                     )
 
                 agent_stance[a_idx] = rec.stance_prob
@@ -504,8 +564,11 @@ def run_suite(
     cfg: ExperimentSuiteConfig,
     backend: Any,
     out_dir: Path,
+    workers: int = 1,
 ) -> dict[str, Any]:
     """Run all Track 4 experimental conditions end-to-end and export summary artifacts."""
+    if workers < 1:
+        raise BackendConfigError("workers must be at least 1.")
     if len({c.condition_id for c in cfg.conditions}) != len(cfg.conditions):
         raise BackendConfigError("Condition IDs must be unique.")
     if isinstance(backend, _HTTPChatBackend):
@@ -552,7 +615,7 @@ def run_suite(
 
         for cond in cfg.conditions:
             cond_recs = _run_condition_rounds(
-                cfg, cond, tasks, agents, peer_graph, backend, on_record=persist
+                cfg, cond, tasks, agents, peer_graph, backend, on_record=persist, workers=workers
             )
             for rec in cond_recs:
                 global_idx = len(all_records)

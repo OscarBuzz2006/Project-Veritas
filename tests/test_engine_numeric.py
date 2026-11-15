@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 import subprocess
 import sys
@@ -16,10 +17,11 @@ from apart_epistemics.engine import (
     TokenPricing,
     analyze_numeric_core,
     build_numeric_prompts,
+    format_prompt_number,
     run_numeric_core,
 )
 from apart_epistemics.engine.numeric_core import _estimate_call_cost_usd
-from apart_epistemics.models import AgentProfile
+from apart_epistemics.models import AgentProfile, TaskItem
 
 
 def test_c1_c2_c3_share_one_system_prompt_and_c3_only_appends_profile(
@@ -57,7 +59,7 @@ def test_numeric_prompt_asks_for_best_estimate_in_task_unit(sample_agent: AgentP
         history=[],
         unit="meters",
     )
-    assert "My current estimate is 1500 meters." in usr
+    assert "My current estimate is 1,500 meters." in usr
     assert "What is your best estimate of the true value?" in usr
     assert "Final estimate: <plain number in meters>" in usr
     assert "nothing after the number" in usr
@@ -462,3 +464,190 @@ def test_cross_process_determinism_and_truncated_jsonl_resume(tmp_path: Path) ->
     assert [round(r.agent_log10_after, 6) for r in repaired] == [
         round(r.agent_log10_after, 6) for r in full
     ]
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (104.317, "104"),
+        (2.51804e08, "252,000,000"),
+        (52.3678, "52"),
+        (4.8, "5"),
+        (0.2, "1"),
+    ],
+)
+def test_format_prompt_number_rounds_to_three_sig_figs_whole_commas(
+    value: float, expected: str
+) -> None:
+    assert format_prompt_number(value) == expected
+
+
+def test_prompts_round_estimates_crowd_and_c3_history_while_keeping_exact_state(
+    tmp_path: Path, sample_agent: AgentProfile
+) -> None:
+    _, usr_medals = build_numeric_prompts(
+        condition_id="C2",
+        agent=sample_agent,
+        question="Total medals?",
+        current_x=104.317,
+        pop_stats=(110.172, 52.3678, 249.614),
+        history=[],
+        unit="medals",
+    )
+    assert "My current estimate is 104 medals." in usr_medals
+    assert "median of 110 (IQR 52 to 250)." in usr_medals
+
+    _, usr_box = build_numeric_prompts(
+        condition_id="C1",
+        agent=sample_agent,
+        question="Cumulative gross?",
+        current_x=2.51804e08,
+        pop_stats=None,
+        history=[],
+        unit="US dollars",
+    )
+    assert "My current estimate is 252,000,000 US dollars." in usr_box
+    assert "e+" not in usr_box
+
+    task = TaskItem(
+        id="box_test",
+        kind="numeric_estimate",
+        domain="box",
+        question="Cumulative gross?",
+        numeric_truth=395_573_235.0,
+        unit="US dollars",
+        source_note="The Numbers daily chart, 2 Aug 2026: $395,573,235",
+    )
+    seen_prompts: list[str] = []
+
+    class SpyBackend(SyntheticEpistemicBackend):
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            seen_prompts.append(kwargs["user_prompt"])
+            return {
+                "raw_reply": "Final estimate: 260000000",
+                "model_slug": "m",
+                "provider": "p",
+                "reasoning_tokens": 0,
+            }
+
+    runs_path = tmp_path / "rounded_c3.jsonl"
+    recs = run_numeric_core(
+        tasks=[task],
+        conditions=["C3"],
+        n_agents=2,
+        n_rounds=2,
+        replicates=1,
+        runs_path=runs_path,
+        backend=SpyBackend(seed=1),
+        alpha=0.3,
+        seed=42,
+    )
+    assert len(seen_prompts) == 4
+    r2_prompt = seen_prompts[2]
+    assert "Recent conversation history:\nTurn 1 User: My current estimate is " in r2_prompt
+    assert " US dollars. | Assistant: Final estimate: 260000000" in r2_prompt
+    assert "e+" not in r2_prompt
+    # Internal state remains exact unrounded log10 values.
+    r1 = recs[0]
+    expected_after = 0.7 * r1.agent_log10_before + 0.3 * math.log10(260_000_000.0)
+    assert r1.agent_log10_after == pytest.approx(expected_after, abs=1e-12)
+    assert abs(10**r1.agent_log10_before - round(float(f"{10**r1.agent_log10_before:.3g}"))) > 1.0
+
+
+def test_tightened_sanity_check_catches_thousand_and_million_unit_slips(tmp_path: Path) -> None:
+    task = TaskItem(
+        id="box_unit",
+        kind="numeric_estimate",
+        domain="box",
+        question="Cumulative gross?",
+        numeric_truth=186_004_506.0,
+        unit="US dollars",
+        source_note="The Numbers daily chart, 2 Aug 2026: $186,004,506",
+    )
+
+    class PlannedBackend(SyntheticEpistemicBackend):
+        def __init__(self, replies: list[str]) -> None:
+            super().__init__(seed=1)
+            self.replies = replies
+            self.calls = 0
+
+        def generate_numeric_reply(self, **kwargs: Any) -> dict[str, Any]:
+            reply = self.replies[min(self.calls, len(self.replies) - 1)]
+            self.calls += 1
+            return {"raw_reply": reply, "model_slug": "m", "provider": "p", "reasoning_tokens": 0}
+
+    # 235,000 vs ~186M (distance ~2.9) and 350 vs ~186M (distance ~5.7) are rejected as misses.
+    slip_backend = PlannedBackend(["Final estimate: 235000", "Final estimate: 350"])
+    slip_recs = run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=1,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "slip.jsonl",
+        backend=slip_backend,
+        start_sd=0.0,
+        start_bias_weight=0.0,
+    )
+    assert slip_backend.calls == 2
+    assert slip_recs[0].miss is True
+
+    # A 10x estimate (distance = 1.0 <= 2.0) is accepted on the first try.
+    ok_backend = PlannedBackend(["Final estimate: 1860045060"])
+    ok_recs = run_numeric_core(
+        tasks=[task],
+        conditions=["C1"],
+        n_agents=1,
+        n_rounds=1,
+        replicates=1,
+        runs_path=tmp_path / "ok.jsonl",
+        backend=ok_backend,
+        start_sd=0.0,
+        start_bias_weight=0.0,
+    )
+    assert ok_backend.calls == 1
+    assert ok_recs[0].miss is False
+    assert ok_recs[0].parsed_value == pytest.approx(1_860_045_060.0)
+
+
+def test_run_numeric_core_parallel_trajectories_match_sequential(tmp_path: Path) -> None:
+    tasks = build_numeric_core_tasks()[:3]
+    seq = run_numeric_core(
+        tasks=tasks,
+        conditions=["C1", "C2", "C3"],
+        n_agents=6,
+        n_rounds=3,
+        replicates=2,
+        runs_path=tmp_path / "seq.jsonl",
+        backend=SyntheticEpistemicBackend(seed=11),
+        seed=11,
+        workers=1,
+    )
+    par_path = tmp_path / "par.jsonl"
+    par = run_numeric_core(
+        tasks=tasks,
+        conditions=["C1", "C2", "C3"],
+        n_agents=6,
+        n_rounds=3,
+        replicates=2,
+        runs_path=par_path,
+        backend=SyntheticEpistemicBackend(seed=11),
+        seed=11,
+        workers=8,
+    )
+    assert len(par) == len(seq) == 3 * 3 * 2 * 3 * 6
+    assert [r.model_dump() for r in par] == [r.model_dump() for r in seq]
+
+    # Parallel resume with all records present returns identical records without new calls.
+    resumed = run_numeric_core(
+        tasks=tasks,
+        conditions=["C1", "C2", "C3"],
+        n_agents=6,
+        n_rounds=3,
+        replicates=2,
+        runs_path=par_path,
+        backend=SyntheticEpistemicBackend(seed=11),
+        seed=11,
+        workers=8,
+    )
+    assert [r.model_dump() for r in resumed] == [r.model_dump() for r in seq]

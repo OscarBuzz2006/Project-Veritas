@@ -1,0 +1,72 @@
+suite_name: "Epistemic Prism — Live Adaption Multi-Model Track 4 + V3 Numeric Suite"
+seed: 42
+num_agents: 4
+num_rounds: 1
+peer_degree: 3
+tasks_per_track: 1
+numeric_tasks: 2
+numeric_replicates: 1
+alpha: 0.3
+numeric_tasks_file: configs/numeric_final_tasks.json
+
+conditions:
+  - condition_id: no_ai
+    label: "No AI Baseline (Independent + Peers)"
+    heterogeneity_type: no_ai
+    nationality_type: none
+    num_models: 0
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: baseline
+
+  - condition_id: us_k1_greedy
+    label: "Monolithic Greedy (K=1, gemma-4-26b-a4b-it, T=0.0)"
+    heterogeneity_type: monolithic_shared
+    nationality_type: us_only
+    num_models: 1
+    models:
+      - gemma-4-26b-a4b-it
+    temperature: 0.0
+    top_p: 0.0
+    peer_exchange: true
+    group: decoding_ablation
+
+  - condition_id: us_k1
+    label: "Monolithic Default (K=1, gemma-4-26b-a4b-it, T=0.8)"
+    heterogeneity_type: monolithic_shared
+    nationality_type: us_only
+    num_models: 1
+    models:
+      - gemma-4-26b-a4b-it
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: k_sweep
+
+  - condition_id: cross_national_k4
+    label: "Four-Model Mix (K=4, DeepSeek-V4-Flash + Gemma-4-26B + Gemma-4-31B + Qwen3.8-27B)"
+    heterogeneity_type: cultural_regional_mix
+    nationality_type: cross_national
+    num_models: 4
+    models:
+      - deepseek-v4-flash
+      - gemma-4-26b-a4b-it
+      - gemma-4-31b-it
+      - qwen3.8-27b
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: nationality
+
+  - condition_id: personalized_peer
+    label: "Personalized Peer (Sycophantic, gemma-4-31b-it)"
+    heterogeneity_type: personalized_peer
+    nationality_type: us_only
+    num_models: 1
+    models:
+      - gemma-4-31b-it
+    temperature: 0.8
+    top_p: 0.95
+    peer_exchange: true
+    group: personalization
