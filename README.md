@@ -1,4 +1,4 @@
-# Epistemic Prism (`apart-epistemics`)
+# Sapere Aude: harnessing the wisdom of the crowd (`apart-epistemics`)
 
 [![CI](https://github.com/vikramwish/apart-epistemics/actions/workflows/ci.yml/badge.svg)](https://github.com/vikramwish/apart-epistemics/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-245A7A.svg)](https://www.python.org/downloads/)
@@ -13,7 +13,7 @@
 
 ## About
 
-Epistemic Prism is a research workbench for investigating how groups of
+'Sapere Aude' (_Latin: 'Dare to use your own wisdom'_) is a research workbench for investigating how groups of
 AI-assisted agents form beliefs, share topics, and make quantitative estimates.
 It pairs a Python simulation and evaluation pipeline with a React interface for
 researchers to compare conditions and inspect the records behind each score.
@@ -42,30 +42,8 @@ Designed for **Apart Research Track 4 (Open Track: Deployment, Adoption, and Imp
 
 ## Key Empirical Highlights
 
-**Synthetic demonstration, not live-model findings.** The table and numeric
-contrasts below come from the seeded synthetic backend. They exercise the
-pipeline and encode simulator assumptions; they do not establish real-world
-model, nationality, personalization, or causal effects. A local inference smoke
-call is not a validation of the multi-model benchmark.
 
-Verified from `apart-epistemics demo --out reports/results --site docs` (`11` Track 4 conditions, `19,008` agent-round traces, `kappa = 1.000`, `3,456` numeric estimation transitions):
 
-| Condition | Provenance | $K$ | Temp | Acc | Brier | Conf Wrong | Eff Topics | Goldman $N_{\text{eff}}$ | Jaccard Dist |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| `no_ai` | `none` | 0 | 0.8 | 0.993 | 0.150 | 0.000 | 6.20 | 15.02 | 0.727 |
-| `us_k1_greedy` | `us_only` | 1 | 0.0 | 0.833 | 0.139 | 0.167 | 1.00 | 1.08 | 0.160 |
-| `us_k1` | `us_only` | 1 | 0.8 | 0.799 | 0.167 | 0.201 | 1.00 | 1.08 | 0.691 |
-| `us_k2` | `us_only` | 2 | 0.8 | 0.965 | 0.056 | 0.035 | 2.74 | 1.38 | 0.705 |
-| `us_k4` | `us_only` | 4 | 0.8 | 0.993 | 0.038 | 0.007 | 3.87 | 1.57 | 0.716 |
-| `cn_k1` | `cn_only` | 1 | 0.8 | 0.729 | 0.212 | 0.271 | 1.00 | 1.08 | 0.702 |
-| `cn_k4` | `cn_only` | 4 | 0.8 | 0.986 | 0.042 | 0.014 | 5.01 | 1.65 | 0.732 |
-| `divergent_sft_pair` | `divergent_sft` | 2 | 0.8 | 0.986 | 0.039 | 0.014 | 6.00 | 1.81 | 0.731 |
-| `cross_national_k4` | `cross_national` | 4 | 0.8 | 1.000 | 0.049 | 0.000 | 6.37 | 2.41 | 0.732 |
-| `personalized_advisor` | `cross_national` | 24 | 0.8 | 1.000 | 0.062 | 0.000 | 6.46 | 2.65 | 0.724 |
-| `personalized_peer` | `us_only` | 24 | 0.8 | 0.486 | 0.420 | 0.514 | 6.46 | 1.75 | 0.744 |
-
-- **Numeric Core (`C1 / C2 / C3` Page Identity)**: Max algebraic identity residual verified at `1.09e-16`; `C2` social median sharing reduces diversity vs `C1` (`mean_diff = -0.0137`, Holm-adjusted `p = 0.00195`), while `C3` persona + conversation history preserves diversity (`0.0189`) and cuts crowd error (`0.00095` vs `0.00341`, Holm `p = 0.00293`).
-- **Live Local Ollama Verification**: Executed single-call live inference against `ollama` (`llama3.1:8b`), extracting `Final estimate: 6853` (`log10 = 3.8359`) via [`parse_numeric_estimate`](src/apart_epistemics/parsers.py).
 
 ---
 
@@ -97,134 +75,6 @@ flowchart LR
 - **Testing & Automation ([`tests/`](tests/), [`Makefile`](Makefile), [`CONTRIBUTING.md`](CONTRIBUTING.md))**: Shared pytest fixtures in [`tests/conftest.py`](tests/conftest.py), per-module unit/integration files, strict `e2e` Playwright marker, Ruff complexity/format gates (`C90 <= 16`), and GitHub Actions branch-coverage CI.
 
 ---
-
-## Visual Highlights
-
-### Four workspace views, one shared dataset
-
-The React explorer uses a monochrome interface with left-sidebar navigation.
-All views read the same Python-generated benchmark; viewing results makes no
-model calls and requires no API keys.
-
-[![Compact React dashboard with sidebar navigation, all 11 conditions, diversity–calibration chart, selected metrics, and round trajectory](docs/screenshots/react-dashboard.png)](docs/screenshots/react-dashboard.png)
-
-| View | What you can do |
-|---|---|
-| **Dashboard** | See all 11 conditions, the comparison chart, six selected-condition metrics, and a topic trajectory together. Verified without page or condition-list scrolling at 1366 × 768. |
-| **Overview** | Filter by family or search, step through rounds, sort scores, change the trajectory metric, and export visible scores as CSV. |
-| **Numeric core** | Inspect C1/C2/C3 crowd-error decomposition, change the plotted metric, and review recorded statistical contrasts. |
-| **Response traces** | Read paired assistant/agent responses, inspect baseline settings, and expand recorded context, extracted topics, and raw JSON. |
-
-The full report can be exported as JSON. Selection carries across the dashboard,
-overview, and response inspector. Smaller screens use a stacked layout with
-local chart/table scrolling to preserve readability.
-
-> **Synthetic demonstration, not live findings.** Response specimens are sampled
-> final-round records, not a full conversation history. System prompts, tool
-> calls, and skill invocation records are not included in the current export;
-> the inspector labels them **Not recorded** rather than inventing activity.
-> The overview round filter does not apply to response specimens.
-
-With Node 22.12+, run `make ui-install`, then `make ui-dev`, and open the URL Vite
-prints. Select **Dashboard** in the sidebar for the compact view. See
-[frontend/README.md](frontend/README.md) for checks and production preview.
-`make serve` instead opens the original Python-generated report, retained under
-`legacy/` in the deployed site.
-
-### Desktop screenshots
-
-Captured from the current React build with Playwright. The dashboard is shown
-at 1366 × 768; the detailed views use a 1440 px desktop viewport. Click a preview
-to open the original image.
-
-<details>
-<summary><strong>Overview: condition comparison, trajectories, and score table</strong></summary>
-
-[![Desktop overview with family filters, charts, and sortable condition scores](docs/screenshots/react-overview.png)](docs/screenshots/react-overview.png)
-
-</details>
-
-<details>
-<summary><strong>Numeric core: crowd error, diversity, and recorded contrasts</strong></summary>
-
-[![Desktop numeric core showing Page's diversity identity, condition summaries, trajectories, and statistical contrasts](docs/screenshots/react-numeric.png)](docs/screenshots/react-numeric.png)
-
-</details>
-
-<details open>
-<summary><strong>Response detail: paired outputs and recorded context</strong></summary>
-
-[![Desktop response specimen showing side-by-side simulation context and agent response, with prompt availability and recorded context expanded](docs/screenshots/react-response-detail.png)](docs/screenshots/react-response-detail.png)
-
-</details>
-
-### Four views of the synthetic benchmark
-
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="reports/figures/epistemic_quadrant.svg"><img src="reports/figures/epistemic_quadrant.svg" alt="Epistemic quadrant comparing topic diversity and calibration across synthetic conditions" width="100%"></a>
-      <br><strong>Diversity × calibration</strong><br>
-      Compare topical breadth with ground-truth calibration rather than treating diversity as a single score.
-    </td>
-    <td width="50%" valign="top">
-      <a href="reports/figures/dissociation_decoding.svg"><img src="reports/figures/dissociation_decoding.svg" alt="Decoding comparison separating lexical variation from conceptual diversity and source independence" width="100%"></a>
-      <br><strong>Wording ≠ independent thinking</strong><br>
-      Contrast surface-level variation with topic coverage and effective independent sources.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="reports/figures/round_trajectories.svg"><img src="reports/figures/round_trajectories.svg" alt="Round-by-round trajectories showing how effective topic counts change during simulated peer exchange" width="100%"></a>
-      <br><strong>Watch the rounds unfold</strong><br>
-      Follow how topic diversity changes as simulated agents exchange information.
-    </td>
-    <td width="50%" valign="top">
-      <a href="reports/figures/pages_headline.svg"><img src="reports/figures/pages_headline.svg" alt="Numeric-core chart comparing crowd error, individual error, and diversity under Page's theorem" width="100%"></a>
-      <br><strong>Decompose the crowd's error</strong><br>
-      Inspect the relationship between individual error, collective error, and estimate diversity.
-    </td>
-  </tr>
-</table>
-
-
-
----
-
-## Tech stack
-
-- **Core**: Python 3.11+, Pydantic v2, PyYAML, standard-library `urllib` HTTP client
-- **Static Visualization**: Native SVG generation, vanilla ES6, CSS Custom Properties (zero CDNs)
-- **React Explorer**: React + TypeScript + Vite + Tailwind, copied shadcn/ui components; same Python report data
-- **QA & Testing**: `pytest`, `pytest-cov`, `ruff`, Playwright Chromium (`1440x900` & `390x844`)
-- **CI/CD**: GitHub Actions matrix (`3.11`, `3.12`), Dependabot, GitHub Pages artifact deploy
-
----
-
-## Run the frontend
-
-```bash
-cd frontend
-npm ci
-npm run dev
-```
-
-Open the local URL printed by Vite. The committed report data is bundled with
-the app; no Python server is required. For a production preview, run
-`npm run build` followed by `npm run preview`.
-
-## Publishing with GitHub Pages
-
-A repository admin must enable **Settings → Pages → Build and deployment →
-Source: GitHub Actions** once for each repository, including forks. The
-[Pages workflow](.github/workflows/pages.yml) checks this configuration before
-building and publishing `frontend/dist`. If setup is missing, deployment is
-skipped with instructions in the workflow summary; application CI still runs.
-After enabling Pages, run **Deploy GitHub Pages → Run workflow**.
-
-The [hosted reference demo](https://vikramwish.github.io/apart-epistemics/) is
-published from `vikramwish/apart-epistemics`. Copying the code to another
-repository does not automatically enable hosting there.
 
 ## Python quick start
 
