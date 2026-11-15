@@ -38,3 +38,7 @@ node_modules/
 # Raw numeric-final-1114 logs exceed GitHub 100 MB; compressed/stripped copies are tracked
 /results/numeric-final-1114/numeric_runs.jsonl
 /results/numeric-final-1114/provider_requests.jsonl
+
+# Raw numeric-final-deepseek logs exceed GitHub limits; gzipped copies are tracked
+/results/numeric-final-deepseek/numeric_runs.jsonl
+/results/numeric-final-deepseek/provider_requests.jsonl
