@@ -1,166 +1,95 @@
-# Sapere Aude: harnessing the wisdom of the crowd (`apart-epistemics`)
+# Sapere Aude: Does a Crowd That Asks One AI Assistant Find the Truth, or the Assistant?
 
-[![CI](https://github.com/vikramwish/apart-epistemics/actions/workflows/ci.yml/badge.svg)](https://github.com/vikramwish/apart-epistemics/actions/workflows/ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-245A7A.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-2F6F4E.svg)](LICENSE)
-[![Live Explorer](https://img.shields.io/badge/live-dashboard-C84B31.svg)](https://vikramwish.github.io/apart-epistemics/)
+**A multi-agent simulation and evaluation testbed measuring how shared LLM assistants reshape crowd diversity, calibration, and collective accuracy.**
 
-> Multi-agent simulation and QA testing suite measuring how assistant provenance (`nationality_type`), model count ($K$), decoding temperature, and personalization regimes reshape agenda diversity, epistemic calibration, Goldman source independence, and Page's Diversity Prediction Theorem.
-
-**Live React explorer:** [https://vikramwish.github.io/apart-epistemics/](https://vikramwish.github.io/apart-epistemics/)
+- **Paper:** *Sapere Aude: Does a crowd that asks one AI assistant find the truth, or the assistant?* (Apart Research AI × Epistemics Sprint, November 2026)
+- **Authors:** Raghav Tyagi, Kevin O'Shaughnessy, Vikram Viswanath, Oscar Burrows
+- **Live React Explorer:** https://vikramwish.github.io/apart-epistemics/
+- **Repository:** https://github.com/vikramwish/apart-epistemics
 
 ---
 
 ## About
 
-'Sapere Aude' (_Latin: 'Dare to use your own wisdom'_) is a research workbench for investigating how groups of
-AI-assisted agents form beliefs, share topics, and make quantitative estimates.
-It pairs a Python simulation and evaluation pipeline with a React interface for
-researchers to compare conditions and inspect the records behind each score.
+**Sapere Aude** (Latin: *"Dare to use your own wisdom"*) is an open-source research workbench for investigating how groups of AI-assisted people form beliefs, converge on estimates, and lose or preserve epistemic diversity. It pairs a reproducible Python simulation and evaluation pipeline with an interactive React interface for inspecting traces, condition comparisons, and round-by-round crowd trajectories.
 
-The workspace covers two tracks: **Track 4** compares model diversity, decoding,
-provenance, and personalization; the **numeric core** measures crowd error and
-estimate diversity using Page's diversity identity. The bundled results are a
-seeded synthetic demonstration, not evidence of real-world model effects.
+The repository centers on two core components:
+1. **The Numeric Crowd Testbed (`results/numeric-final-1114`, `results/numeric-final-luna-none`, `analysis.py`):** Simulates crowds of $N = 30$ rule-based people starting from a shared $1.5\times$ directional mistake who repeatedly query a single LLM assistant (`GPT-6 Luna`) over $T = 6$ rounds on post-cutoff 2026 events with verified ground truth. Each round, people move $30\%$ of the way toward the assistant's estimate ($x_{i,t+1} = 0.7 x_{i,t} + 0.3 a_{i,t}$), and crowd error is decomposed exactly via Page's Diversity Prediction Theorem.
+2. **Track 4 Categorical & Multi-Backend Suite (`src/apart_epistemics/`):** Extends evaluation to multi-model provenance (`nationality_type`), model count ($K$), decoding temperature, and blinded dual-judge topic clustering, alongside deterministic synthetic demos for zero-cost offline exploration.
 
-The frontend uses React, TypeScript, Vite, Tailwind, and shadcn/ui components.
-It works from saved report data, so exploring the demo needs no API keys or live
-model connection.
+The frontend uses React, TypeScript, Vite, Tailwind CSS, and shadcn/ui components, running directly from saved report artifacts with no API keys required.
 
-## Why it exists
+---
 
-Multi-agent deployments increasingly wire multiple simulated humans to a single underlying foundation model or regional model family. Evaluating such ecosystems solely with embedding similarity or surface phrasing hides critical failure modes identified in recent literature (Kim et al. 2025/2026; Qiu et al. 2026; Sourati et al. 2025):
+## Why It Exists
 
-1. **Decoding Veil vs. Epistemic Monoculture**: Stochastic sampling (`T=0.8`) restores lexical variety over greedy decoding (`T=0.0, top_p=0.0`) without diversifying underlying concepts, arguments, or correlated sources.
-2. **National & Post-Training Provenance (`nationality_type x K`)**: Scaling $K$ within one frontier ecosystem differs sharply from cross-national pools (US + CN + EU) or same-base divergent SFT models (e.g., `Qwen3.8-27B` paired with `Arete-27B`).
-3. **Sycophantic Personalization Split**: Peer-mirroring assistants can preserve diverse topical agendas while silently degrading calibration (`Brier`, confident-wrong errors).
-4. **Page's Diversity Prediction Theorem on Quantitative Estimates**: Under social feedback (`C2` population median sharing), crowd spread collapses mathematically via `Crowd Error = Avg Individual Error - Diversity`.
+Crowds are wise when individual errors point in different directions and cancel out (Galton, 1907; Page, 2007). When many people consult the same AI assistant, their errors may stop canceling out:
 
-Designed for **Apart Research Track 4 (Open Track: Deployment, Adoption, and Impact)** with lightweight peer-exchange interactions (avoiding bloated orchestration frameworks) plus a crash-resumable numeric core.
+- **Epistemic Herding Without Sycophancy:** Even when an assistant barely defers to individual users (moving only $11\text{–}14\%$ toward each person's estimate under low reasoning), repeated consultation causes everyone to hear the same voice, halving crowd spread while locking in the assistant's mistakes.
+- **Deployment Information Regimes (`SOLO` / `PEER` / `TAILORED`):** Loosely adapted from Thejaswi et al. (2026), we test whether exposing the assistant to only the user's estimate (`SOLO`, C1), adding the crowd's median and interquartile spread (`PEER`, C2), or adding a user profile and conversation history (`TAILORED`, C3) alters convergence or accuracy.
+- **Post-Cutoff Estimation vs. Recall:** Standard benchmarks conflate parametric memorization with reasoning. By pairing 2026 post-cutoff events (where cold model error exceeds $26\%$) against memorized pre-cutoff census controls, the testbed separates genuine error correction from shared echo.
+- **Hidden Reasoning & Echo Susceptibility:** Toggling hidden reasoning off (`reasoning_effort=none`) dramatically increases user echoing (from $0.14$ to $0.61$ in `SOLO`) and reveals statistically significant diversity differences across deployment conditions.
 
 ---
 
 ## Key Empirical Highlights
 
+Results from the full 17,820-query main run (`results/numeric-final-1114`, `GPT-6 Luna`, low reasoning effort) and reasoning-off ablation (`results/numeric-final-luna-none`):
 
+- **Crowds Converged on the Assistant, Mistakes Included:** Across the eight main post-cutoff questions, crowds started $1.53\times$ off from the truth and ended $1.41\times$ (`SOLO`), $1.38\times$ (`PEER`), and $1.39\times$ (`TAILORED`) off after 6 rounds—sitting within a few percent of the assistant's own biased priors while typical individual spread around the crowd center collapsed from $1.72\times$ to $1.11\text{–}1.17\times$.
+- **Prompt Context Did Not Reliably Improve Accuracy:** Adding crowd summaries (`PEER` vs. `SOLO`, $p_{\text{Holm}} = 0.95$) or user profiles and history (`TAILORED` vs. `PEER`, $p_{\text{Holm}} = 0.59$) produced no statistically reliable gain in final crowd error, while cutting diversity roughly in half relative to `SOLO`.
+- **Controls Confirmed Correction When Facts Were Known:** On pre-cutoff Indian census controls (Nahan, Kullu) where the model knew the exact answer, crowds converged to within $1.05\times$ of truth across all conditions.
+- **Hidden Reasoning Dampens User Echoing:** Switching hidden reasoning off increased the round-1 user echo slope in `SOLO` from $0.14$ to $0.61$ (reaching $1.00$ outright copying on box-office questions) and produced significant diversity shifts across conditions (`PEER < SOLO`, $p_{\text{Holm}} = 0.031$; `TAILORED > PEER`, $p_{\text{Holm}} = 0.047$) without improving accuracy.
 
+| Condition | Round-6 Crowd Error ($\log_{10}^2$) | Crowd Center Offset | Round-6 Diversity ($\log_{10}^2$) | Typical Spread Offset | Round-1 User Echo Slope |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **SOLO** (User estimate only) | `0.0222` | `1.41x` | `0.0048` | `1.17x` | `0.139` (`0.61` reasoning off) |
+| **PEER** (+ Crowd median & IQR) | `0.0193` | `1.38x` | `0.0024` | `1.12x` | `0.107` (`0.17` reasoning off) |
+| **TAILORED** (+ Profile & history) | `0.0206` | `1.39x` | `0.0021` | `1.11x` | `0.111` (`0.19` reasoning off) |
 
 ---
 
 ## Features
 
-- **Dual-Track Simulation Engine** ([`engine/`](src/apart_epistemics/engine/)): Lightweight peer-exchange communication graph supporting both categorical calibration/open-debate rounds (`GROUND_TRUTH`, `OPEN_DEBATE`) and damped `log10` quantitative belief updating (`C1/C2/C3`), with shared Holm-Bonferroni contrast analysis ([`contrasts.py`](src/apart_epistemics/engine/contrasts.py)).
-- **Blinded Dual-Judge Topic Summarizer** ([`summarizer.py`](src/apart_epistemics/summarizer.py)): Strips condition, model family, nationality, and round metadata, hashes deterministic `blind_id`s, consolidates a shared global codebook, enforces Cohen's $\kappa \ge 0.70$, and exports stratified `audit_human_check.csv`.
-- **Protocol-Clean Multi-Backend Adapters** ([`backends/`](src/apart_epistemics/backends/)): Deterministic `SyntheticEpistemicBackend`, offline `ReplayBackend`, local `OllamaBackend`, OpenRouter with automatic `:online` suffix stripping and `allow_fallbacks: false` provider pinning, plus OpenAI, Anthropic, and Gemini adapters built over a shared `_HTTPChatBackend` base with credential masking.
-- **Crash-Resumable JSONL & Budget Guard**: Skips completed `(condition_id, question_id, replicate, round_idx, agent_id)` cells on restart, retries once on unparseable replies, logs `miss=True` safely without corrupting beliefs, and halts cleanly on `BudgetExceededError`.
-- **Self-Contained Interactive Explorer & SVG Pipeline** ([`report/`](src/apart_epistemics/report/), [`dashboard.html`](src/apart_epistemics/templates/dashboard.html)): Zero external CDN dependencies; keyboard-accessible `1440px` desktop and `390px` mobile views with live round scrubber, family filters, sortable ledger (`aria-sort`), and slide-over trace drawer.
+- **Dual-Track Simulation Engine (`src/apart_epistemics/engine/`):** Supports damped $\log_{10}$ quantitative belief updating (`SOLO`/`C1`, `PEER`/`C2`, `TAILORED`/`C3`) with Page (2007) error-diversity decomposition and exact Wilcoxon / Holm-Bonferroni contrast analysis (`analysis.py`, `contrasts.py`), alongside multi-round categorical debate simulations (`GROUND_TRUTH`, `OPEN_DEBATE`).
+- **Post-Cutoff Benchmark & Calibration Suite (`configs/`):** Curated 2026 post-cutoff estimation questions (Asian Games, Commonwealth Games, US-Canada box office) split into high- and low-spread strata, paired with pre-cutoff census controls and a pre-registered movability check.
+- **Protocol-Clean Multi-Backend Adapters (`src/apart_epistemics/backends/`):** OpenRouter (`openai/gpt-6-luna`, `allow_fallbacks: false`), Adaption (`gemma-4-26b-a4b-it`, `qwen3.5-397b`), OpenAI, Anthropic, Gemini, local Ollama, offline `ReplayBackend`, and deterministic `SyntheticEpistemicBackend`.
+- **Crash-Resumable JSONL & Budget Guard:** Skips completed `(condition_id, question_id, replicate, round_idx, agent_id)` cells on restart, retries once on format errors, logs unparseable replies safely as `miss=True`, and enforces persistent USD request reservations via `--budget`.
+- **Blinded Dual-Judge Topic Summarizer (`summarizer.py`):** Strips condition, model, and round metadata, hashes deterministic `blind_id`s, enforces Cohen's $\kappa \ge 0.70$, and exports stratified `audit_human_check.csv`.
+- **Interactive React Explorer (`frontend/`):** Zero-external-dependency explorer with round scrubbers, condition/stratum filters, sortable ledgers, and full prompt-and-reply trace drawers.
 
 ---
 
 ## Architecture & Project Structure
 
-```mermaid
-flowchart LR
-    CFG["YAML Config / Datasets<br/>(datasets/, models.py)"] --> ENG["Simulation Engine<br/>(engine/)"]
-    BE["Backends<br/>(backends/: synthetic / ollama / openrouter / replay)"] --> ENG
-    ENG --> PAR["Strict Parsers<br/>(parsers.py)"]
-    ENG --> SUM["Blinded Dual-Judge Summarizer<br/>(summarizer.py)"]
-    PAR --> MET["Epistemic & Statistical Metrics<br/>(Page, Hill N1, Goldman, Holm)<br/>(metrics.py)"]
-    SUM --> MET
-    MET --> REP["SVG Figures & Lab Notebook<br/>(report/, dashboard.html)"]
-    REP --> DOCS["docs/index.html & reports/figures/*.svg"]
-```
-
-- **Library code ([`src/apart_epistemics/`](src/apart_epistemics/))**: Modular subpackages for [`datasets/`](src/apart_epistemics/datasets/), [`backends/`](src/apart_epistemics/backends/), [`engine/`](src/apart_epistemics/engine/), and [`report/`](src/apart_epistemics/report/), alongside [`models.py`](src/apart_epistemics/models.py), [`parsers.py`](src/apart_epistemics/parsers.py), [`metrics.py`](src/apart_epistemics/metrics.py), [`summarizer.py`](src/apart_epistemics/summarizer.py), [`cli.py`](src/apart_epistemics/cli.py), and PEP 561 [`py.typed`](src/apart_epistemics/py.typed).
-- **Testing & Automation ([`tests/`](tests/), [`Makefile`](Makefile), [`CONTRIBUTING.md`](CONTRIBUTING.md))**: Shared pytest fixtures in [`tests/conftest.py`](tests/conftest.py), per-module unit/integration files, strict `e2e` Playwright marker, Ruff complexity/format gates (`C90 <= 16`), and GitHub Actions branch-coverage CI.
+- `src/apart_epistemics/` — Core Python library (`datasets/`, `backends/`, `engine/`, `report/`, `models.py`, `parsers.py`, `metrics.py`, `summarizer.py`, `cli.py`).
+- `results/` — Saved run manifests and JSONL request/reply logs (`numeric-final-1114` main run, `numeric-final-luna-none` reasoning-off ablation, and pilot sweeps).
+- `analysis.py` — Recomputes all Page (2007) decompositions, echo slopes, bootstrap intervals, and Holm-adjusted Wilcoxon tests directly from saved logs.
+- `configs/` — Task definitions, prompt templates, rounding rules, and selection guards.
+- `frontend/` — React + TypeScript + Vite web explorer deployed to GitHub Pages.
+- `reports/` — Generated tables, figures, and model evaluation artifacts.
+- `tests/` — Offline unit, integration, manifest-resume, budget-guard, and Playwright browser tests.
 
 ---
 
-## Python quick start
+## Python Quick Start
 
-**Hackathon teammates:** see [HACKATHON.md](HACKATHON.md) for the full onboarding
-and testing checklist, Windows commands, troubleshooting, and live-run caveats.
-No API keys or model downloads are needed for the offline demo.
+See `HACKATHON.md` for the full onboarding checklist, Windows commands, and live-run safety caveats. No API keys or model downloads are required for offline analysis or the synthetic demo.
 
 ```bash
-git clone https://github.com/vikramwish/apart-epistemics.git
+git clone [https://github.com/vikramwish/apart-epistemics.git](https://github.com/vikramwish/apart-epistemics.git)
 cd apart-epistemics
 
 make install     # Python 3.11+; no uv required
 make check       # Lint, fast tests, and small synthetic demo in tmp/
-make serve       # Open http://127.0.0.1:8000; Ctrl-C to stop
+make serve       # Open [http://127.0.0.1:8000](http://127.0.0.1:8000); Ctrl-C to stop
 
-# Optional: browser tests (separate browser download)
+# Recompute paper statistics directly from the released final logs (zero API cost)
+python analysis.py
+
+# Optional: browser tests (requires Playwright Chromium)
 make install-browser
 make test
 
-# Optional: rebuild FULL benchmark and tracked dashboard (zero API cost)
+# Optional: rebuild full offline benchmark and tracked dashboard
 make demo
-```
-
-Live cloud runs read exported environment variables; `.env` is not automatically
-loaded. Read the safety limitations in [HACKATHON.md](HACKATHON.md) first.
-
----
-
-## Testing
-
-The Python suite includes regression coverage for actual model routing, prompted JSON parsing,
-manifest-validated resume, incomplete analysis, persistent request budgets, secret
-redaction, trace preservation, and independent-judge availability, alongside the
-math, provider, CLI, and browser checks. Tests run offline with zero API charges. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`Makefile`](Makefile) for workflows:
-
-```bash
-make lint       # ruff check . && ruff format --check .
-make test-fast  # pytest -m "not e2e" -v (~2s)
-make cov        # pytest --cov=apart_epistemics --cov-report=term-missing -v
-```
-
-The React frontend adds 20 unit tests and 10 desktop/mobile browser checks:
-
-```bash
-make ui-check   # TypeScript, formatting, unit tests, production build
-make ui-e2e     # Browser checks; install frontend Playwright Chromium first
-```
-
-Use the CI badge and your local test output for current verification status.
-Browser tests require a working Playwright Chromium installation and permission
-to launch subprocesses; fast tests do not require a browser binary.
-
----
-
-## Roadmap
-
-- Execute multi-seed live OpenRouter runs across `US_ONLY`, `CN_ONLY`, `DIVERGENT_SFT`, and `CROSS_NATIONAL` pools using `--budget` caps and deterministic `ReplayBackend` archival.
-- Collect 3-rater human verification annotations against `reports/results/audit_human_check.csv` to calibrate automated dual-judge topic labeling on domain debates.
-- Extend `audit-selection` to ingest cold-start OpenRouter evaluation CSVs automatically prior to benchmark sweeps.
-
-## What I learned
-
-- Decoupling surface phrasing variance (`pairwise_jaccard_distance`) from conceptual agenda diversity (`effective_topic_count`, `goldman_effective_sources`) immediately flags temperature-induced diversity illusions.
-- Treating LLM numeric/JSON parsing and resume state as first-class crash-safe contracts eliminates expensive lost runs before multi-model API budgets are touched.
-- Inspecting actual Playwright screenshots at both `1440px` and `390px` catches SVG label overlap and right-edge button clipping that pure DOM unit tests miss.
-
-
-## Experiment integrity
-
-Live multi-model conditions require explicit provider-compatible `models` lists;
-`--model` selects the agent simulator and numeric assistant. Actual model/provider
-identities, parse status, and prompts are saved in new live traces.
-
-Numeric resumes validate a saved manifest. Track 4 refuses to overwrite existing
-traces and flushes each completed observation. Incomplete or legacy unverified
-numeric runs do not publish final comparisons. Default seed labels do not qualify
-as independent topic judging: reliability is unavailable until two judges run.
-Source-diversity and persuasion metrics remain explicitly labeled assumption-based
-proxies; pooled H4 correlation is descriptive, not a causal effect.
-
-`--budget` reserves `--request-allowance` USD before every HTTP attempt across both
-tracks (default allowance: 1 USD). Reservations persist in `budget.json` and include
-failed requests. Set the allowance above the largest possible per-request charge
-for your selected models. This controls authorized request allowances, not actual
-provider billing. See [live-run details](HACKATHON.md#5-live-run-limitations--agree-with-the-team-before-spending).
-
-The [audit and resolution notes](docs/codebase-audit.md) explain the failures and
-regression coverage. Gemini credentials now use the API header documented in the
-[official reference](https://ai.google.dev/api), rather than request URLs.
