@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this code or build on this work, please cite it as below."
+title: "Sapere Aude: Does a crowd that asks one AI assistant find the truth, or the assistant?"
+authors:
+  - family-names: Tyagi
+    given-names: Raghav
+  - family-names: "O'Shaughnessy"
+    given-names: Kevin
+  - family-names: Burrows
+    given-names: Oscar
+  - family-names: Viswanath
+    given-names: Vikram
+repository-code: "https://github.com/OscarBuzz2006/Project-Veritas"
+license: MIT
