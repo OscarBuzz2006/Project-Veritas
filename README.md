@@ -4,8 +4,6 @@
 
 - **Paper:** *Sapere Aude: Does a crowd that asks one AI assistant find the truth, or the assistant?* (Apart Research AI × Epistemics Sprint, November 2026)
 - **Authors:** Raghav Tyagi, Kevin O'Shaughnessy, Vikram Viswanath, Oscar Burrows
-- **Repository:** https://github.com/vikramwish/apart-epistemics
-
 ---
 
 ## About
