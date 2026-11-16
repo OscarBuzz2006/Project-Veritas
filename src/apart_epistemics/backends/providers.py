@@ -82,7 +82,7 @@ class OpenRouterBackend(_HTTPChatBackend):
         headers = {
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/vikramwish/apart-epistemics",
+            "HTTP-Referer": "https://github.com/OscarBuzz2006/Sapere-Aude",
             "X-Title": "Epistemic Prism",
         }
         data = self._post(
