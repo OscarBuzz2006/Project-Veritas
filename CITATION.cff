@@ -8,7 +8,5 @@ authors:
     given-names: Kevin
   - family-names: Burrows
     given-names: Oscar
-  - family-names: Viswanath
-    given-names: Vikram
-repository-code: "https://github.com/OscarBuzz2006/Project-Veritas"
+repository-code: "https://github.com/OscarBuzz2006/Sapere-Aude/"
 license: MIT

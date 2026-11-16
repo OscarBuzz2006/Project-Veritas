@@ -71,11 +71,11 @@ Results from the full 17,820-query main run (`results/numeric-final-1114`, `GPT-
 
 ## Python Quick Start
 
-See `HACKATHON.md` for the full onboarding checklist, Windows commands, and live-run safety caveats. No API keys or model downloads are required for offline analysis or the synthetic demo.
+No API keys or model downloads are required for offline analysis or the synthetic demo.
 
 ```bash
-git clone [https://github.com/vikramwish/apart-epistemics.git](https://github.com/vikramwish/apart-epistemics.git)
-cd apart-epistemics
+git clone https://github.com/OscarBuzz2006/Sapere-Aude.git
+cd Sapere-Aude
 
 make install     # Python 3.11+; no uv required
 make check       # Lint, fast tests, and small synthetic demo in tmp/
