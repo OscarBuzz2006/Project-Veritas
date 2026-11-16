@@ -3,7 +3,7 @@
 **A multi-agent simulation and evaluation testbed measuring how shared LLM assistants reshape crowd diversity, calibration, and collective accuracy.**
 
 - **Paper:** *Sapere Aude: Does a crowd that asks one AI assistant find the truth, or the assistant?* (Apart Research AI × Epistemics Sprint, November 2026)
-- **Authors:** Raghav Tyagi, Kevin O'Shaughnessy, Vikram Viswanath, Oscar Burrows
+- **Authors:** Raghav Tyagi, Kevin O'Shaughnessy, Oscar Burrows, Vikram Viswanath
 ---
 
 ## About
