@@ -28,11 +28,6 @@ reports/results/*.jsonl
 tmp/
 .DS_Store
 node_modules/
-/frontend/test-results/
-/frontend/playwright-report/
-
-
-/frontend/.designs/
 *.cpgz
 
 # Raw numeric-final-1114 logs exceed GitHub 100 MB; compressed/stripped copies are tracked
