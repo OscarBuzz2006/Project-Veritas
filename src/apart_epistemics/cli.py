@@ -373,6 +373,12 @@ def _backend_from_args(args: argparse.Namespace, seed: int) -> Any:
         if args.backend != "openrouter":
             raise BackendConfigError("--pin-provider is only supported with --backend openrouter.")
         backend_kwargs["pin_provider"] = args.pin_provider
+    if getattr(args, "reasoning_effort", None):
+        if args.backend != "openrouter":
+            raise BackendConfigError(
+                "--reasoning-effort is only supported with --backend openrouter."
+            )
+        backend_kwargs["reasoning_effort"] = args.reasoning_effort
     return create_backend(args.backend, **backend_kwargs)
 
 
@@ -704,6 +710,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--pin-provider",
         default=None,
         help="OpenRouter only: route every call to this provider with no fallbacks.",
+    )
+    p_run.add_argument(
+        "--reasoning-effort",
+        default=None,
+        choices=["none", "minimal", "low", "medium", "high"],
+        help=(
+            "OpenRouter only: reasoning effort sent with every call (default: low). "
+            "Use none for models that spend the whole token limit on hidden reasoning."
+        ),
     )
     p_run.add_argument(
         "--max-tokens",
